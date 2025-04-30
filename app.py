@@ -130,7 +130,8 @@ if fuel_rows:
     st.metric("Penalty (€)", f"{penalty:,.2f}")
 
     if penalty == 0 and balance > 0:
-        st.success(f"Surplus savings: {balance:,.0f} gCO₂eq below target")
+        surplus_eur = (balance / 1000) * 2.4
+        st.success(f"Over-compliance credit: {surplus_eur:,.2f} EUR for {balance:,.0f} gCO2eq below target")
 
     # Export to Excel
     output = io.BytesIO()
@@ -141,7 +142,7 @@ if fuel_rows:
             "Total Emissions (gCO2eq)": total_emissions,
             "GHG Intensity": ghg_intensity,
             "Compliance Balance": balance,
-            "Penalty (€)": penalty
+            "Penalty (EUR)": penalty
         }]).to_excel(writer, index=False, sheet_name='Summary')
     output.seek(0)
     
