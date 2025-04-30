@@ -67,8 +67,8 @@ year = st.sidebar.selectbox("Compliance Year", [2025, 2030])
 target_ghg_intensity = get_target_ghg_intensity(year)
 
 # Reward mechanisms
-ops = st.sidebar.checkbox("Use Onshore Power Supply (OPS)?", value=False)
-wind = st.sidebar.checkbox("Use Wind-Assisted Propulsion?", value=False)
+ops_discount = st.sidebar.selectbox("OPS Reduction (%)", [0, 1, 2, 3], index=3)  # 3% default
+wind_discount = st.sidebar.selectbox("Wind-Assisted Reduction (%)", [0, 2, 4, 5], index=1)  # 2% default
 
 # Calculation logic
 total_energy = 0.0
@@ -88,10 +88,10 @@ for fuel in selected_fuels:
     })
 
 # Apply reward reductions
-if ops:
-    total_emissions *= 0.97  # OPS reward (example)
-if wind:
-    total_emissions *= 0.95  # Wind reward (example)
+if ops_discount > 0:
+    total_emissions *= (1 - ops_discount / 100)
+if wind_discount > 0:
+    total_emissions *= (1 - wind_discount / 100)
 
 if fuel_rows:
     st.subheader("Fuel Breakdown")
