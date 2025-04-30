@@ -83,8 +83,18 @@ st.sidebar.markdown("---")
 year = st.sidebar.selectbox("Compliance Year", list(range(2025, 2036)))
 target_ghg_intensity = get_target_ghg_intensity(year)
 
-ops_discount = st.sidebar.selectbox("OPS Reduction (%)", [0, 1, 2, 3], index=3)
-wind_discount = st.sidebar.selectbox("Wind-Assisted Reduction (%)", [0, 2, 4, 5], index=1)
+ops_discount = st.sidebar.selectbox(
+    "OPS Reduction (%)",
+    [0, 1, 2, 3],
+    index=0,
+    help="Reward for use of Onshore Power Supply (OPS) during port stays. Max 3% emissions reduction allowed."
+)
+wind_discount = st.sidebar.selectbox(
+    "Wind-Assisted Reduction (%)",
+    [0, 2, 4, 5],
+    index=0,
+    help="Reward for using wind propulsion assistance. Reduction reflects certified propulsion effectiveness."
+)
 
 # === CALCULATIONS ===
 total_energy = 0.0
