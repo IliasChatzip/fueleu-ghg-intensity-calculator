@@ -100,11 +100,11 @@ penalty_per_mj = 2.4 / 1000
 for fuel in selected_fuels:
     mass_g = fuel['mass_mt'] * 1_000_000
     energy = mass_g * fuel['lcv']
-            if ghg_scope == "CO₂ only":
-            co2_only_ef = 3.114 / fuel['lcv'] + (13.5 if "OPS" not in fuel['name'] else 0.0)
-            emissions = energy * co2_only_ef
-        else:
-            emissions = energy * fuel['ef']
+    if ghg_scope == "CO₂ only":
+        co2_only_ef = 3.114 / fuel['lcv'] + (0.0 if fuel['ef'] == 0 else 13.5)
+        emissions = energy * co2_only_ef
+    else:
+        emissions = energy * fuel['ef']
     total_energy += energy
     total_emissions += emissions
     fuel_rows.append({
