@@ -2,7 +2,6 @@
 
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
 
 # === EMISSION FACTORS DATABASE (Expanded) ===
 default_fuels = [
@@ -45,20 +44,9 @@ def get_target_ghg_intensity(year):
     }
     return base * (1 - reduction.get(year, 0.0))
 
-def plot_target_trend():
-    years = list(range(2025, 2036))
-    values = [get_target_ghg_intensity(y) for y in years]
-    fig, ax = plt.subplots()
-    ax.plot(years, values, marker='o')
-    ax.set_title("FuelEU Target GHG Intensity Forecast")
-    ax.set_ylabel("gCO2eq/MJ")
-    ax.set_xlabel("Year")
-    ax.grid(True)
-    st.pyplot(fig)
 
 st.title("FuelEU Maritime GHG Intensity Calculator")
 
-plot_target_trend()
 
 # === USER INPUTS ===
 st.sidebar.header("Fuel Input")
@@ -143,48 +131,10 @@ if fuel_rows:
         surplus_eur = (balance / 1000) * 2.4
         st.success(f"Over-compliance credit: {surplus_eur:,.2f} EUR for {balance:,.0f} gCO2eq below target")
 
-    # Export to Excel
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        df_fuel.to_excel(writer, index=False, sheet_name='Fuel Breakdown')
-        pd.DataFrame([{
-            "Total Energy (MJ)": total_energy,
-            "Total Emissions (gCO2eq)": total_emissions,
-            "GHG Intensity": ghg_intensity,
-            "Compliance Balance": balance,
-            "Penalty (EUR)": penalty
-        }]).to_excel(writer, index=False, sheet_name='Summary')
-    output.seek(0)
     
-    # Export to PDF
-    from fpdf import FPDF
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt="FuelEU Maritime GHG Summary", ln=True, align='C')
-    pdf.ln(10)
-    for key, val in {
-        "Total Energy (MJ)": total_energy,
-        "Total Emissions (gCO2eq)": total_emissions,
-        "GHG Intensity (gCO2eq/MJ)": ghg_intensity,
-        "Compliance Balance (gCO2eq)": balance,
-        "Penalty (€)": penalty
-    }.items():
-        pdf.cell(200, 10, txt=f"{key}: {val:.2f}", ln=True)
-    pdf_output = pdf.output(dest='S').encode('latin-1', errors='replace')
-    st.download_button(
-        label="Download Results as PDF",
-        data=pdf_output,
-        file_name="fueleu_ghg_summary.pdf",
-        mime="application/pdf"
-    )
+    
+    
 
-    st.download_button(
-        
-        label="Download Results as Excel",
-        data=output,
-        file_name="fueleu_ghg_calculation.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+    
 else:
     st.info("Please enter fuel inputs in the sidebar to see results.")
