@@ -40,7 +40,7 @@ def get_target_ghg_intensity(year):
     reduction = {2025: 0.02, 2030: 0.06}
     return base * (1 - reduction.get(year, 0.0))
 
-st.title("Advanced FuelEU Maritime GHG Intensity Calculator")
+st.title("FuelEU Maritime GHG Intensity Calculator")
 
 # Sidebar inputs
 st.sidebar.header("Fuel Input")
