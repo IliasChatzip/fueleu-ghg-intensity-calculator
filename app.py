@@ -1,10 +1,10 @@
-# Streamlit Web App: FuelEU Maritime GHG Intensity Calculator (Expanded)
+# Streamlit Web App: Advanced FuelEU Maritime GHG Intensity Calculator
 
 import streamlit as st
 import pandas as pd
 
 # === EMISSION FACTORS DATABASE (Expanded) ===
-fuel_defaults = pd.DataFrame([
+default_fuels = [
     # Fossil Fuels
     {"name": "Heavy Fuel Oil (HFO)", "lcv_mj_per_g": 0.0405, "wtw_gco2_per_mj": (3.114 + 0.00005*29.8 + 0.00018*273)/0.0405 + 13.5},
     {"name": "Marine Gas Oil (MGO)", "lcv_mj_per_g": 0.0427, "wtw_gco2_per_mj": (3.206 + 0.00005*29.8 + 0.00018*273)/0.0427 + 14.4},
@@ -33,51 +33,66 @@ fuel_defaults = pd.DataFrame([
     {"name": "Onshore Power Supply (OPS)", "lcv_mj_per_g": 1.0, "wtw_gco2_per_mj": 0.0},
     {"name": "Synthetic Fuels", "lcv_mj_per_g": 0.042, "wtw_gco2_per_mj": 10.0},
     {"name": "Recycled Carbon Fuels (RCFs)", "lcv_mj_per_g": 0.042, "wtw_gco2_per_mj": 70.0},
-])
+]
 
-st.title("FuelEU Maritime GHG Intensity Calculator")
+def get_target_ghg_intensity(year):
+    base = 91.16
+    reduction = {2025: 0.02, 2030: 0.06}
+    return base * (1 - reduction.get(year, 0.0))
 
-st.markdown("""
-Enter the fuel mix below. The calculator will compute the total energy, total emissions, and GHG intensity (gCO₂eq/MJ).
-""")
+st.title("Advanced FuelEU Maritime GHG Intensity Calculator")
 
-# === USER INPUT ===
-selected_fuels = []
+# Sidebar inputs
 st.sidebar.header("Fuel Input")
+fuel_defaults = pd.DataFrame(default_fuels)
+selected_fuels = []
+
 for i in range(1, 6):
     fuel_type = st.sidebar.selectbox(f"Fuel {i} type", ["None"] + list(fuel_defaults["name"]), index=0, key=f"fuel_{i}_type")
     if fuel_type != "None":
+        mode = st.sidebar.radio(f"Use default or custom values for {fuel_type}?", ["Default", "Custom"], key=f"mode_{i}")
         mass = st.sidebar.number_input(f"{fuel_type} mass (MT)", min_value=0.0, value=0.0, step=100.0, key=f"mass_{i}")
         if mass > 0:
-            selected_fuels.append({"name": fuel_type, "mass_mt": mass})
+            if mode == "Custom":
+                lcv = st.sidebar.number_input(f"LCV for {fuel_type} (MJ/g)", value=0.04, key=f"lcv_{i}")
+                ef = st.sidebar.number_input(f"WtW EF for {fuel_type} (gCO₂eq/MJ)", value=90.0, key=f"ef_{i}")
+            else:
+                entry = fuel_defaults[fuel_defaults.name == fuel_type].iloc[0]
+                lcv, ef = entry['lcv_mj_per_g'], entry['wtw_gco2_per_mj']
+            selected_fuels.append({"name": fuel_type, "mass_mt": mass, "lcv": lcv, "ef": ef})
 
-# === CALCULATIONS ===
+# Year-based target
+st.sidebar.markdown("---")
+year = st.sidebar.selectbox("Compliance Year", [2025, 2030])
+target_ghg_intensity = get_target_ghg_intensity(year)
+
+# Reward mechanisms
+ops = st.sidebar.checkbox("Use Onshore Power Supply (OPS)?", value=False)
+wind = st.sidebar.checkbox("Use Wind-Assisted Propulsion?", value=False)
+
+# Calculation logic
 total_energy = 0.0
 total_emissions = 0.0
 fuel_rows = []
-
-target_ghg_intensity = 89.33680  # FuelEU GHG intensity target
-penalty_per_mj = 2.4 / 1000  # EUR/gCO2eq excess per MJ
+penalty_per_mj = 2.4 / 1000
 
 for fuel in selected_fuels:
-    entry = fuel_defaults[fuel_defaults.name == fuel['name']].iloc[0]
-    lcv = entry['lcv_mj_per_g']
-    ef = entry['wtw_gco2_per_mj']
     mass_g = fuel['mass_mt'] * 1_000_000
-    energy = mass_g * lcv
-    emissions = energy * ef
-
+    energy = mass_g * fuel['lcv']
+    emissions = energy * fuel['ef']
     total_energy += energy
     total_emissions += emissions
-
     fuel_rows.append({
-        "Fuel": fuel['name'],
-        "Mass (MT)": fuel['mass_mt'],
-        "Energy (MJ)": round(energy, 0),
-        "Emissions (gCO₂eq)": round(emissions, 0)
+        "Fuel": fuel['name'], "Mass (MT)": fuel['mass_mt'],
+        "Energy (MJ)": round(energy, 2), "Emissions (gCO₂eq)": round(emissions, 2)
     })
 
-# === OUTPUT ===
+# Apply reward reductions
+if ops:
+    total_emissions *= 0.97  # OPS reward (example)
+if wind:
+    total_emissions *= 0.95  # Wind reward (example)
+
 if fuel_rows:
     st.subheader("Fuel Breakdown")
     st.dataframe(pd.DataFrame(fuel_rows))
