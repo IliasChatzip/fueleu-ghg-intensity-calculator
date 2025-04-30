@@ -160,9 +160,7 @@ if fuel_rows:
         "Penalty (€)": penalty
     }.items():
         pdf.cell(200, 10, txt=f"{key}: {val:,.2f}", ln=True)
-    pdf_output = io.BytesIO()
-    pdf.output(pdf_output)
-    pdf_output.seek(0)
+    pdf_output = pdf.output(dest='S').encode('latin-1')
     st.download_button(
         label="Download Results as PDF",
         data=pdf_output,
