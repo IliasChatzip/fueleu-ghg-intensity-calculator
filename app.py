@@ -93,16 +93,13 @@ penalty_per_mj = 2.4 / 1000
 for fuel in selected_fuels:
     mass_g = fuel['mass_mt'] * 1_000_000
     energy = mass_g * fuel['lcv']
-    ttw_per_g = 3.114 + (0.00005 * 29.8) + (0.00018 * 273)
-    emissions = (mass_g * fuel['lcv'] * fuel['ef']) + (mass_g * ttw_per_g)
+    emissions = energy * fuel['ef']
     total_energy += energy
     total_emissions += emissions
     fuel_rows.append({
         "Fuel": fuel['name'],
         "Mass (MT)": f"{fuel['mass_mt']:.2f}",
         "Energy (MJ)": f"{energy:,.2f}",
-        "TtW Emissions (gCO₂eq)": f"{mass_g * ttw_per_g:,.2f}",
-        "WtT Emissions (gCO₂eq)": f"{mass_g * fuel['lcv'] * fuel['ef']:,.2f}",
         "Emissions (gCO₂eq)": f"{emissions:,.2f}"
     })
 
@@ -121,7 +118,7 @@ if fuel_rows:
 
     ghg_intensity = total_emissions / total_energy if total_energy > 0 else 0
     balance = total_energy * (target_ghg_intensity - ghg_intensity)
-    penalty = 0.0 if balance >= 0 else abs(balance) * penalty_per_mj
+    penalty = 0.0 if balance >= 0 else abs(balance) / 1000 * 0.64
 
     st.subheader("Summary")
     st.metric("Total Energy (MJ)", f"{total_energy:,.0f}")
