@@ -93,20 +93,23 @@ penalty_per_mj = 2.4 / 1000
 for fuel in selected_fuels:
     mass_g = fuel['mass_mt'] * 1_000_000
     energy = mass_g * fuel['lcv']
-    emissions = energy * fuel['ef']
+        ttw_per_g = 3.114 + (0.00005 * 29.8) + (0.00018 * 273)
+    emissions = (mass_g * fuel['lcv'] * fuel['ef']) + (mass_g * ttw_per_g)
     total_energy += energy
     total_emissions += emissions
     fuel_rows.append({
         "Fuel": fuel['name'],
         "Mass (MT)": f"{fuel['mass_mt']:.2f}",
         "Energy (MJ)": f"{energy:,.2f}",
+        "TtW Emissions (gCO₂eq)": f"{mass_g * ttw_per_g:,.2f}",
+        "WtT Emissions (gCO₂eq)": f"{mass_g * fuel['lcv'] * fuel['ef']:,.2f}",
         "Emissions (gCO₂eq)": f"{emissions:,.2f}"
     })
 
-if ops_discount > 0:
-    total_emissions *= (1 - ops_discount / 100)
-if wind_discount > 0:
-    total_emissions *= (1 - wind_discount / 100)
+# === APPLY OPS AND WIND ASSISTANCE CORRECTLY ===
+reward_factor = (1 - ops_discount / 100) * (1 - wind_discount / 100)  # Applied multiplicatively per EU regulation
+total_emissions *= reward_factor
+st.caption("OPS and Wind rewards applied according to FuelEU Maritime Regulation Article 5(6) — multiplicative discount on WtW emissions.")
 
 # === OUTPUT ===
 import io
