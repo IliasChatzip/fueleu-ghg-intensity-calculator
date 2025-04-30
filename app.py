@@ -68,6 +68,13 @@ for i in range(1, 6):
             selected_fuels.append({"name": fuel_type, "mass_mt": mass, "lcv": lcv, "ef": ef})
 
 st.sidebar.markdown("---")
+ghg_scope = st.sidebar.radio(
+    "GHG Scope",
+    ["CO₂ only", "Full (CO₂ + CH₄ + N₂O)"],
+    index=1,
+    help="Choose whether to include only CO₂ or also CH₄ and N₂O in Tank-to-Wake calculations."
+)
+pooling_option = st.sidebar.checkbox("Simulate pooling/trading of surplus", value=False, help="Toggle to simulate the use of surplus GHG savings via FuelEU pooling or credit transfer provisions.")
 year = st.sidebar.selectbox("Compliance Year", list(range(2025, 2036)))
 target_ghg_intensity = get_target_ghg_intensity(year)
 
@@ -93,7 +100,11 @@ penalty_per_mj = 2.4 / 1000
 for fuel in selected_fuels:
     mass_g = fuel['mass_mt'] * 1_000_000
     energy = mass_g * fuel['lcv']
-    emissions = energy * fuel['ef']
+            if ghg_scope == "CO₂ only":
+            co2_only_ef = 3.114 / fuel['lcv'] + (13.5 if "OPS" not in fuel['name'] else 0.0)
+            emissions = energy * co2_only_ef
+        else:
+            emissions = energy * fuel['ef']
     total_energy += energy
     total_emissions += emissions
     fuel_rows.append({
@@ -127,9 +138,9 @@ if fuel_rows:
     st.metric("Compliance Balance (gCO₂eq)", f"{balance:,.0f}")
     st.metric("Penalty (€)", f"{penalty:,.2f}")
 
-    if penalty == 0 and balance > 0:
+    if penalty == 0 and balance > 0 and pooling_option:
         surplus_eur = (balance / 1000) * 2.4
-        st.success(f"Over-compliance credit: {surplus_eur:,.2f} EUR for {balance:,.0f} gCO2eq below target")
+        st.success(f"Surplus margin: {surplus_eur:,.2f} EUR equivalent for {balance:,.0f} gCO2eq below target. May be used in pooling or trading as per FuelEU provisions.")
 
     
     
