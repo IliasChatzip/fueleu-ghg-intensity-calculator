@@ -2,6 +2,7 @@
 
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
 
 # === EMISSION FACTORS DATABASE (Expanded) ===
 default_fuels = [
@@ -37,12 +38,29 @@ default_fuels = [
 
 def get_target_ghg_intensity(year):
     base = 91.16
-    reduction = {2025: 0.02, 2030: 0.06}
+    reduction = {
+        2025: 0.02, 2026: 0.02, 2027: 0.02, 2028: 0.02, 2029: 0.02,
+        2030: 0.06, 2031: 0.06, 2032: 0.06, 2033: 0.06, 2034: 0.06,
+        2035: 0.14
+    }
     return base * (1 - reduction.get(year, 0.0))
+
+def plot_target_trend():
+    years = list(range(2025, 2036))
+    values = [get_target_ghg_intensity(y) for y in years]
+    fig, ax = plt.subplots()
+    ax.plot(years, values, marker='o')
+    ax.set_title("FuelEU Target GHG Intensity Forecast")
+    ax.set_ylabel("gCO₂eq/MJ")
+    ax.set_xlabel("Year")
+    ax.grid(True)
+    st.pyplot(fig)
 
 st.title("FuelEU Maritime GHG Intensity Calculator")
 
-# Sidebar inputs
+plot_target_trend()
+
+# === USER INPUTS ===
 st.sidebar.header("Fuel Input")
 fuel_defaults = pd.DataFrame(default_fuels)
 selected_fuels = []
@@ -61,16 +79,14 @@ for i in range(1, 6):
                 lcv, ef = entry['lcv_mj_per_g'], entry['wtw_gco2_per_mj']
             selected_fuels.append({"name": fuel_type, "mass_mt": mass, "lcv": lcv, "ef": ef})
 
-# Year-based target
 st.sidebar.markdown("---")
-year = st.sidebar.selectbox("Compliance Year", [2025, 2030])
+year = st.sidebar.selectbox("Compliance Year", list(range(2025, 2036)))
 target_ghg_intensity = get_target_ghg_intensity(year)
 
-# Reward mechanisms
-ops_discount = st.sidebar.selectbox("OPS Reduction (%)", [0, 1, 2, 3], index=3)  # 3% default
-wind_discount = st.sidebar.selectbox("Wind-Assisted Reduction (%)", [0, 2, 4, 5], index=1)  # 2% default
+ops_discount = st.sidebar.selectbox("OPS Reduction (%)", [0, 1, 2, 3], index=3)
+wind_discount = st.sidebar.selectbox("Wind-Assisted Reduction (%)", [0, 2, 4, 5], index=1)
 
-# Calculation logic
+# === CALCULATIONS ===
 total_energy = 0.0
 total_emissions = 0.0
 fuel_rows = []
@@ -83,19 +99,24 @@ for fuel in selected_fuels:
     total_energy += energy
     total_emissions += emissions
     fuel_rows.append({
-        "Fuel": fuel['name'], "Mass (MT)": fuel['mass_mt'],
-        "Energy (MJ)": round(energy, 2), "Emissions (gCO₂eq)": round(emissions, 2)
+        "Fuel": fuel['name'],
+        "Mass (MT)": f"{fuel['mass_mt']:.2f}",
+        "Energy (MJ)": f"{energy:,.2f}",
+        "Emissions (gCO₂eq)": f"{emissions:,.2f}"
     })
 
-# Apply reward reductions
 if ops_discount > 0:
     total_emissions *= (1 - ops_discount / 100)
 if wind_discount > 0:
     total_emissions *= (1 - wind_discount / 100)
 
+# === OUTPUT ===
+import io
+
 if fuel_rows:
     st.subheader("Fuel Breakdown")
-    st.dataframe(pd.DataFrame(fuel_rows))
+    df_fuel = pd.DataFrame(fuel_rows)
+    st.dataframe(df_fuel)
 
     ghg_intensity = total_emissions / total_energy if total_energy > 0 else 0
     balance = total_energy * (target_ghg_intensity - ghg_intensity)
@@ -107,5 +128,57 @@ if fuel_rows:
     st.metric("GHG Intensity (gCO₂eq/MJ)", f"{ghg_intensity:.5f}")
     st.metric("Compliance Balance (gCO₂eq)", f"{balance:,.0f}")
     st.metric("Penalty (€)", f"{penalty:,.2f}")
+
+    if penalty == 0 and balance > 0:
+        st.success(f"Surplus savings: {balance:,.0f} gCO₂eq below target")
+
+    # Export to Excel
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        df_fuel.to_excel(writer, index=False, sheet_name='Fuel Breakdown')
+        pd.DataFrame([{
+            "Total Energy (MJ)": total_energy,
+            "Total Emissions (gCO2eq)": total_emissions,
+            "GHG Intensity": ghg_intensity,
+            "Compliance Balance": balance,
+            "Penalty (€)": penalty
+        }]).to_excel(writer, index=False, sheet_name='Summary')
+    output.seek(0)
+    st.download_button(
+        label="Download Results as Excel",
+        data=output,
+        file_name="fueleu_ghg_calculation.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+    # Export to PDF
+    from fpdf import FPDF
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt="FuelEU Maritime GHG Summary", ln=True, align='C')
+    pdf.ln(10)
+    for key, val in {
+        "Total Energy (MJ)": total_energy,
+        "Total Emissions (gCO2eq)": total_emissions,
+        "GHG Intensity (gCO2eq/MJ)": ghg_intensity,
+        "Compliance Balance (gCO2eq)": balance,
+        "Penalty (€)": penalty
+    }.items():
+        pdf.cell(200, 10, txt=f"{key}: {val:,.2f}", ln=True)
+    pdf_output = io.BytesIO()
+    pdf.output(pdf_output)
+    pdf_output.seek(0)
+    st.download_button(
+        label="Download Results as PDF",
+        data=pdf_output,
+        file_name="fueleu_ghg_summary.pdf",
+        mime="application/pdf"
+    )
+        label="Download Results as Excel",
+        data=output,
+        file_name="fueleu_ghg_calculation.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 else:
     st.info("Please enter fuel inputs in the sidebar to see results.")
