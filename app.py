@@ -144,13 +144,7 @@ if fuel_rows:
             "Penalty (€)": penalty
         }]).to_excel(writer, index=False, sheet_name='Summary')
     output.seek(0)
-    st.download_button(
-        label="Download Results as Excel",
-        data=output,
-        file_name="fueleu_ghg_calculation.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-
+    
     # Export to PDF
     from fpdf import FPDF
     pdf = FPDF()
@@ -175,6 +169,9 @@ if fuel_rows:
         file_name="fueleu_ghg_summary.pdf",
         mime="application/pdf"
     )
+
+    st.download_button(
+        
         label="Download Results as Excel",
         data=output,
         file_name="fueleu_ghg_calculation.xlsx",
