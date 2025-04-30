@@ -93,7 +93,7 @@ penalty_per_mj = 2.4 / 1000
 for fuel in selected_fuels:
     mass_g = fuel['mass_mt'] * 1_000_000
     energy = mass_g * fuel['lcv']
-        ttw_per_g = 3.114 + (0.00005 * 29.8) + (0.00018 * 273)
+    ttw_per_g = 3.114 + (0.00005 * 29.8) + (0.00018 * 273)
     emissions = (mass_g * fuel['lcv'] * fuel['ef']) + (mass_g * ttw_per_g)
     total_energy += energy
     total_emissions += emissions
