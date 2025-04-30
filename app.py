@@ -109,6 +109,3 @@ if fuel_rows:
     st.metric("Penalty (€)", f"{penalty:,.2f}")
 else:
     st.info("Please enter fuel inputs in the sidebar to see results.")
-git add app.py
-git commit -m "Updated calculator with advanced features"
-git push origin main
