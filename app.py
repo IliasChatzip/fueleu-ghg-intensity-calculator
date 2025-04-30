@@ -159,8 +159,8 @@ if fuel_rows:
         "Compliance Balance (gCO2eq)": balance,
         "Penalty (€)": penalty
     }.items():
-        pdf.cell(200, 10, txt=f"{key}: {val:,.2f}", ln=True)
-    pdf_output = pdf.output(dest='S').encode('latin-1')
+        pdf.cell(200, 10, txt=f"{key}: {val:.2f}", ln=True)
+    pdf_output = pdf.output(dest='S').encode('latin-1', errors='replace')
     st.download_button(
         label="Download Results as PDF",
         data=pdf_output,
