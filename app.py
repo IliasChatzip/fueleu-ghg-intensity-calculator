@@ -51,7 +51,7 @@ def plot_target_trend():
     fig, ax = plt.subplots()
     ax.plot(years, values, marker='o')
     ax.set_title("FuelEU Target GHG Intensity Forecast")
-    ax.set_ylabel("gCO₂eq/MJ")
+    ax.set_ylabel("gCO2eq/MJ")
     ax.set_xlabel("Year")
     ax.grid(True)
     st.pyplot(fig)
