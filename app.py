@@ -4,87 +4,75 @@ import matplotlib.pyplot as plt
 
 # === EMISSION FACTORS DATABASE ===
 default_fuels = [
-    {"name": "Heavy Fuel Oil (HFO)", "lcv_mj_per_g": 0.0405, "wtw_gco2_per_mj": (3.114 + 0.00005*25 + 0.00018*298)/0.0405 + 13.5},
-    {"name": "Marine Gas Oil (MGO)", "lcv_mj_per_g": 0.0427, "wtw_gco2_per_mj": (3.206 + 0.00005*25 + 0.00018*298)/0.0427 + 14.4},
-    {"name": "Very Low Sulphur Fuel Oil (VLSFO)", "lcv_mj_per_g": 0.041, "wtw_gco2_per_mj": 91.0},
-    {"name": "Liquefied Natural Gas (LNG)", "lcv_mj_per_g": 0.050, "wtw_gco2_per_mj": 79.0},
-    {"name": "Biodiesel (UCO)", "lcv_mj_per_g": 0.03727, "wtw_gco2_per_mj": 14.9}
+    {"name": "Heavy Fuel Oil (HFO)", "lcv": 0.0405, "wtt": 13.5},
+    {"name": "Marine Gas Oil (MGO)", "lcv": 0.0427, "wtt": 14.4},
+    {"name": "Very Low Sulphur Fuel Oil (VLSFO)", "lcv": 0.041, "wtt": 13.5},
+    {"name": "Liquefied Natural Gas (LNG)", "lcv": 0.050, "wtt": 11.2},
+    {"name": "Liquefied Petroleum Gas (LPG)", "lcv": 0.046, "wtt": 11.2},
 ]
 
-# === TARGET CALCULATION ===
-def get_target_ghg_intensity(year):
-    base = 91.16
-    reductions = {2025:0.02,2026:0.02,2027:0.02,2028:0.02,2029:0.02,
-                  2030:0.06,2031:0.06,2032:0.06,2033:0.06,2034:0.06,2035:0.14}
-    if year in reductions:
-        return base*(1-reductions[year])
-    elif year>2035:
-        # linear to 80% by 2050
-        return base*(1 - (0.14 + (year-2035)*(0.8-0.14)/(2050-2035)))
-    else:
-        return base
+# GWP standards
+GWP = {
+    "AR4": {"CH4": 25, "N2O": 298},
+    "AR5": {"CH4": 29.8, "N2O": 273}
+}
 
-# === PLOT FORECAST ===
-years_line = [2020] + list(range(2025,2051,5))
-target_vals = [91.16] + [get_target_ghg_intensity(y) for y in years_line[1:]]
-fig,ax = plt.subplots(figsize=(8,4))
-ax.plot(years_line,target_vals,marker='o',linestyle='--')
-ax.fill_between(years_line,target_vals,alpha=0.2)
-ax.set_title('GHG Target Forecast (2020–2050)')
-ax.set_xlabel('Year')
-ax.set_ylabel('gCO2eq/MJ')
-ax.grid(True)
-st.pyplot(fig)
+# Sidebar inputs
+st.sidebar.header("Settings")
+gwp_std = st.sidebar.selectbox("GWP Standard", ["AR4", "AR5"], index=0)
+scope = st.sidebar.selectbox("GHG Scope", ["CO2 only", "Full (CO2+CH4+N2O)"], index=1)
+year = st.sidebar.selectbox("Compliance Year", list(range(2025, 2051)), index=0)
+target = 91.16 * (1 - (0.02 if year<2030 else 0.06 if year<2035 else 0.14 if year==2035 else (0.14 + (year-2035)*(0.80-0.14)/15)))
+ops = st.sidebar.selectbox("OPS reduction (%)", [0,1,2,3], index=0)
+wind = st.sidebar.selectbox("Wind reduction (%)", [0,2,4,5], index=0)
+pooling = st.sidebar.checkbox("Enable pooling", value=False)
 
-# === SIDEBAR INPUTS ===
-st.sidebar.header('Fuel Input')
-fuel_defaults = pd.DataFrame(default_fuels)
-selected_fuels = []
-for i in range(1,4):
-    name = st.sidebar.selectbox(f'Fuel {i}', ['None']+list(fuel_defaults.name), key=i)
-    if name!='None':
-        mass = st.sidebar.number_input(f'{name} (MT)', min_value=0.0, step=100.0, key=f'mass{i}')
-        if mass>0:
-            entry = fuel_defaults[fuel_defaults.name==name].iloc[0]
-            selected_fuels.append({'name':name,'mass_mt':mass,'lcv':entry.lcv_mj_per_g,'ef':entry.wtw_gco2_per_mj})
+# Input fuels
+st.sidebar.header("Fuel Inputs")
+inputs=[]
+for fuel in default_fuels:
+    mt = st.sidebar.number_input(fuel['name']+" (MT)", min_value=0.0, value=0.0, step=100.0, key=fuel['name'])
+    if mt>0:
+        inputs.append({"name": fuel['name'],"lcv":fuel['lcv'],"wtt":fuel['wtt'],"mass":mt})
 
-st.sidebar.markdown('---')
-\
-# Scope and Options
-ghg_scope = st.sidebar.radio('GHG Scope',['CO2 only','Full'],index=0)
-pooling = st.sidebar.checkbox('Enable pooling',value=False)
-
-# === CALCULATIONS ===
-total_energy=0.0
-total_emissions=0.0
-fuel_rows=[]
-for fuel in selected_fuels:
-    mass_g = fuel['mass_mt']*1e6
-    energy = mass_g * fuel['lcv']
-    if ghg_scope=='CO2 only':
-        ttw_per_g = 3.114
-        ef_dyn = ttw_per_g/fuel['lcv'] + (fuel['ef']-((3.114+0.00005*25+0.00018*298)/fuel['lcv']))
-        emissions = energy*ef_dyn
-    else:
-        emissions = energy * fuel['ef']
-    total_energy+=energy
-    total_emissions+=emissions
-    fuel_rows.append({'Fuel':fuel['name'],'Energy (MJ)':energy,'Emissions (gCO2eq)':emissions})
-
-balance = total_energy*(get_target_ghg_intensity(2025)-total_emissions/total_energy)
-penalty = abs(balance)/1000*0.64 if balance<0 else 0.0
-
-# === OUTPUT ===
-st.subheader('Fuel Details')
-st.dataframe(pd.DataFrame(fuel_rows))
-st.subheader('Summary')
-st.write(f'Total Energy: {total_energy:,.0f} MJ')
-st.write(f'GHG Intensity: {total_emissions/total_energy:.2f} gCO2eq/MJ')
-st.write(f'Target: {get_target_ghg_intensity(2025):.2f} gCO2eq/MJ')
-st.write(f'Penalty: €{penalty:,.2f}')
-
-if penalty==0 and pooling:
-    savings = balance/1000*2.4
-    st.success(f'Pooling savings: €{savings:,.2f}')
+# Main logic
+if inputs:
+    total_E=0
+    total_em=0
+    rows=[]
+    for f in inputs:
+        m_g = f['mass']*1e6
+        E = m_g * f['lcv']
+        if scope=="CO2 only":
+            ttw_g = 3.114
+            ef = ttw_g/f['lcv'] + f['wtt']
+        else:
+            G = GWP[gwp_std]
+            ttw_g = 3.114 + 0.00005*G['CH4'] + 0.00018*G['N2O']
+            ef = ttw_g/f['lcv'] + f['wtt']
+        em = E * ef
+        total_E += E
+        total_em += em
+        rows.append({"Fuel":f['name'],"Energy_MJ":E,"Emissions_g":em})
+    # rewards
+    total_em *= (1-ops/100)*(1-wind/100)
+    intensity = total_em/total_E
+    balance = total_E*(target - intensity)
+    penalty = 0 if balance>=0 else abs(balance)/1000*0.64
+    st.subheader("Fuel breakdown")
+    st.dataframe(pd.DataFrame(rows))
+    st.subheader("Summary")
+    st.metric("Intensity (g/MJ)",f"{intensity:.5f}")
+    st.metric("Target (g/MJ)",f"{target:.5f}")
+    st.metric("Balance (g)",f"{balance:,.0f}")
+    st.metric("Penalty (€)",f"{penalty:,.2f}")
+    # forecast chart
+    yrs = [2020]+list(range(2025,2051,5))
+    vals = [91.16]+[91.16*(1-0.02) if y<2030 else 91.16*(1-0.06) if y<2035 else 91.16*(1-0.14) if y==2035 else 91.16*(1-0.80) for y in yrs[1:]]
+    fig,ax=plt.subplots()
+    ax.plot(yrs,vals,marker='o')
+    ax.set_xlabel('Year')
+    ax.set_ylabel('Target (g/MJ)')
+    st.pyplot(fig)
 else:
-    st.info('Enter values to see results.')
+    st.info("Enter fuel inputs to calculate.")
