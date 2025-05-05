@@ -90,7 +90,7 @@ gwp_standard=st.sidebar.selectbox(
     "GWP Standard",
     ["AR5 (29.8/273)","AR4 (25/298)"],
     index=1,
-    help="Select GWP standard for CH4/N2O"
+    help="Select GWP standard for CH4 and N2O: choose AR4 for 2025 per current regulation; based on EMSA, AR5 will apply from 2026 onwards (use AR5 thereafter)."
 )
 if gwp_standard.startswith("AR5"): gwp_ch4,gwp_n2o=29.8,273
 else: gwp_ch4,gwp_n2o=25,298
@@ -139,8 +139,10 @@ if fuel_rows:
     st.metric("Target GHG Intensity (gCO2eq/MJ)", f"{target:.5f}")
     st.metric("Compliance Balance (gCO2eq)",f"{bal:,.0f}")
     st.metric("Penalty (€)",f"{penalty:,.2f}")
-        # GHG Target Forecast Chart (5-year intervals up to 2050) with enhanced formatting
-    years_line = list(range(2025, 2051, 5))
+        # GHG Target Forecast Chart (including 2020 baseline and 5-year intervals up to 2050)
+    years_line = [2020] + list(range(2025, 2051, 5))
+    # Baseline target for 2020 is the reference value 91.16 gCO2eq/MJ
+    target_vals = [91.16] + [get_target_ghg_intensity(y) for y in years_line[1:]]
     target_vals = [get_target_ghg_intensity(y) for y in years_line]
     fig, ax = plt.subplots(figsize=(8, 4))
     ax.plot(
