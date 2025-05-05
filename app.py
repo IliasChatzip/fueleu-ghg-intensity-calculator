@@ -54,9 +54,7 @@ for i in range(1, 6):
     ft = st.sidebar.selectbox(f"Fuel {i}", ["None"] + fuel_defaults["name"].tolist(), key=f"fuel_{i}")
     if ft != "None":
         mode = st.sidebar.radio(f"{ft} values", ["Default", "Custom"], key=f"mode_{i}")
-        mass = st.sidebar.number_input(
-            f"{ft} mass (MT)", min_value=0.0, value=0.0, step=100.0, key=f"mass_{i}"
-        )
+        mass = st.sidebar.number_input(f"{ft} mass (MT)", min_value=0.0, value=0.0, step=100.0, key=f"mass_{i}")
         if mass > 0:
             if mode == "Custom":
                 lcv = st.sidebar.number_input(f"LCV {ft}", 0.04, key=f"lcv_{i}")
@@ -111,7 +109,6 @@ for fuel in selected_fuels:
         ef_calc = ttw_g_per_g / fuel['lcv'] + (fuel['ef'] if fuel['ef']>0 else 0)
         emissions = energy * ef_calc
     else:
-        # full scope uses preset EF which includes CH4/N2O and WtT
         emissions = energy * fuel['ef']
     # apply rewards
     reward_factor = (1 - ops/100) * (1 - wind/100)
