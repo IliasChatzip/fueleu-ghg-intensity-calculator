@@ -94,7 +94,9 @@ wind_discount = st.sidebar.selectbox(
 gwp_standard = st.sidebar.selectbox(
     "GWP Standard",
     ["AR5 (29.8/273)", "AR4 (25/298)"],
-    index=0,
+    index=1,
+    help="Select the GWP standard for CH₄ and N₂O: AR5 or AR4"
+),
     help="Select the GWP standard for CH₄ and N₂O: AR5 or AR4"
 )
 if gwp_standard.startswith("AR5"):
