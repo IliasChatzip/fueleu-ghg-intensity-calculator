@@ -133,9 +133,9 @@ for fuel in selected_fuels:
             emissions = energy * ef_dynamic
         else:
             emissions = energy * fuel['ef']
-    total_energy += energy
-    total_emissions += emissions += energy
+        total_energy += energy
     total_emissions += emissions
+
     fuel_rows.append({
         "Fuel": fuel['name'],
         "Mass (MT)": f"{fuel['mass_mt']:.2f}",
