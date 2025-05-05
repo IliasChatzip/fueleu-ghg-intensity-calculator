@@ -91,6 +91,18 @@ wind_discount = st.sidebar.selectbox(
     help="Reward for using wind propulsion assistance. Reduction reflects certified propulsion effectiveness."
 )
 
+gwp_standard = st.sidebar.selectbox(
+    "GWP Standard",
+    ["AR5 (29.8/273)", "AR4 (25/298)"],
+    index=0,
+    help="Select the GWP standard for CH₄ and N₂O: AR5 or AR4"
+)
+if gwp_standard.startswith("AR5"):
+    gwp_ch4, gwp_n2o = 29.8, 273
+else:
+    gwp_ch4, gwp_n2o = 25, 298
+
+
 # === CALCULATIONS ===
 total_energy = 0.0
 total_emissions = 0.0
@@ -100,12 +112,29 @@ penalty_per_mj = 2.4 / 1000
 for fuel in selected_fuels:
     mass_g = fuel['mass_mt'] * 1_000_000
     energy = mass_g * fuel['lcv']
+    # Determine emissions based on GHG scope and GWP standard
     if ghg_scope == "CO₂ only":
-        co2_only_ef = 3.114 / fuel['lcv'] + (0.0 if fuel['ef'] == 0 else 13.5)
-        emissions = energy * co2_only_ef
+        # CO₂-only: only CO₂ emissions
+        co2_ttw_per_g = 3.114
+        # Well-to-Tank default: only for major fossil fuels
+        wtt = 0.0
+        if fuel['name'] == "Heavy Fuel Oil (HFO)":
+            wtt = 13.5
+        elif fuel['name'] == "Marine Gas Oil (MGO)":
+            wtt = 14.4
+        co2_ef_dynamic = co2_ttw_per_g / fuel['lcv'] + wtt
+        emissions = energy * co2_ef_dynamic
     else:
-        emissions = energy * fuel['ef']
+        # Full scope: include CH₄ and N₂O with selected GWP
+        if fuel['name'] in ["Heavy Fuel Oil (HFO)", "Marine Gas Oil (MGO)"]:
+            ttw_per_g = 3.114 + (0.00005 * gwp_ch4) + (0.00018 * gwp_n2o)
+            wtt = 13.5 if fuel['name'] == "Heavy Fuel Oil (HFO)" else 14.4
+            ef_dynamic = ttw_per_g / fuel['lcv'] + wtt
+            emissions = energy * ef_dynamic
+        else:
+            emissions = energy * fuel['ef']
     total_energy += energy
+    total_emissions += emissions += energy
     total_emissions += emissions
     fuel_rows.append({
         "Fuel": fuel['name'],
