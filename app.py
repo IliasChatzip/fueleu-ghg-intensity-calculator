@@ -2,6 +2,7 @@
 
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
 
 # === EMISSION FACTORS DATABASE (Expanded) ===
 default_fuels = [
@@ -122,6 +123,17 @@ if fuel_rows:
     st.metric("GHG Intensity (gCO2eq/MJ)",f"{gi:.5f}")
     st.metric("Compliance Balance (gCO2eq)",f"{bal:,.0f}")
     st.metric("Penalty (€)",f"{penalty:,.2f}")
+    # GHG Target Forecast Chart (5-year intervals up to 2050)
+    years_line = list(range(2025, 2051, 5))
+    target_vals = [get_target_ghg_intensity(y) for y in years_line]
+    fig, ax = plt.subplots()
+    ax.plot(years_line, target_vals, marker='o')
+    ax.set_title("GHG Target Forecast (5-year intervals up to 2050)")
+    ax.set_xlabel("Year")
+    ax.set_ylabel("Target gCO2eq/MJ")
+    ax.set_xticks(years_line)
+    ax.grid(True)
+    st.pyplot(fig)
     if penalty==0 and bal>0 and pooling:
         surplus=(bal/1000)*2.4
         st.success(f"Surplus margin: {surplus:,.2f} EUR equivalent for {bal:,.0f} gCO2eq below target.")
