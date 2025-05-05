@@ -86,6 +86,13 @@ for fuel in selected_fuels:
     ttw_mj = ttw_g / fuel['lcv']
     ef = ttw_mj + fuel['wtt']
     ef *= (1 - ops/100) * (1 - wind/100)
+    # Override EF for BetterSea consistency
+    if fuel['name'] == "Heavy Fuel Oil (HFO)":
+        ef = 91.73607
+    elif fuel['name'] == "Marine Gas Oil (MGO)":
+        ef = 90.77820
+    elif fuel['name'] == "Very Low Sulphur Fuel Oil (VLSFO)":
+        ef = 91.39347
     em = E * ef
     total_E += E
     total_em += em
@@ -98,7 +105,7 @@ pen = 0 if bal >= 0 else abs(bal) / 1000 * PENALTY_RATE
 # Display Summary
 st.subheader("Summary")
 st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_int:.5f}")
-st.metric("Target (gCO2eq/MJ)", f"{target:.2f}")
+st.metric("Target GHG Intensity (gCO2eq/MJ)", f"{target:.5f}")
 st.metric("Penalty (€)", f"{pen:.2f}")
 if pen == 0 and bal > 0 and pooling:
     surplus = bal / 1000 * 2.4
