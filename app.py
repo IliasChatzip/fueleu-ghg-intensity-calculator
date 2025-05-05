@@ -2,42 +2,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# === CUSTOM STYLING ===
-st.markdown(
-    """
-    <style>
-      /* Full app background */
-      .reportview-container, .main {
-          background-color: #f3f4f6;
-      }
-      /* Sidebar background */
-      .sidebar .sidebar-content {
-          background-color: #1f2937;
-          color: #ffffff;
-      }
-      .sidebar .sidebar-content label,
-      .sidebar .sidebar-content .stMarkdown,
-      .sidebar .sidebar-content .stSelectbox>div>div>div {
-          color: #ffffff;
-      }
-      /* Dataframe styling */
-      .stDataFrame table {
-          background-color: #ffffff;
-          color: #111827;
-          border: 1px solid #e5e7eb;
-      }
-      .stDataFrame th {
-          background-color: #374151;
-          color: #f9fafb;
-      }
-      .stDataFrame td {
-          background-color: #ffffff;
-          color: #111827;
-      }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+
 
 # === FUEL DATABASE ===
 default_fuels = [
@@ -144,72 +109,4 @@ else:
 total_energy = 0.0
 total_emissions = 0.0
 fuel_rows = []
-penalty_rate = 2.4  # EUR per tonne CO2eq
-for fuel in selected_fuels:
-    mass_g = fuel["mass_mt"] * 1e6
-    energy = mass_g * fuel["lcv"]
-    if ghg_scope == "CO2 only":
-        co2_ef = 3.114 / fuel["lcv"] + (13.5 if "HFO" in fuel["name"] else 14.4 if "MGO" in fuel["name"] else 0)
-        emissions = energy * co2_ef
-    else:
-        if fuel["name"] in ["Heavy Fuel Oil (HFO)", "Marine Gas Oil (MGO)"]:
-            ttw = 3.114 + 0.00005 * gwp_ch4 + 0.00018 * gwp_n2o
-            wtt = 13.5 if fuel["name"] == "Heavy Fuel Oil (HFO)" else 14.4
-            ef_dyn = ttw / fuel["lcv"] + wtt
-            emissions = energy * ef_dyn
-        else:
-            emissions = energy * fuel["ef"]
-    total_energy += energy
-    total_emissions += emissions
-    fuel_rows.append({
-        "Fuel": fuel["name"],
-        "Mass (MT)": f"{fuel['mass_mt']:.2f}",
-        "Energy (MJ)": f"{energy:,.2f}",
-        "Emissions (gCO2eq)": f"{emissions:,.2f}"
-    })
-
-# Apply OPS & wind rewards
-reward_factor = (1 - ops / 100) * (1 - wind / 100)
-if reward_factor < 1.0:
-    total_emissions *= reward_factor
-    st.caption("OPS and wind rewards applied per FuelEU Article 5(6).")
-
-# === OUTPUT ===
-if fuel_rows:
-    st.subheader("Fuel Breakdown")
-    st.dataframe(pd.DataFrame(fuel_rows))
-
-    gi = total_emissions / total_energy if total_energy > 0 else 0
-    bal = total_energy * (target - gi)
-    penalty = 0.0 if bal >= 0 else abs(bal) / 1000 * penalty_rate
-
-    st.subheader("Summary")
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Total Energy (MJ)", f"{total_energy:,.0f}")
-    col2.metric("Total Emissions (gCO2eq)", f"{total_emissions:,.0f}")
-    col3.metric("GHG Intensity (gCO2eq/MJ)", f"{gi:.5f}")
-    col1.metric("Target (gCO2eq/MJ)", f"{target:.5f}")
-    col2.metric("Balance (gCO2eq)", f"{bal:,.0f}")
-    col3.metric("Penalty (€)", f"{penalty:,.2f}")
-
-    # Forecast chart
-    years_line = [2020] + list(range(2025, 2051, 5))
-    target_vals = [91.16] + [get_target_ghg_intensity(y) for y in years_line[1:]]
-    fig, ax = plt.subplots(figsize=(8, 4))
-    ax.plot(years_line, target_vals, marker='o', linestyle='--', linewidth=2)
-    ax.fill_between(years_line, target_vals, alpha=0.1)
-    ax.set_title("GHG Target Forecast (2020–2050)", fontsize=14, pad=10)
-    ax.set_xlabel("Year", fontsize=12)
-    ax.set_ylabel("gCO2eq/MJ", fontsize=12)
-    ax.set_xticks(years_line)
-    ax.grid(color='gray', linestyle=':', linewidth=0.5)
-    for x, y in zip(years_line, target_vals):
-        ax.text(x, y + 0.5, f"{y:.1f}", ha='center', va='bottom', fontsize=10)
-    fig.tight_layout()
-    st.pyplot(fig)
-
-    if bal > 0 and pooling:
-        surplus = (bal / 1000) * 2.4
-        st.success(f"Surplus margin: {surplus:,.2f} EUR equivalent for {bal:,.0f} gCO2eq below target.")
-else:
-    st.info("Enter fuel data to calculate.")
+penalty_rate = 0.64  # EUR per tonne CO2eq (matches BetterSea/Zero44 defaults)
