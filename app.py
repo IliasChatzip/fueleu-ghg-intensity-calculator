@@ -28,7 +28,6 @@ default_fuels = [
 ]
 
 # === TARGET METHOD ===
-
 def get_target_ghg_intensity(year):
     base = 91.16
     if year <= 2029:
@@ -49,7 +48,9 @@ st.title("FuelEU Maritime GHG Intensity Calculator")
 # === SIDEBAR INPUTS ===
 st.sidebar.header("Inputs & Options")
 fuel_defaults = pd.DataFrame(default_fuels)
-selected_fuels = []
+fuel_rows = []
+
+# Fuel consumption input slots
 for i in range(1, 6):
     ft = st.sidebar.selectbox(f"Fuel {i}", ["None"] + fuel_defaults["name"].tolist(), key=f"fuel_{i}")
     if ft != "None":
@@ -62,93 +63,78 @@ for i in range(1, 6):
             else:
                 row = fuel_defaults[fuel_defaults.name == ft].iloc[0]
                 lcv, ef = row.lcv_mj_per_g, row.wtw_gco2_per_mj
-            selected_fuels.append({"name": ft, "mass_mt": mass, "lcv": lcv, "ef": ef})
+            fuel_rows.append({"name": ft, "mass_mt": mass, "lcv": lcv, "ef": ef})
 
-# Options
+# Additional options
 st.sidebar.markdown("---")
-
 # GHG Scope
 ghg_scope = st.sidebar.radio(
     "GHG Scope", ["CO2 only", "Full (CO2 + CH4 + N2O)"], index=1,
     help="Include CH4 and N2O for full scope or CO2 only for simplified mode."
 )
-
-# Pooling simulation
+# Simulate pooling
 pooling = st.sidebar.checkbox(
     "Simulate pooling/trading of surplus", value=False,
-    help="Display surplus margin that could be pooled/traded as per FuelEU."
+    help="Allow surplus to be pooled or traded under FuelEU."
 )
-
 # Compliance year
-year = st.sidebar.selectbox("Compliance Year", list(range(2025, 2036)), index=0,
+year = st.sidebar.selectbox(
+    "Compliance Year", list(range(2025, 2051)), index=0,
     help="Select reporting year for GHG target intensity."
 )
 target = get_target_ghg_intensity(year)
-
 # Rewards
 ops = st.sidebar.selectbox("OPS Reduction (%)", [0, 1, 2, 3], index=0)
 wind = st.sidebar.selectbox("Wind-Assisted Reduction (%)", [0, 2, 4, 5], index=0)
-
-# GWP standard
-gwp_standard = st.sidebar.selectbox(
-    "GWP Standard", ["AR5 (29.8/273)", "AR4 (25/298)"], index=1,
-    help="Select GWP for CH4/N2O: AR4 for 2025; AR5 applies from 2026+."
-)
-if gwp_standard.startswith("AR5"):
-    gwp_ch4, gwp_n2o = 29.8, 273
-else:
-    gwp_ch4, gwp_n2o = 25, 298
-
 # === CALCULATIONS ===
 total_energy = 0.0
 total_emissions = 0.0
-fuel_rows = []
 penalty_rate = 0.64  # EUR per tonne CO2eq
 
-for fuel in selected_fuels:
-    mass_g = fuel['mass_mt'] * 1_000_000
+for fuel in fuel_rows:
+    mass_g = fuel['mass_mt'] * 1e6
     energy = mass_g * fuel['lcv']
-    # emissions
+    # Calculate emissions based on scope\g
     if ghg_scope == "CO2 only":
-        ttw_g_per_g = 3.114
-        wtt = fuel['ef'] if fuel['ef'] > 0 else 0.0
-        ef_dynamic = ttw_g_per_g / fuel['lcv'] + wtt
-        emissions = energy * ef_dynamic
+        ttw_per_g = 3.114
+        ef_dynamic = ttw_per_g / fuel['lcv'] + fuel['ef']
     else:
-        ttw_g_per_g = (3.114 + 0.00005 * gwp_ch4 + 0.00018 * gwp_n2o)
-        if fuel['name'] == "Heavy Fuel Oil (HFO)":
-            wtt = 13.5
-        elif fuel['name'] == "Marine Gas Oil (MGO)":
-            wtt = 14.4
-        else:
-            wtt = fuel['ef']
-        ef_dynamic = ttw_g_per_g / fuel['lcv'] + wtt
-        emissions = energy * ef_dynamic
-    # apply rewards
-    reward_factor = (1 - ops/100) * (1 - wind/100)
+        ttw_per_g = 3.114 + 0.00005*29.8 + 0.00018*273
+        ef_dynamic = ttw_per_g / fuel['lcv'] + fuel['ef']
+    emissions = energy * ef_dynamic
+    # Apply rewards
+    reward_factor = (1 - ops/100)*(1 - wind/100)
     emissions *= reward_factor
     total_energy += energy
     total_emissions += emissions
-    fuel_rows.append({
-        "Fuel": fuel['name'],
-        "Mass (MT)": f"{fuel['mass_mt']:.2f}",
-        "Energy (MJ)": f"{energy:,.2f}",
-        "Emissions (gCO2eq)": f"{emissions:,.2f}"
-    })
 
 # === OUTPUT ===
 if fuel_rows:
     st.subheader("Fuel Breakdown")
-    st.dataframe(pd.DataFrame(fuel_rows))
-    ghg_intensity = total_emissions / total_energy if total_energy > 0 else 0
+    breakdown = []
+    for f in fuel_rows:
+        breakdown.append({
+            "Fuel": f['name'],
+            "Mass (MT)": f['mass_mt'],
+            "Energy (MJ)": f['lcv']*f['mass_mt']*1e6,  
+            "Emissions (gCO2eq)": ef_dynamic * f['lcv']*f['mass_mt']*1e6
+        })
+    st.dataframe(pd.DataFrame(breakdown))
+    ghg_intensity = total_emissions/total_energy
     st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.5f}")
     st.metric("Target GHG Intensity (gCO2eq/MJ)", f"{target:.5f}")
-    balance = total_energy * (target - ghg_intensity)
+    balance = total_energy*(target - ghg_intensity)
     st.metric("Compliance Balance (gCO2eq)", f"{balance:,.0f}")
-    penalty = 0.0 if balance >= 0 else abs(balance)/1000 * penalty_rate
+    penalty = 0 if balance >=0 else abs(balance)/1e3*penalty_rate
     st.metric("Penalty (€)", f"{penalty:,.2f}")
-    if pooling and balance > 0:
-        surplus = abs(balance)/1000*2.4
-        st.success(f"Surplus margin: {surplus:,.2f} EUR could be pooled/traded.")
+    # Forecast chart including 2020 baseline
+    years_line = [2020] + list(range(2025, 2051, 5))
+    target_vals = [91.16] + [get_target_ghg_intensity(y) for y in years_line[1:]]
+    fig, ax = plt.subplots()
+    ax.plot(years_line, target_vals, marker='o')
+    ax.set_title("GHG Target Forecast (5-year intervals up to 2050)")
+    ax.set_xlabel("Year")
+    ax.set_ylabel("gCO2eq/MJ")
+    st.pyplot(fig)
 else:
-    st.info("Enter fuel inputs to display results.")
+    st.info("Enter fuels in the sidebar to calculate.")
