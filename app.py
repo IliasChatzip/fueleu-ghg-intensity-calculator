@@ -54,11 +54,28 @@ def get_target_ghg_intensity(year):
 st.title("FuelEU Maritime GHG Intensity Calculator")
 
 # Sidebar: Fuel Inputs (always on top)
+# Sidebar: Fuel Inputs (5 selectable fuels)
 st.sidebar.header("Fuel Inputs")
 selected_fuels = []
-for fuel in fuels:
-    mt = st.sidebar.number_input(
-        f"{fuel['name']} (MT)", min_value=0.0, value=0.0, step=100.0, key=f"mt_{fuel['name']}"
+for i in range(1, 6):
+    fuel_option = st.sidebar.selectbox(
+        f"Fuel {i}",
+        ["None"] + [f["name"] for f in fuels],
+        index=0,
+        key=f"fuel_select_{i}"
+    )
+    if fuel_option != "None":
+        mass_mt = st.sidebar.number_input(
+            f"{fuel_option} mass (MT)",
+            min_value=0.0,
+            value=0.0,
+            step=100.0,
+            key=f"mt_{i}"
+        )
+        if mass_mt > 0:
+            # Retrieve fuel properties
+            fuel_data = next(f for f in fuels if f["name"] == fuel_option)
+            selected_fuels.append({**fuel_data, "mt": mass_mt}) (MT)", min_value=0.0, value=0.0, step=100.0, key=f"mt_{fuel['name']}"
     )
     if mt > 0:
         selected_fuels.append({**fuel, "mt": mt})
