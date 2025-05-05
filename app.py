@@ -34,9 +34,24 @@ default_fuels = [
 ]
 
 def get_target_ghg_intensity(year):
+    """
+    Returns the maximum GHG intensity target (gCO2eq/MJ) for a given year according to FuelEU Maritime Regulation.
+    Official targets: 2025–2029: 2% reduction; 2030–2034: 6% reduction; 2035: 14% reduction; then linear progression to 80% reduction by 2050.
+    """
     base = 91.16
-    reduction = {2025:0.02,2026:0.02,2027:0.02,2028:0.02,2029:0.02,2030:0.06,2031:0.06,2032:0.06,2033:0.06,2034:0.06,2035:0.14}
-    return base*(1-reduction.get(year,0.0))
+    if year <= 2029:
+        reduction = 0.02
+    elif year <= 2034:
+        reduction = 0.06
+    elif year == 2035:
+        reduction = 0.14
+    elif 2035 < year <= 2050:
+        # Linear interpolation from 14% in 2035 to 80% in 2050
+        reduction = 0.14 + (0.80 - 0.14) * (year - 2035) / (2050 - 2035)
+    else:
+        # Beyond 2050, assume 80% reduction
+        reduction = 0.80
+    return base * (1 - reduction)
 
 st.title("FuelEU Maritime GHG Intensity Calculator")
 # Sidebar
