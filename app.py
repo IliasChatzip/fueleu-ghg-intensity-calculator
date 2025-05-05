@@ -66,7 +66,12 @@ for i in range(1, 6):
 
 st.sidebar.markdown("---")
 st.sidebar.header("Options")
-year = st.sidebar.selectbox("Compliance Year", list(range(2025, 2051)), index=0)
+year = st.sidebar.selectbox(
+    "Compliance Year",
+    [2020, 2025, 2030, 2035, 2040, 2045, 2050],
+    index=1,
+    help="Select compliance year (every 5 years from 2020 to 2050)."
+)
 
 # Show target for selected year
 current_target = target_intensity(year)
