@@ -46,7 +46,13 @@ for i in range(1,6):
     fuel_type=st.sidebar.selectbox(f"Fuel {i} type",["None"]+list(fuel_defaults["name"]),index=0,key=f"fuel_{i}")
     if fuel_type!="None":
         mode=st.sidebar.radio(f"Values for {fuel_type}",["Default","Custom"],key=f"mode_{i}")
-        mass=st.sidebar.number_input(f"{fuel_type} mass (MT)",0.0,0.0,step=100.0,key=f"mass_{i}")
+        mass=st.sidebar.number_input(
+                f"{fuel_type} mass (MT)",
+                min_value=0.0,
+                value=0.0,
+                step=100.0,
+                key=f"mass_{i}"
+            )
         if mass>0:
             if mode=="Custom":
                 lcv=st.sidebar.number_input(f"LCV {fuel_type}",0.04,key=f"lcv_{i}")
