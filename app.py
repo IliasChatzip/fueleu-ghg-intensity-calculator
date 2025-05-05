@@ -73,8 +73,7 @@ ops = st.sidebar.selectbox("OPS Reduction (%)", [0,1,2,3], index=0)
 wind = st.sidebar.selectbox("Wind-Assisted Reduction (%)", [0,2,4,5], index=0)
 
 # === CALCULATION ===
-totE = 0.0
- totEm = 0.0
+totE = 0.0totEm = 0.0
 rows = []
 for name, mt in selected:
     data = next(f for f in fuels if f['name']==name)
