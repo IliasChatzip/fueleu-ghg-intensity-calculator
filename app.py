@@ -94,10 +94,14 @@ for name, mt in selected_fuels:
     fuel = next(f for f in fuels if f["name"] == name)
     mass_g = mt * 1_000_000
     energy = mass_g * fuel["lcv"]  # MJ
-    # Determine EF
+        # Determine EF (Well-to-Wake)
     if "override_ef" in fuel:
         ef = fuel["override_ef"]
+    elif any(keyword in name for keyword in ["Biodiesel", "HVO", "Bio-LNG", "Bio-Methanol", "Green", "E-"]):
+        # Biofuels and recycled fuels: no TtW emissions, only WtT
+        ef = fuel.get("wtt", 0.0)
     else:
+        # Fossil fuels: full dynamic TtW + WtT
         if gwp_choice.startswith("AR4"):
             gwp = GWP_VALUES["AR4"]
         else:
