@@ -136,18 +136,34 @@ if fuel_rows:
     st.metric("Total Energy (MJ)",f"{total_energy:,.0f}")
     st.metric("Total Emissions (gCO2eq)",f"{total_emissions:,.0f}")
     st.metric("GHG Intensity (gCO2eq/MJ)",f"{gi:.5f}")
+    st.metric("Target GHG Intensity (gCO2eq/MJ)", f"{target:.5f}")
     st.metric("Compliance Balance (gCO2eq)",f"{bal:,.0f}")
     st.metric("Penalty (€)",f"{penalty:,.2f}")
-    # GHG Target Forecast Chart (5-year intervals up to 2050)
+        # GHG Target Forecast Chart (5-year intervals up to 2050) with enhanced formatting
     years_line = list(range(2025, 2051, 5))
     target_vals = [get_target_ghg_intensity(y) for y in years_line]
-    fig, ax = plt.subplots()
-    ax.plot(years_line, target_vals, marker='o')
-    ax.set_title("GHG Target Forecast (5-year intervals up to 2050)")
-    ax.set_xlabel("Year")
-    ax.set_ylabel("Target gCO2eq/MJ")
+    fig, ax = plt.subplots(figsize=(8, 4))
+    ax.plot(
+        years_line,
+        target_vals,
+        marker='o',
+        linestyle='--',
+        linewidth=2
+    )
+    ax.fill_between(years_line, target_vals, alpha=0.1)
+    ax.set_title(
+        "GHG Target Forecast",
+        fontsize=14,
+        pad=10
+    )
+    ax.set_xlabel("Year", fontsize=12)
+    ax.set_ylabel("Target gCO2eq/MJ", fontsize=12)
     ax.set_xticks(years_line)
-    ax.grid(True)
+    ax.grid(color='gray', linestyle=':', linewidth=0.5)
+    # Annotate each point
+    for x, y in zip(years_line, target_vals):
+        ax.text(x, y + 0.5, f"{y:.1f}", ha='center', va='bottom', fontsize=10)
+    fig.tight_layout()
     st.pyplot(fig)
     if penalty==0 and bal>0 and pooling:
         surplus=(bal/1000)*2.4
