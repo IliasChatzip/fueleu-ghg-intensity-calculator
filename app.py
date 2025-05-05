@@ -106,9 +106,9 @@ for name, mt in selected_fuels:
     totEm += emissions
     rows.append({
         "Fuel": name,
-        "Mass (MT)": mt,
-        "Energy (MJ)": round(energy, 2),
-        "Emissions (gCO2eq)": round(emissions, 2)
+        "Mass (MT)": f"{mt:.2f}",
+        "Energy (MJ)": f"{energy:,.2f}",
+        "Emissions (gCO2eq)": f"{emissions:,.2f}"
     })
 
 # === OUTPUT ===
