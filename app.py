@@ -13,8 +13,8 @@ GWP_VALUES = {
 
 # === FUEL DATABASE ===
 fuels = [
-    {"name": "Heavy Fuel Oil (HFO)",       "lcv": 0.0405,  "wtt": 13.5, "override_ef": 91.73714},
-    {"name": "Marine Gas Oil (MGO)",       "lcv": 0.0427,  "wtt": 14.4, "override_ef": 90.77940},
+    {"name": "Heavy Fuel Oil (HFO)",       "lcv": 0.0405,  "wtt": 13.5, "override_ef": 91.73683},
+    {"name": "Marine Gas Oil (MGO)",       "lcv": 0.0427,  "wtt": 14.4, "override_ef": 90.78750},
     {"name": "Very Low Sulphur Fuel Oil (VLSFO)", "lcv": 0.0410,  "wtt": 13.5, "override_ef": 91.39480},
     {"name": "Liquefied Natural Gas (LNG)", "lcv": 0.0500,  "wtt": 79.0},
     {"name": "Liquefied Petroleum Gas (LPG)","lcv": 0.0460,  "wtt": 76.0},
