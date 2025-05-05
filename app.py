@@ -108,7 +108,6 @@ for name, mt in selected_fuels:
         "Fuel": name,
         "Mass (MT)": mt,
         "Energy (MJ)": round(energy, 2),
-        "EF (gCO2eq/MJ)": round(ef, 4),
         "Emissions (gCO2eq)": round(emissions, 2)
     })
 
