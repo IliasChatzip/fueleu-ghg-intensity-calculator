@@ -103,12 +103,26 @@ penalty_rate = 0.64  # EUR per tonne CO2eq
 for fuel in selected_fuels:
     mass_g = fuel['mass_mt'] * 1_000_000
     energy = mass_g * fuel['lcv']
-    # emissions
+        # emissions
     if ghg_scope == "CO2 only":
-        ttw_g_per_g = 3.114  # CO2 only
-        ef_calc = ttw_g_per_g / fuel['lcv'] + (fuel['ef'] if fuel['ef']>0 else 0)
-        emissions = energy * ef_calc
+        # CO2-only: only CO2 emissions per g fuel
+        ttw_g_per_g = 3.114
+        wtt = fuel['ef'] if fuel['ef'] > 0 else 0.0
+        ef_dynamic = ttw_g_per_g / fuel['lcv'] + wtt
+        emissions = energy * ef_dynamic
     else:
+        # Full scope: dynamic EF based on selected GWP standard for CH4 and N2O
+        ttw_g_per_g = (3.114 + 0.00005 * gwp_ch4 + 0.00018 * gwp_n2o)
+        # Well-to-Tank default per fuel
+        if fuel['name'] == "Heavy Fuel Oil (HFO)":
+            wtt = 13.5
+        elif fuel['name'] == "Marine Gas Oil (MGO)":
+            wtt = 14.4
+        else:
+            wtt = fuel['ef']  # use static WtW EF for other fuels
+        ef_dynamic = ttw_g_per_g / fuel['lcv'] + wtt
+        emissions = energy * ef_dynamic
+
         emissions = energy * fuel['ef']
     # apply rewards
     reward_factor = (1 - ops/100) * (1 - wind/100)
