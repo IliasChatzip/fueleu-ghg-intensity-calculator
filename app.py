@@ -141,9 +141,9 @@ if fuel_rows:
     st.metric("Penalty (€)",f"{penalty:,.2f}")
         # GHG Target Forecast Chart (including 2020 baseline and 5-year intervals up to 2050)
     years_line = [2020] + list(range(2025, 2051, 5))
-    # Baseline target for 2020 is the reference value 91.16 gCO2eq/MJ
+        # Baseline target for 2020 is the reference value 91.16 gCO2eq/MJ
+    years_line = [2020] + list(range(2025, 2051, 5))
     target_vals = [91.16] + [get_target_ghg_intensity(y) for y in years_line[1:]]
-    target_vals = [get_target_ghg_intensity(y) for y in years_line]
     fig, ax = plt.subplots(figsize=(8, 4))
     ax.plot(
         years_line,
