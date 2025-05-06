@@ -99,11 +99,6 @@ realE = 0.0
 emissions = 0.0
 rows = []
 
-target = target_intensity(year)
-ghg_intensity = emissions / totE if totE else 0
-balance = totE * (target - ghg_intensity)
-penalty = max(0.0, abs(balance) * PENALTY_RATE / (ghg_intensity * VLSFO_ENERGY_CONTENT)) if balance < 0 else 0.0
-
 years = list(range(2020, 2051, 5))
 targets = [target_intensity(y) for y in years]
 
@@ -153,11 +148,4 @@ ax.legend()
 ax.grid(True)
 st.pyplot(fig)
 
-# Benchmark sector-wide targets for comparison
-years = list(range(2020, 2051, 5))
-targets = [target_intensity(y) for y in years]
-
-target = target_intensity(year)
-ghg_intensity = emissions / totE if totE else 0
-balance = totE * (target - ghg_intensity)
 penalty = max(0.0, abs(balance) * PENALTY_RATE / (ghg_intensity * VLSFO_ENERGY_CONTENT)) if balance < 0 else 0.0
