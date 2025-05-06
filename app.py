@@ -64,7 +64,7 @@ st.sidebar.markdown(f"**Target {year}: {target:.5f} gCO₂eq/MJ**")
 
 gwp_choice = st.sidebar.radio("GWP Standard", ["AR4 (25/298)", "AR5 (29.8/273)"], index=0)
 ops = st.sidebar.selectbox("OPS Reduction (%)", list(range(0, 20)),index=0)
-wind = st.sidebar.selectbox("Wind-Assisted Reduction", [1,0.99,0.97,0.95], index=1)
+wind = st.sidebar.selectbox("Wind-Assisted Reduction", [1,0.99,0.97,0.95], index=0)
 
 # === CALCULATION ===
 totE = 0.0
