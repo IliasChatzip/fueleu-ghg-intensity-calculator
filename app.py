@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 # === CONFIGURATION ===
 BASE_TARGET = 91.16  # Reference GHG intensity for 2020
 REDUCTIONS = {2025: 0.02, 2030: 0.06, 2035: 0.14, 2050: 0.80}
-PENALTY_RATE = 2400  # EUR per tonne VLSFO equivalent
+PENALTY_RATE = 1428  # EUR per tonne VLSFO equivalent
 VLSFO_ENERGY_CONTENT = 41000  # MJ per tonne VLSFO
 GWP_VALUES = {
     "AR4": {"CH4": 25, "N2O": 298},
@@ -15,7 +15,7 @@ GWP_VALUES = {
 # === FUEL DATABASE ===
 fuels = [
     {"name": "Heavy Fuel Oil (HFO)",            "lcv": 0.0405, "wtt": 13.5, "ttw_co2": 3.114},
-    {"name": "Very Low Sulphur Fuel Oil (VLSFO)","lcv": 0.0410, "wtt": 13.2, "ttw_co2": 3.188},
+    {"name": "Low Fuel Oil (LFO)",              "lcv": 0.0410, "wtt": 13.2, "ttw_co2": 3.151},
     {"name": "Marine Gas Oil (MGO)",            "lcv": 0.0427, "wtt": 14.4, "ttw_co2": 3.206},
     {"name": "Liquefied Natural Gas (LNG)",     "lcv": 0.0500, "wtt": 79.0,  "ttw_co2": 2.750},
     {"name": "Liquefied Petroleum Gas (LPG)",   "lcv": 0.0460, "wtt": 76.0,  "ttw_co2": 3.000},
