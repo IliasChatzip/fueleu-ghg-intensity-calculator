@@ -14,21 +14,21 @@ GWP_VALUES = {
 
 # === FUEL DATABASE ===
 fuels = [
-    {"name": "Heavy Fuel Oil (HFO)",            "lcv": 0.0405, "wtt": 13.5, "ttw_co2": 3.114},"ttw_ch4": 0.00005},"ttw_n20": 0.00018},
-    {"name": "Low Fuel Oil (LFO)",              "lcv": 0.0410, "wtt": 13.2, "ttw_co2": 3.151},"ttw_ch4": 0.00005},"ttw_n20": 0.00018},
-    {"name": "Marine Gas Oil (MGO)",            "lcv": 0.0427, "wtt": 14.4, "ttw_co2": 3.206},"ttw_ch4": 0.00005},"ttw_n20": 0.00018},
-    {"name": "Liquefied Natural Gas (LNG)",     "lcv": 0.0491, "wtt": 18.5,  "ttw_co2": 2.750},"ttw_ch4": 0.0},"ttw_n20": 0.00011},
-    {"name": "Liquefied Petroleum Gas (LPG)",   "lcv": 0.0460, "wtt": 7.8,  "ttw_co2": 3.015},"ttw_ch4": 0.0},"ttw_n20": 0.0},
-    {"name": "Methanol (Fossil)",               "lcv": 0.0199, "wtt": 31.3,  "ttw_co2": 1.375},"ttw_ch4": 0.0},"ttw_n20": 0.0},
-    {"name": "Biodiesel (UCO)",                "lcv": 0.04300, "wtt": 14.9, "ttw_co2": 0.0},"ttw_ch4": 3.114},"ttw_n20": 3.114},
-    {"name": "Biodiesel (Animal Fats)",        "lcv": 0.04300, "wtt": 20.8, "ttw_co2": 0.0},"ttw_ch4": 3.114},"ttw_n20": 3.114},
-    {"name": "Biodiesel (Sunflower Oil)",      "lcv": 0.04300, "wtt": 44.7, "ttw_co2": 2.834},"ttw_ch4": 0.0},"ttw_n20": 0.0},
-    {"name": "Biodiesel (Soybean Oil)",        "lcv": 0.04300, "wtt": 47, "ttw_co2": 2.834},"ttw_ch4": 0.0},"ttw_n20": 0.0},
-    {"name": "Biodiesel (Palm Oil)",           "lcv": 0.04300, "wtt": 75.7, "ttw_co2": 2.834},"ttw_ch4": 0.0},"ttw_n20": 0.0},
-    {"name": "Hydrotreated Vegetable Oil from rape seed (HVO)","lcv": 0.0440, "wtt": 50.1, "ttw_co2": 3.115},"ttw_ch4": 0.00005},"ttw_n20": 0.00018},
-    {"name": "Bio-LNG",                        "lcv": 0.0491, "wtt": 14.1,  "ttw_co2": 2.75},"ttw_ch4": 0.0},"ttw_n20": 0.00011},
-    {"name": "Bio-Methanol",                   "lcv": 0.0199, "wtt": 13.5,  "ttw_co2": 0.0},"ttw_ch4": 0.0},"ttw_n20": 0.0},
-    {"name": "Onshore Power Supply (OPS)",     "lcv": 1.0000, "wtt": 0.0,   "ttw_co2": 0.0},"ttw_ch4": 0.0},"ttw_n20": 0.0},
+    {"name": "Heavy Fuel Oil (HFO)",            "lcv": 0.0405, "wtt": 13.5, "ttw_co2": 3.114,"ttw_ch4": 0.00005,"ttw_n20": 0.00018},
+    {"name": "Low Fuel Oil (LFO)",              "lcv": 0.0410, "wtt": 13.2, "ttw_co2": 3.151,"ttw_ch4": 0.00005,"ttw_n20": 0.00018},
+    {"name": "Marine Gas Oil (MGO)",            "lcv": 0.0427, "wtt": 14.4, "ttw_co2": 3.206,"ttw_ch4": 0.00005,"ttw_n20": 0.00018},
+    {"name": "Liquefied Natural Gas (LNG)",     "lcv": 0.0491, "wtt": 18.5,  "ttw_co2": 2.750,"ttw_ch4": 0.0,"ttw_n20": 0.00011},
+    {"name": "Liquefied Petroleum Gas (LPG)",   "lcv": 0.0460, "wtt": 7.8,  "ttw_co2": 3.015,"ttw_ch4": 0.0,"ttw_n20": 0.0},
+    {"name": "Methanol (Fossil)",               "lcv": 0.0199, "wtt": 31.3,  "ttw_co2": 1.375,"ttw_ch4": 0.0,"ttw_n20": 0.0},
+    {"name": "Biodiesel (UCO)",                "lcv": 0.04300, "wtt": 14.9, "ttw_co2": 0.0,"ttw_ch4": 3.114,"ttw_n20": 3.114},
+    {"name": "Biodiesel (Animal Fats)",        "lcv": 0.04300, "wtt": 20.8, "ttw_co2": 0.0,"ttw_ch4": 3.114,"ttw_n20": 3.114},
+    {"name": "Biodiesel (Sunflower Oil)",      "lcv": 0.04300, "wtt": 44.7, "ttw_co2": 2.834,"ttw_ch4": 0.0,"ttw_n20": 0.0},
+    {"name": "Biodiesel (Soybean Oil)",        "lcv": 0.04300, "wtt": 47, "ttw_co2": 2.834,"ttw_ch4": 0.0,"ttw_n20": 0.0},
+    {"name": "Biodiesel (Palm Oil)",           "lcv": 0.04300, "wtt": 75.7, "ttw_co2": 2.834,"ttw_ch4": 0.0,"ttw_n20": 0.0},
+    {"name": "Hydrotreated Vegetable Oil from rape seed (HVO)","lcv": 0.0440, "wtt": 50.1, "ttw_co2": 3.115,"ttw_ch4": 0.00005,"ttw_n20": 0.00018},
+    {"name": "Bio-LNG",                        "lcv": 0.0491, "wtt": 14.1,  "ttw_co2": 2.75,"ttw_ch4": 0.0,"ttw_n20": 0.00011},
+    {"name": "Bio-Methanol",                   "lcv": 0.0199, "wtt": 13.5,  "ttw_co2": 0.0,"ttw_ch4": 0.0,"ttw_n20": 0.0},
+    {"name": "Onshore Power Supply (OPS)",     "lcv": 1.0000, "wtt": 0.0,   "ttw_co2": 0.0,"ttw_ch4": 0.0,"ttw_n20": 0.0},
 ]
 
 # === FUNCTION TO COMPUTE TARGET INTENSITY ===
