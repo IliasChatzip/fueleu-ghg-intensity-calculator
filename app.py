@@ -60,6 +60,10 @@ def target_intensity(year: int) -> float:
     return BASE_TARGET * (1 - red)
 
 # === STREAMLIT UI ===
+
+ops = st.sidebar.selectbox("OPS Reduction (%)", [0, 1, 2], index=0, help="Reduction applied when using Onshore Power Supply (max 2%)")
+wind = st.sidebar.selectbox("Wind Correction Factor", [1.00, 0.99, 0.97, 0.95], index=0, help="Wind-assisted reduction factor (e.g., 0.95 = 5% reduction)")
+
 st.title("FuelEU Maritime - GHG Intensity & Penalty Calculator")
 st.sidebar.header("Fuel Inputs")
 selected: list[tuple[str, float]] = []
@@ -91,8 +95,8 @@ for name, mt in selected:
     ttw_g = fuel["ttw_co2"] + fuel["ttw_ch4"] * gwp["CH4"] + fuel["ttw_n20"] * gwp["N2O"]
     ef = ttw_g / lcv + fuel["wtt"]
 
-    # Apply correction factors
-    ef *= 1.0  # wind and OPS already applied in earlier code if needed
+  # Apply OPS and wind correction
+    ef *= (1 - ops / 100) * wind
 
     # Apply RFNBO multiplier
     energy_credit = energy * (RFNBO_MULTIPLIER if fuel["rfnbo"] and year <= 2033 else 1)
