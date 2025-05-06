@@ -72,8 +72,7 @@ gwp_choice = st.sidebar.radio(
     ["AR4 (25/298)", "AR5 (29.8/273)"],
     index=0,
     help="AR4 is used for 2025 compliance. AR5 applies from 2026 onward."
-)", "AR5 (29.8/273)"],
-    index=0,
+)
 ops = st.sidebar.selectbox(
     "OPS Reduction (%)",
     [0, 1, 2],
