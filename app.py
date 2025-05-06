@@ -63,8 +63,8 @@ target = target_intensity(year)
 st.sidebar.markdown(f"**Target {year}: {target:.5f} gCO₂eq/MJ**")
 
 gwp_choice = st.sidebar.radio("GWP Standard", ["AR4 (25/298)", "AR5 (29.8/273)"], index=0)
-ops = st.sidebar.selectbox("OPS Reduction (%)", [0,1,2,3], index=0)
-wind = st.sidebar.selectbox("Wind-Assisted Reduction (%)", [0,2,4,5], index=0)
+ops = st.sidebar.selectbox("OPS Reduction (%)", list(range(0, 20),index=0)
+wind = st.sidebar.selectbox("Wind-Assisted Reduction", [1,0.99,0.97,0.95], index=1)
 
 # === CALCULATION ===
 totE = 0.0
@@ -81,7 +81,7 @@ for name, mt in selected:
         ttw_g = fuel["ttw_co2"] + fuel["ttw_ch4"] * gwp["CH4"] + fuel["ttw_n20"] * gwp["N2O"]
         ttw_mj = ttw_g / fuel["lcv"]
         ef = ttw_mj + fuel["wtt"]
-    ef *= (1 - ops/100) * (1 - wind/100)
+    ef *= (1 - nbo_reduction/100) * (1 - ops/100) * (1 - wind/100)
     emissions = energy * ef
     totE += energy
     totEm += emissions
