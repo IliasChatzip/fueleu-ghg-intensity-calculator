@@ -61,6 +61,9 @@ def target_intensity(year: int) -> float:
 
 # === STREAMLIT UI ===
 
+if st.sidebar.button("🔁 Reset Calculator"):
+    st.experimental_rerun()
+
 st.title("FuelEU Maritime - GHG Intensity & Penalty Calculator")
 st.sidebar.header("Fuel Inputs")
 selected: list[tuple[str, float]] = []
@@ -95,6 +98,15 @@ totE = 0.0
 realE = 0.0
 emissions = 0.0
 rows = []
+
+target = target_intensity(year)
+ghg_intensity = emissions / totE if totE else 0
+balance = totE * (target - ghg_intensity)
+penalty = max(0.0, abs(balance) * PENALTY_RATE / (ghg_intensity * VLSFO_ENERGY_CONTENT)) if balance < 0 else 0.0
+
+years = list(range(2020, 2051, 5))
+targets = [target_intensity(y) for y in years]
+
 gwp = GWP_VALUES["AR4"] if gwp_choice.startswith("AR4") else GWP_VALUES["AR5"]
 
 for name, mt in selected:
@@ -128,10 +140,6 @@ st.metric("Total Emissions (gCO2eq)", f"{emissions:,.0f}")
 st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}", delta="✅ Compliant" if ghg_intensity <= target else "❌ Over target")
 st.metric("Compliance Balance", f"{balance:,.0f}")
 st.metric("Penalty (EUR)", f"{penalty:,.2f}")
-
-# === COMPLIANCE & COMPARISON ===
-
-penalty = max(0.0, abs(balance) * PENALTY_RATE / (ghg_intensity * VLSFO_ENERGY_CONTENT)) if balance < 0 else 0.0
 
 # === COMPLIANCE CHART ===
 st.subheader("Sector-wide GHG Intensity Targets")
