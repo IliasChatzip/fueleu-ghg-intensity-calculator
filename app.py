@@ -2,15 +2,6 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-"""
-FuelEU Maritime GHG‑intensity & penalty calculator
---------------------------------------------------
-Highlights
-* RFNBO multiplier (×2 energy credit until end‑2033) implemented.
-* Default CH4/N2O slip factors from FuelEU Annex II.
-* OPS reward capped at 2 %. Wind correction uses direct factor (1 = no reduction).
-"""
-
 # === CONFIGURATION ===
 BASE_TARGET = 91.16  # gCO2eq/MJ reference for 2020
 REDUCTIONS = {2025: 0.02, 2030: 0.06, 2035: 0.14, 2050: 0.80}
@@ -69,10 +60,7 @@ def target_intensity(year: int) -> float:
     return BASE_TARGET * (1 - red)
 
 # === STREAMLIT UI ===
-
-
 st.title("FuelEU Maritime - GHG Intensity & Penalty Calculator")
-
 st.sidebar.header("Fuel Inputs")
 selected: list[tuple[str, float]] = []
 for i in range(1, 6):
