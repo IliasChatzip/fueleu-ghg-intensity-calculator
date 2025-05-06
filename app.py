@@ -106,7 +106,7 @@ gwp = GWP_VALUES["AR4"] if gwp_choice.startswith("AR4") else GWP_VALUES["AR5"]
 
 for name, mt in selected:
     fuel = next(f for f in fuels if f["name"] == name)
-    mass_g = mt * 1_000_000
+    mass_g = mt * 1_000_000 if fuel["name"] != "Liquefied Natural Gas (LNG)" else mt * 1_000_000 * 0.5
     lcv = fuel["lcv"]
     energy = mass_g * lcv
     co2_corr = fuel["ttw_co2"] * (1 - ops / 100) * wind
@@ -147,5 +147,3 @@ ax.set_title("Your Performance vs Sector Target")
 ax.legend()
 ax.grid(True)
 st.pyplot(fig)
-
-
