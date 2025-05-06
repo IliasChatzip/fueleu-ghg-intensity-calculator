@@ -17,17 +17,17 @@ fuels = [
     {"name": "Heavy Fuel Oil (HFO)",             "lcv": 0.0405, "wtt": 13.5, "ttw_co2": 3.114,"ttw_ch4": 0.00005,"ttw_n20": 0.00018},
     {"name": "Low Fuel Oil (LFO)",               "lcv": 0.0410, "wtt": 13.2, "ttw_co2": 3.151,"ttw_ch4": 0.00005,"ttw_n20": 0.00018},
     {"name": "Marine Gas Oil (MGO)",             "lcv": 0.0427, "wtt": 14.4, "ttw_co2": 3.206,"ttw_ch4": 0.00005,"ttw_n20": 0.00018},
-    {"name": "Liquefied Natural Gas (LNG)",      "lcv": 0.0491, "wtt": 18.5, "ttw_co2": 2.750,"ttw_ch4": 0.0,    "ttw_n20": 0.00011},
-    {"name": "Liquefied Petroleum Gas (LPG)",    "lcv": 0.0460, "wtt": 7.8,  "ttw_co2": 3.015,"ttw_ch4": 0.0,    "ttw_n20": 0.0},
-    {"name": "Methanol (Fossil)",                "lcv": 0.0199, "wtt": 31.3, "ttw_co2": 1.375,"ttw_ch4": 0.0,    "ttw_n20": 0.0},
-    {"name": "Biodiesel (UCO)",                  "lcv": 0.0430, "wtt": 14.9, "ttw_co2": 0.0,  "ttw_ch4": 3.114,  "ttw_n20": 3.114},
-    {"name": "Biodiesel (Animal Fats)",          "lcv": 0.0430, "wtt": 20.8, "ttw_co2": 0.0,  "ttw_ch4": 3.114,  "ttw_n20": 3.114},
-    {"name": "Biodiesel (Sunflower Oil)",        "lcv": 0.0430, "wtt": 44.7, "ttw_co2": 2.834,"ttw_ch4": 0.0,    "ttw_n20": 0.0},
-    {"name": "Biodiesel (Soybean Oil)",          "lcv": 0.0430, "wtt": 47.0, "ttw_co2": 2.834,"ttw_ch4": 0.0,    "ttw_n20": 0.0},
-    {"name": "Biodiesel (Palm Oil)",             "lcv": 0.0430, "wtt": 75.7, "ttw_co2": 2.834,"ttw_ch4": 0.0,    "ttw_n20": 0.0},
+    {"name": "Liquefied Natural Gas (LNG)",      "lcv": 0.0491, "wtt": 18.5,  "ttw_co2": 2.750,"ttw_ch4": 0.0,"ttw_n20": 0.00011},
+    {"name": "Liquefied Petroleum Gas (LPG)",    "lcv": 0.0460, "wtt": 7.8,  "ttw_co2": 3.015,"ttw_ch4": 0.0,"ttw_n20": 0.0},
+    {"name": "Methanol (Fossil)",                "lcv": 0.0199, "wtt": 31.3,  "ttw_co2": 1.375,"ttw_ch4": 0.0,"ttw_n20": 0.0},
+    {"name": "Biodiesel (UCO)",                  "lcv": 0.04300, "wtt": 14.9, "ttw_co2": 0.0,"ttw_ch4": 0.0,"ttw_n20": 0.0},
+    {"name": "Biodiesel (Animal Fats)",          "lcv": 0.04300, "wtt": 20.8, "ttw_co2": 0.0,"ttw_ch4": 0.0,"ttw_n20": 0.0},
+    {"name": "Biodiesel (Sunflower Oil)",        "lcv": 0.04300, "wtt": 44.7, "ttw_co2": 2.834,"ttw_ch4": 0.0,"ttw_n20": 0.0},
+    {"name": "Biodiesel (Soybean Oil)",          "lcv": 0.04300, "wtt": 47, "ttw_co2": 2.834,"ttw_ch4": 0.0,"ttw_n20": 0.0},
+    {"name": "Biodiesel (Palm Oil)",             "lcv": 0.04300, "wtt": 75.7, "ttw_co2": 2.834,"ttw_ch4": 0.0,"ttw_n20": 0.0},
     {"name": "Hydrotreated Vegetable Oil (HVO)", "lcv": 0.0440, "wtt": 50.1, "ttw_co2": 3.115,"ttw_ch4": 0.00005,"ttw_n20": 0.00018},
-    {"name": "Bio-LNG",                          "lcv": 0.0491, "wtt": 14.1, "ttw_co2": 2.75, "ttw_ch4": 0.0,    "ttw_n20": 0.00011},
-    {"name": "Bio-Methanol",                     "lcv": 0.0199, "wtt": 13.5, "ttw_co2": 0.0,  "ttw_ch4": 0.0,    "ttw_n20": 0.0},
+    {"name": "Bio-LNG",                          "lcv": 0.0491, "wtt": 14.1,  "ttw_co2": 2.75,"ttw_ch4": 0.0,"ttw_n20": 0.00011},
+    {"name": "Bio-Methanol",                     "lcv": 0.0199, "wtt": 13.5,  "ttw_co2": 0.0,"ttw_ch4": 0.0,"ttw_n20": 0.0},
 ]
 
 # === FUNCTION TO COMPUTE TARGET INTENSITY ===
@@ -58,13 +58,33 @@ for i in range(1, 6):
         if mass > 0:
             selected.append((choice, mass))
 
-year = st.sidebar.selectbox("Compliance Year", [2020, 2025, 2030, 2035, 2040, 2045, 2050], index=1)
+year = st.sidebar.selectbox(
+    "Compliance Year",
+    [2020, 2025, 2030, 2035, 2040, 2045, 2050],
+    index=1,
+    help="Select the year for which FuelEU compliance is being evaluated."
+)
 target = target_intensity(year)
 st.sidebar.markdown(f"**Target {year}: {target:.5f} gCO₂eq/MJ**")
 
-gwp_choice = st.sidebar.radio("GWP Standard", ["AR4 (25/298)", "AR5 (29.8/273)"], index=0)
-ops = st.sidebar.selectbox("OPS Reduction (%)", list(range(0, 20)), index=0)
-wind = st.sidebar.selectbox("Wind-Assisted Reduction", [1, 0.99, 0.97, 0.95], index=0)
+gwp_choice = st.sidebar.radio(
+    "GWP Standard",
+    ["AR4 (25/298)", "AR5 (29.8/273)"],
+    index=0,
+    help="AR4 is used for 2025 compliance. AR5 applies from 2026 onward."
+)", "AR5 (29.8/273)"], index=0)
+ops = st.sidebar.selectbox(
+    "OPS Reduction (%)",
+    [0, 1, 2],
+    index=0,
+    help="Reduction applied when using Onshore Power Supply during port stays (max 2% allowed)."
+)), index=0)
+wind = st.sidebar.selectbox(
+    "Wind-Assisted Reduction",
+    [1, 0.99, 0.97, 0.95],
+    index=1,
+    help="Wind correction factor applied to emissions (e.g. 0.95 = 5% reduction)."
+)
 
 # === CALCULATION ===
 totE = 0.0
@@ -75,9 +95,12 @@ for name, mt in selected:
     fuel = next(f for f in fuels if f["name"] == name)
     mass_g = mt * 1_000_000
     energy = mass_g * fuel["lcv"]
-    ttw_g = fuel["ttw_co2"] + fuel["ttw_ch4"] * gwp["CH4"] + fuel["ttw_n20"] * gwp["N2O"]
-    ttw_mj = ttw_g / fuel["lcv"]
-    ef = ttw_mj + fuel["wtt"]
+    if fuel["ttw_co2"] == 0.0:
+        ef = fuel["wtt"]
+    else:
+        ttw_g = fuel["ttw_co2"] + fuel["ttw_ch4"] * gwp["CH4"] + fuel["ttw_n20"] * gwp["N2O"]
+        ttw_mj = ttw_g / fuel["lcv"]
+        ef = ttw_mj + fuel["wtt"]
     ef *= (1 - ops / 100) * (1 - wind)
     emissions = energy * ef
     totE += energy
