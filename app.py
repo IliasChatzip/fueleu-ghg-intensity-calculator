@@ -91,6 +91,8 @@ year = st.sidebar.selectbox(
     index=1,
     help="Select the reporting year to compare against the target intensity.")
 
+
+
 # === CALCULATION ENGINE ===
 totE = 0.0
 realE = 0.0
@@ -121,6 +123,8 @@ for name, mt in selected:
     emissions += ef * energy
 
     rows.append({"Fuel": name, "Mass (MT)": mt, "Energy (MJ)": round(energy), "GHG Factor": round(ef, 2), "Emissions (gCO₂eq)": round(ef * energy)})
+
+
 
 st.subheader("Fuel Breakdown")
 st.dataframe(pd.DataFrame(rows))
