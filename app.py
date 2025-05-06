@@ -67,6 +67,7 @@ wind = st.sidebar.selectbox("Wind Correction Factor", [1.00, 0.99, 0.97, 0.95], 
 st.title("FuelEU Maritime - GHG Intensity & Penalty Calculator")
 st.sidebar.header("Fuel Inputs")
 selected: list[tuple[str, float]] = []
+
 for i in range(1, 6):
     choice = st.sidebar.selectbox(f"Fuel {i}", ["None"] + [f["name"] for f in fuels], key=f"fuel_{i}")
     if choice != "None":
@@ -74,11 +75,28 @@ for i in range(1, 6):
         if mass > 0:
             selected.append((choice, mass))
 
+ops = st.sidebar.selectbox("OPS Reduction (%)", [0, 1, 2], index=0, help="Reduction applied when using Onshore Power Supply (max 2%)")
+wind = st.sidebar.selectbox("Wind Correction Factor", [1.00, 0.99, 0.97, 0.95], index=0, help="Wind-assisted reduction factor (e.g., 0.95 = 5% reduction)")
+
 year = st.sidebar.selectbox(
     "Compliance Year",
     [2020, 2025, 2030, 2035, 2040, 2045, 2050],
     index=1,
     help="Select the reporting year to compare against the target intensity.")
+
+# === COMPLIANCE CHART ===
+import matplotlib.pyplot as plt
+
+st.subheader("Sector-wide GHG Intensity Targets")
+fig, ax = plt.subplots(figsize=(8, 4))
+ax.plot(years, targets, linestyle='--', marker='o', label='EU Target')
+ax.axhline(ghg_intensity, color='red', linestyle='-', label='Your GHG Intensity')
+ax.set_xlabel("Year")
+ax.set_ylabel("gCO2eq/MJ")
+ax.set_title("Your Performance vs Sector Target")
+ax.legend()
+ax.grid(True)
+st.pyplot(fig)
 
 # === CALCULATION ENGINE ===
 totE = 0.0
@@ -108,6 +126,21 @@ for name, mt in selected:
     rows.append({"Fuel": name, "Mass (MT)": mt, "Energy (MJ)": round(energy), "GHG Factor": round(ef, 2), "Emissions (gCO₂eq)": round(ef * energy)})
 
 # === COMPLIANCE ===
+
+st.subheader("Fuel Breakdown")
+st.dataframe(pd.DataFrame(rows))
+
+st.subheader("Summary")
+st.metric("Total Energy (MJ)", f"{totE:,.0f}")
+st.metric("Total Emissions (gCO2eq)", f"{emissions:,.0f}")
+st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}")
+st.metric("Compliance Balance", f"{balance:,.0f}")
+st.metric("Penalty (EUR)", f"{penalty:,.2f}")
+
+# Benchmark sector-wide targets for comparison
+years = list(range(2020, 2051, 5))
+targets = [target_intensity(y) for y in years]
+
 target = target_intensity(year)
 ghg_intensity = emissions / totE if totE else 0
 balance = totE * (target - ghg_intensity)
