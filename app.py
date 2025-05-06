@@ -109,8 +109,10 @@ for name, mt in selected:
     mass_g = mt * 1_000_000
     lcv = fuel["lcv"]
     energy = mass_g * lcv
-    ttw_g = fuel["ttw_co2"] + fuel["ttw_ch4"] * gwp["CH4"] + fuel["ttw_n20"] * gwp["N2O"]
-    ttw_corrected = ttw_g * (1 - ops / 100) * wind / lcv
+    co2_corr = fuel["ttw_co2"] * (1 - ops / 100) * wind
+    ch4_corr = fuel["ttw_ch4"] * gwp["CH4"]
+    n2o_corr = fuel["ttw_n20"] * gwp["N2O"]
+    ttw_corrected = (co2_corr + ch4_corr + n2o_corr) / lcv
     ef = ttw_corrected + fuel["wtt"]
 
     # Apply RFNBO multiplier
@@ -138,10 +140,12 @@ st.metric("Penalty (EUR)", f"{max(0.0, abs(totE * (target_intensity(year) - (emi
 st.subheader("Sector-wide GHG Intensity Targets")
 fig, ax = plt.subplots(figsize=(8, 4))
 ax.plot(years, targets, linestyle='--', marker='o', label='EU Target')
-ax.axhline(ghg_intensity, color='red', linestyle='-', label='Your GHG Intensity')
+ax.axhline(emissions / totE if totE else 0, color='red', linestyle='-', label='Your GHG Intensity')
 ax.set_xlabel("Year")
 ax.set_ylabel("gCO2eq/MJ")
 ax.set_title("Your Performance vs Sector Target")
 ax.legend()
 ax.grid(True)
 st.pyplot(fig)
+
+
