@@ -5,11 +5,6 @@ import matplotlib.pyplot as plt
 """
 FuelEU Maritime GHG‑intensity & penalty calculator
 --------------------------------------------------
-Highlights
-* RFNBO multiplier (×2 energy credit until end‑2033) implemented.
-* Default CH₄/N₂O slip factors from FuelEU Annex II.
-* OPS reward capped at 2 %. Wind correction uses direct factor (1 = no reduction).
-"""
 
 # === CONFIGURATION ===
 BASE_TARGET = 91.16  # gCO₂eq/MJ reference for 2020
@@ -70,9 +65,6 @@ def target_intensity(year: int) -> float:
 
 # === STREAMLIT UI ===
 
-
-st.title("FuelEU Maritime – GHG Intensity & Penalty Calculator")
-
 st.sidebar.header("Fuel Inputs")
 selected: list[tuple[str, float]] = []
 for i in range(1, 6):
@@ -120,5 +112,3 @@ target = target_intensity(year)
 ghg_intensity = emissions / totE if totE else 0
 balance = totE * (target - ghg_intensity)
 penalty = max(0.0, abs(balance) * PENALTY_RATE / (ghg_intensity * VLSFO_ENERGY_CONTENT)) if balance < 0 else 0.0
-
-
