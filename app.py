@@ -68,6 +68,26 @@ def target_intensity(year: int) -> float:
     red = REDUCTIONS[2035] + frac * (REDUCTIONS[2050] - REDUCTIONS[2035])
     return BASE_TARGET * (1 - red)
 
+# === STREAMLIT UI ===
+st.set_page_config(page_title="FuelEU Maritime Calculator", layout="wide")
+
+st.title("FuelEU Maritime – GHG Intensity & Penalty Calculator")
+
+st.sidebar.header("Fuel Inputs")
+selected: list[tuple[str, float]] = []
+for i in range(1, 6):
+    choice = st.sidebar.selectbox(f"Fuel {i}", ["None"] + [f["name"] for f in fuels], key=f"fuel_{i}")
+    if choice != "None":
+        mass = st.sidebar.number_input(f"{choice} mass (MT)", min_value=0.0, value=0.0, step=100.0, key=f"mass_{i}")
+        if mass > 0:
+            selected.append((choice, mass))
+
+year = st.sidebar.selectbox(
+    "Compliance Year",
+    [2020, 2025, 2030, 2035, 2040, 2045, 2050],
+    index=1,
+    help="Select the reporting year to compare against the target intensity.")
+
 # === CALCULATION ENGINE ===
 totE = 0.0
 realE = 0.0
@@ -101,7 +121,6 @@ ghg_intensity = emissions / totE if totE else 0
 balance = totE * (target - ghg_intensity)
 penalty = max(0.0, abs(balance) * PENALTY_RATE / (ghg_intensity * VLSFO_ENERGY_CONTENT)) if balance < 0 else 0.0
 
-# === STREAMLIT UI ===
 st.set_page_config(page_title="FuelEU Maritime Calculator", layout="wide")
 
 st.title("FuelEU Maritime – GHG Intensity & Penalty Calculator")
