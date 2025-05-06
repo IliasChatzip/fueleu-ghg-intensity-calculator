@@ -120,7 +120,7 @@ for name, mt in selected:
 
     totE += energy_credit
     realE += energy  # Actual MJ without multiplier for penalty reference
-    emissions += ef * energy_credit
+    emissions += ef * energy
 
     rows.append({"Fuel": name, "Mass (MT)": mt, "Energy (MJ)": round(energy), "GHG Factor": round(ef, 2), "Emissions (gCO₂eq)": round(ef * energy)})
 
@@ -147,3 +147,5 @@ ax.set_title("Your Performance vs Sector Target")
 ax.legend()
 ax.grid(True)
 st.pyplot(fig)
+
+
