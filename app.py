@@ -82,7 +82,7 @@ ops = st.sidebar.selectbox(
 wind = st.sidebar.selectbox(
     "Wind-Assisted Reduction",
     [1, 0.99, 0.97, 0.95],
-    index=1,
+    index=0,
     help="Wind correction factor applied to emissions (e.g. 0.95 = 5% reduction)."
 )
 
