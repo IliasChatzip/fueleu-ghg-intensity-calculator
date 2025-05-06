@@ -81,7 +81,7 @@ for name, mt in selected:
         ttw_g = fuel["ttw_co2"] + fuel["ttw_ch4"] * gwp["CH4"] + fuel["ttw_n20"] * gwp["N2O"]
         ttw_mj = ttw_g / fuel["lcv"]
         ef = ttw_mj + fuel["wtt"]
-    ef *= (1 - nbo_reduction/100) * (1 - ops/100) * (1 - wind/100)
+    ef *= (1 - ops/100) * (1 - wind/100)
     emissions = energy * ef
     totE += energy
     totEm += emissions
