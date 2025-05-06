@@ -75,6 +75,13 @@ for i in range(1, 6):
 ops = st.sidebar.selectbox("OPS Reduction (%)", [0, 1, 2], index=0, help="Reduction applied when using Onshore Power Supply (max 2%)")
 wind = st.sidebar.selectbox("Wind Correction Factor", [1.00, 0.99, 0.97, 0.95], index=0, help="Wind-assisted reduction factor (e.g., 0.95 = 5% reduction)")
 
+gwp_choice = st.sidebar.radio(
+    "GWP Standard",
+    ["AR4 (25/298)", "AR5 (29.8/273)"],
+    index=0,
+    help="AR4 is the default standard for 2025; AR5 applies from 2026 onward."
+)
+
 year = st.sidebar.selectbox(
     "Compliance Year",
     [2020, 2025, 2030, 2035, 2040, 2045, 2050],
@@ -88,7 +95,7 @@ totE = 0.0
 realE = 0.0
 emissions = 0.0
 rows = []
-gwp = GWP_VALUES["AR4"] if year == 2025 else GWP_VALUES["AR5"]
+gwp = GWP_VALUES["AR4"] if gwp_choice.startswith("AR4") else GWP_VALUES["AR5"]
 
 for name, mt in selected:
     fuel = next(f for f in fuels if f["name"] == name)
@@ -110,6 +117,22 @@ for name, mt in selected:
 
     rows.append({"Fuel": name, "Mass (MT)": mt, "Energy (MJ)": round(energy), "GHG Factor": round(ef, 2), "Emissions (gCO₂eq)": round(ef * energy)})
 
+
+
+st.subheader("Fuel Breakdown")
+st.dataframe(pd.DataFrame(rows))
+
+st.subheader("Summary")
+st.metric("Total Energy (MJ)", f"{totE:,.0f}")
+st.metric("Total Emissions (gCO2eq)", f"{emissions:,.0f}")
+st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}", delta="✅ Compliant" if ghg_intensity <= target else "❌ Over target")
+st.metric("Compliance Balance", f"{balance:,.0f}")
+st.metric("Penalty (EUR)", f"{penalty:,.2f}")
+
+# === COMPLIANCE & COMPARISON ===
+
+penalty = max(0.0, abs(balance) * PENALTY_RATE / (ghg_intensity * VLSFO_ENERGY_CONTENT)) if balance < 0 else 0.0
+
 # === COMPLIANCE CHART ===
 st.subheader("Sector-wide GHG Intensity Targets")
 fig, ax = plt.subplots(figsize=(8, 4))
@@ -121,20 +144,6 @@ ax.set_title("Your Performance vs Sector Target")
 ax.legend()
 ax.grid(True)
 st.pyplot(fig)
-
-# === COMPLIANCE ===
-
-st.subheader("Fuel Breakdown")
-st.dataframe(pd.DataFrame(rows))
-
-st.subheader("Summary")
-st.metric("Total Energy (MJ)", f"{totE:,.0f}")
-st.metric("Total Emissions (gCO2eq)", f"{emissions:,.0f}")
-st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}")
-st.metric("Compliance Balance", f"{balance:,.0f}")
-st.metric("Penalty (EUR)", f"{penalty:,.2f}")
-
-# === COMPLIANCE & COMPARISON ===
 
 # Benchmark sector-wide targets for comparison
 years = list(range(2020, 2051, 5))
