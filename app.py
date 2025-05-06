@@ -31,8 +31,8 @@ fuels = [
     {"name": "Low Fuel Oil (LFO)",               "lcv": 0.0410, "wtt": 13.2, "ttw_co2": 3.151, "ttw_ch4": 0.00005, "ttw_n20": 0.00018, "rfnbo": False},
     {"name": "Marine Gas Oil (MGO)",             "lcv": 0.0427, "wtt": 14.4, "ttw_co2": 3.206, "ttw_ch4": 0.00005, "ttw_n20": 0.00018, "rfnbo": False},
     {"name": "Liquefied Natural Gas (LNG)",      "lcv": 0.0491, "wtt": 18.5, "ttw_co2": 2.750, "ttw_ch4": 0.14,    "ttw_n20": 0.00011, "rfnbo": False},
-    {"name": "Liquefied Petroleum Gas (LPG)",    "lcv": 0.0460, "wtt": 7.8,  "ttw_co2": 3.015, "ttw_ch4": 0.007,  "ttw_n20": 0.0,     "rfnbo": False},
-    {"name": "Methanol (Fossil)",                "lcv": 0.0199, "wtt": 31.3, "ttw_co2": 1.375, "ttw_ch4": 0.003,  "ttw_n20": 0.0,     "rfnbo": False},
+    {"name": "Liquefied Petroleum Gas (LPG)",    "lcv": 0.0460, "wtt": 7.8,  "ttw_co2": 3.015, "ttw_ch4": 0.007,   "ttw_n20": 0.0,     "rfnbo": False},
+    {"name": "Methanol (Fossil)",                "lcv": 0.0199, "wtt": 31.3, "ttw_co2": 1.375, "ttw_ch4": 0.003,   "ttw_n20": 0.0,     "rfnbo": False},
 
     # Biofuels (TtW CO₂ assumed neutral)
     {"name": "Biodiesel (UCO)",                  "lcv": 0.0430, "wtt": 14.9, "ttw_co2": 0.0,    "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
@@ -43,12 +43,12 @@ fuels = [
     {"name": "Hydrotreated Vegetable Oil (HVO)", "lcv": 0.0440, "wtt": 50.1, "ttw_co2": 3.115,  "ttw_ch4": 0.00005,"ttw_n20": 0.00018, "rfnbo": False},
 
     # RFNBO fuels (zero TtW CO₂, multiplier applies)
-    {"name": "E-Methanol",                        "lcv": 0.0199, "wtt": 1.0,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": True},
-    {"name": "E-LNG",                             "lcv": 0.0491, "wtt": 1.0,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": True},
-    {"name": "Green Hydrogen",                   "lcv": 0.1200, "wtt": 0.0,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": True},
-    {"name": "Green Ammonia",                    "lcv": 0.0186, "wtt": 0.0,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": True},
-    {"name": "Bio-LNG",                          "lcv": 0.0491, "wtt": 14.1, "ttw_co2": 2.75,   "ttw_ch4": 0.14,   "ttw_n20": 0.00011, "rfnbo": False},
-    {"name": "Bio-Methanol",                     "lcv": 0.0199, "wtt": 13.5, "ttw_co2": 0.0,    "ttw_ch4": 0.003,  "ttw_n20": 0.0,     "rfnbo": False},
+    {"name": "E-Methanol",                        "lcv": 0.0199, "wtt": 1.0,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,   "ttw_n20": 0.0,     "rfnbo": True},
+    {"name": "E-LNG",                             "lcv": 0.0491, "wtt": 1.0,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,   "ttw_n20": 0.0,     "rfnbo": True},
+    {"name": "Green Hydrogen",                    "lcv": 0.1200, "wtt": 0.0,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,   "ttw_n20": 0.0,     "rfnbo": True},
+    {"name": "Green Ammonia",                     "lcv": 0.0186, "wtt": 0.0,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,   "ttw_n20": 0.0,     "rfnbo": True},
+    {"name": "Bio-LNG",                           "lcv": 0.0491, "wtt": 14.1, "ttw_co2": 2.75,   "ttw_ch4": 0.14,  "ttw_n20": 0.00011, "rfnbo": False},
+    {"name": "Bio-Methanol",                      "lcv": 0.0199, "wtt": 13.5, "ttw_co2": 0.0,    "ttw_ch4": 0.003, "ttw_n20": 0.0,     "rfnbo": False},
 ]
 
 # === HELPER ===
@@ -104,9 +104,9 @@ penalty = max(0.0, abs(balance) * PENALTY_RATE / (ghg_intensity * VLSFO_ENERGY_C
 # === STREAMLIT UI ===
 st.set_page_config(page_title="FuelEU Maritime Calculator", layout="wide")
 
-st.title("⚓ FuelEU Maritime – GHG Intensity & Penalty Calculator")
+st.title("FuelEU Maritime – GHG Intensity & Penalty Calculator")
 
-st.sidebar.header("🏷️ Fuel Inputs")
+st.sidebar.header("Fuel Inputs")
 selected: list[tuple[str, float]] = []
 for i in range(1, 6):
     choice = st.sidebar.selectbox(f"Fuel {i}", ["None"] + [f["name"] for f in fuels], key=f"fuel_{i}")
@@ -119,8 +119,4 @@ year = st.sidebar.selectbox(
     "Compliance Year",
     [2020, 2025, 2030, 2035, 2040, 2045, 2050],
     index=1,
-    help="Select the reporting year to compare against the target intensity."
-)
-    [2020, 2025, 2030, 2035, 2040, 2045, 2050],
-    index=1,
-    help="Select the reporting year to compare against the target intensity."
+    help="Select the reporting year to compare against the target intensity.")
