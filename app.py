@@ -134,7 +134,7 @@ st.metric("Total Energy (MJ)", f"{totE:,.0f}")
 st.metric("Total Emissions (gCO2eq)", f"{emissions:,.0f}")
 st.metric("GHG Intensity (gCO2eq/MJ)", f"{emissions / totE:.2f}" if totE else "0.00")
 st.metric("Compliance Balance", f"{totE * (target_intensity(year) - (emissions / totE if totE else 0)):,.0f}")
-st.metric("Penalty (EUR)", f"{max(0.0, abs(totE * (target_intensity(year) - (emissions / totE if totE else 0))) * PENALTY_RATE / ((emissions / totE if totE else 1) * VLSFO_ENERGY_CONTENT)):.2f}")
+st.metric("Penalty (EUR)", f"{(abs(totE * (target_intensity(year) - (emissions / totE))) * PENALTY_RATE / ((emissions / totE) * VLSFO_ENERGY_CONTENT)):,.2f}" if totE and (emissions / totE) > target_intensity(year) else "0.00")
 
 # === COMPLIANCE CHART ===
 st.subheader("Sector-wide GHG Intensity Targets")
@@ -147,3 +147,5 @@ ax.set_title("Your Performance vs Sector Target")
 ax.legend()
 ax.grid(True)
 st.pyplot(fig)
+
+
