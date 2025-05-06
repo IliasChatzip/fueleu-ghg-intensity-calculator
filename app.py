@@ -81,7 +81,7 @@ ops = st.sidebar.selectbox(
 )
 wind = st.sidebar.selectbox(
     "Wind-Assisted Reduction",
-    [1, 0.99, 0.97, 0.95],
+    [0, 0.99, 0.97, 0.95],
     index=0,
     help="Wind correction factor applied to emissions (e.g. 0.95 = 5% reduction)."
 )
@@ -101,7 +101,7 @@ for name, mt in selected:
         ttw_g = fuel["ttw_co2"] + fuel["ttw_ch4"] * gwp["CH4"] + fuel["ttw_n20"] * gwp["N2O"]
         ttw_mj = ttw_g / fuel["lcv"]
         ef = ttw_mj + fuel["wtt"]
-    ef *= (1 - ops / 100) * (1 - wind)
+    ef *= (1 - ops / 100) *(1- wind)
     emissions = energy * ef
     totE += energy
     totEm += emissions
