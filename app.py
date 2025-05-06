@@ -124,15 +124,17 @@ for name, mt in selected:
 
     rows.append({"Fuel": name, "Mass (MT)": mt, "Energy (MJ)": round(energy), "GHG Factor": round(ef, 2), "Emissions (gCO₂eq)": round(ef * energy)})
 
+
+
 st.subheader("Fuel Breakdown")
 st.dataframe(pd.DataFrame(rows))
 
 st.subheader("Summary")
 st.metric("Total Energy (MJ)", f"{totE:,.0f}")
 st.metric("Total Emissions (gCO2eq)", f"{emissions:,.0f}")
-st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}")
-st.metric("Compliance Balance", f"{balance:,.0f}")
-st.metric("Penalty (EUR)", f"{penalty:,.2f}")
+st.metric("GHG Intensity (gCO2eq/MJ)", f"{emissions / totE:.2f}" if totE else "0.00")
+st.metric("Compliance Balance", f"{totE * (target_intensity(year) - (emissions / totE if totE else 0)):,.0f}")
+st.metric("Penalty (EUR)", f"{max(0.0, abs(totE * (target_intensity(year) - (emissions / totE if totE else 0))) * PENALTY_RATE / ((emissions / totE if totE else 1) * VLSFO_ENERGY_CONTENT)):.2f}")
 
 # === COMPLIANCE CHART ===
 st.subheader("Sector-wide GHG Intensity Targets")
@@ -145,5 +147,3 @@ ax.set_title("Your Performance vs Sector Target")
 ax.legend()
 ax.grid(True)
 st.pyplot(fig)
-
-penalty = max(0.0, abs(balance) * PENALTY_RATE / (ghg_intensity * VLSFO_ENERGY_CONTENT)) if balance < 0 else 0.0
