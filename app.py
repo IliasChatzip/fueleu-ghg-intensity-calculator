@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 # === CONFIGURATION ===
 BASE_TARGET = 91.16  # Reference GHG intensity for 2020
 REDUCTIONS = {2025: 0.02, 2030: 0.06, 2035: 0.14, 2050: 0.80}
-PENALTY_RATE = 0.64  # EUR per tonne CO2eq
+PENALTY_RATE = 2400  # EUR per tonne VLSFO equivalent
+VLSFO_ENERGY_CONTENT = 41000  # MJ per tonne VLSFO
 GWP_VALUES = {
     "AR4": {"CH4": 25, "N2O": 298},
     "AR5": {"CH4": 29.8, "N2O": 273}
@@ -128,7 +129,7 @@ st.dataframe(pd.DataFrame(rows))
 if totE > 0:
     ghg_int = totEm / totE
     balance = totE * (target - ghg_int)
-    penalty = 0.0 if balance >= 0 else abs(balance)/1000 * PENALTY_RATE
+    penalty = 0.0 if balance >= 0 else abs(balance) * PENALTY_RATE / (ghg_int * VLSFO_ENERGY_CONTENT)
 
     st.subheader("Summary")
     st.metric("Total Energy (MJ)", f"{totE:,.0f}")
