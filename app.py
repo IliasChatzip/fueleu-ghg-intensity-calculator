@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 # === CONFIGURATION ===
 BASE_TARGET = 91.16  # Reference GHG intensity for 2020
 REDUCTIONS = {2025: 0.02, 2030: 0.06, 2035: 0.14, 2050: 0.80}
-PENALTY_RATE = 2400  # EUR per tonne VLSFO equivalent
+PENALTY_RATE = 1427.723  # EUR per tonne VLSFO equivalent
 VLSFO_ENERGY_CONTENT = 41000  # MJ per tonne VLSFO
 GWP_VALUES = {
     "AR4": {"CH4": 25, "N2O": 298},
