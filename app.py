@@ -122,12 +122,22 @@ for name, mt in selected:
     realE += energy  # Actual MJ without multiplier for penalty reference
     emissions += ef * energy
 
-    rows.append({"Fuel": name, "Mass (MT)": mt, "Energy (MJ)": round(energy), "GHG Factor": round(ef, 2), "Emissions (gCO₂eq)": round(ef * energy)})
+    rows.append({"Fuel": name, "Mass (MT)": f"{mt:,.0f}", "Energy (MJ)": f"{energy:,.0f}", "GHG Factor": f"{ef:,.2f}", "Emissions (gCO2eq)": f"{ef * energy:,.0f}"})
 
 
 
 st.subheader("Fuel Breakdown")
-st.dataframe(pd.DataFrame(rows))
+df_display = pd.DataFrame(rows)
+st.data_editor(
+    df_display,
+    hide_index=True,
+    column_config={
+        "Mass (MT)": st.column_config.Column(width="small"),
+        "Energy (MJ)": st.column_config.Column(width="medium"),
+        "GHG Factor": st.column_config.Column(width="small"),
+        "Emissions (gCO2eq)": st.column_config.Column(width="large")
+    }
+)
 
 st.subheader("Summary")
 st.metric("Total Energy (MJ)", f"{totE:,.0f}")
