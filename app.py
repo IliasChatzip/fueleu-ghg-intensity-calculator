@@ -124,8 +124,6 @@ for name, mt in selected:
 
     rows.append({"Fuel": name, "Mass (MT)": mt, "Energy (MJ)": round(energy), "GHG Factor": round(ef, 2), "Emissions (gCO₂eq)": round(ef * energy)})
 
-
-
 st.subheader("Fuel Breakdown")
 st.dataframe(pd.DataFrame(rows))
 
