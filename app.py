@@ -72,13 +72,16 @@ gwp_choice = st.sidebar.radio(
     ["AR4 (25/298)", "AR5 (29.8/273)"],
     index=0,
     help="AR4 is used for 2025 compliance. AR5 applies from 2026 onward."
+)", "AR5 (29.8/273)"],
+    index=0,
+    help="AR4 is used for 2025 compliance. AR5 applies from 2026 onward."
 )", "AR5 (29.8/273)"], index=0)
 ops = st.sidebar.selectbox(
     "OPS Reduction (%)",
     [0, 1, 2],
     index=0,
     help="Reduction applied when using Onshore Power Supply during port stays (max 2% allowed)."
-)), index=0)
+)
 wind = st.sidebar.selectbox(
     "Wind-Assisted Reduction",
     [1, 0.99, 0.97, 0.95],
