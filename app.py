@@ -115,8 +115,7 @@ for i in range(1, 6):
         if mass > 0:
             selected.append((choice, mass))
 
-year = st.sidebar.selectbox(
-    "Compliance Year",
+year = st.sidebar.selectbox("Compliance Year"),
     [2020, 2025, 2030, 2035, 2040, 2045, 2050],
     index=1,
     help="Select the reporting year to compare against the target intensity."
