@@ -13,9 +13,9 @@ GWP_VALUES = {
 
 # === FUEL DATABASE ===
 fuels = [
-    {"name": "Heavy Fuel Oil (HFO)",  "lcv": 0.0405,  "wtt": 13.5,  "override_ef": 91.73684},
-    {"name": "Marine Gas Oil (MGO)",  "lcv": 0.0427,  "wtt": 14.4,  "override_ef": 90.78388},
-    {"name": "Very Low Sulphur Fuel Oil (VLSFO)", "lcv": 0.0410, "wtt": 13.2, "override_ef": 91.39347},
+    {"name": "Heavy Fuel Oil (HFO)",  "lcv": 0.0405,  "wtt": 13.5},
+    {"name": "Marine Gas Oil (MGO)",  "lcv": 0.0427,  "wtt": 14.4},
+    {"name": "Very Low Sulphur Fuel Oil (VLSFO)", "lcv": 0.0410, "wtt": 13.2},
     {"name": "Liquefied Natural Gas (LNG)", "lcv": 0.0500,  "wtt": 79.0},
     {"name": "Liquefied Petroleum Gas (LPG)","lcv": 0.0460,  "wtt": 76.0},
     {"name": "Methanol (Fossil)",           "lcv": 0.0199,  "wtt": 94.0},
@@ -95,27 +95,12 @@ for name, mt in selected_fuels:
     mass_g = mt * 1_000_000
     energy = mass_g * fuel["lcv"]  # MJ
     # Determine EF (Well-to-Wake) (Well-to-Wake)
-    if "override_ef" in fuel and gwp_choice.startswith("AR4"):  # use override only for AR4
-        ef = fuel["override_ef"]
-    elif any(keyword in name for keyword in ["Biodiesel", "HVO", "Bio-LNG", "Bio-Methanol", "Green", "E-"]):
-        # Biofuels and recycled fuels: no TtW emissions, only WtT
+    if any(keyword in name for keyword in ["Biodiesel", "HVO", "Bio-LNG", "Bio-Methanol", "Green", "E-"]):
         ef = fuel.get("wtt", 0.0)
-    else:
-        # Fossil fuels: full dynamic TtW + WtT
-        if gwp_choice.startswith("AR4"):
-            gwp = GWP_VALUES["AR4"]
-        else:
-            gwp = GWP_VALUES["AR5"]
-        ttw_g_per_g = 3.114 + 0.00005 * gwp["CH4"] + 0.00018 * gwp["N2O"]
-        ef = ttw_g_per_g / fuel["lcv"] + fuel.get("wtt", 0.0)
-    # Apply rewards
-    ef *= (1 - ops/100) * (1 - wind/100)
-    emissions = energy * ef
-    totE += energy
-    totEm += emissions
-    rows.append({
-        "Fuel": name,
-        "Mass (MT)": f"{mt:.2f}",
+    else:    # Fossil fuels: full dynamic TtW + WtT ["Biodiesel", "HVO", "Bio-LNG", "Bio-Methanol", "Green", "E-"]):
+        # Biofuels: WtT only
+        ef = fuel.get("wtt", 0.0)
+    else:{",
         "Energy (MJ)": f"{energy:,.2f}",
         "Emissions (gCO2eq)": f"{emissions:,.2f}"
     })
