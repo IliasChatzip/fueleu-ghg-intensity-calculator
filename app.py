@@ -28,7 +28,6 @@ fuels = [
     {"name": "Hydrotreated Vegetable Oil from rape seed (HVO)","lcv": 0.0440, "wtt": 50.1, "ttw_co2": 3.115,"ttw_ch4": 0.00005,"ttw_n20": 0.00018},
     {"name": "Bio-LNG",                        "lcv": 0.0491, "wtt": 14.1,  "ttw_co2": 2.75,"ttw_ch4": 0.0,"ttw_n20": 0.00011},
     {"name": "Bio-Methanol",                   "lcv": 0.0199, "wtt": 13.5,  "ttw_co2": 0.0,"ttw_ch4": 0.0,"ttw_n20": 0.0},
-    {"name": "Onshore Power Supply (OPS)",     "lcv": 1.0000, "wtt": 0.0,   "ttw_co2": 0.0,"ttw_ch4": 0.0,"ttw_n20": 0.0},
 ]
 
 # === FUNCTION TO COMPUTE TARGET INTENSITY ===
