@@ -91,8 +91,6 @@ year = st.sidebar.selectbox(
     index=1,
     help="Select the reporting year to compare against the target intensity.")
 
-
-
 # === CALCULATION ENGINE ===
 totE = 0.0
 realE = 0.0
