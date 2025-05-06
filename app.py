@@ -124,15 +124,13 @@ for name, mt in selected:
 
     rows.append({"Fuel": name, "Mass (MT)": mt, "Energy (MJ)": round(energy), "GHG Factor": round(ef, 2), "Emissions (gCO₂eq)": round(ef * energy)})
 
-
-
 st.subheader("Fuel Breakdown")
 st.dataframe(pd.DataFrame(rows))
 
 st.subheader("Summary")
 st.metric("Total Energy (MJ)", f"{totE:,.0f}")
 st.metric("Total Emissions (gCO2eq)", f"{emissions:,.0f}")
-st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}", delta="✅ Compliant" if ghg_intensity <= target else "❌ Over target")
+st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}")
 st.metric("Compliance Balance", f"{balance:,.0f}")
 st.metric("Penalty (EUR)", f"{penalty:,.2f}")
 
