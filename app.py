@@ -61,9 +61,6 @@ def target_intensity(year: int) -> float:
 
 # === STREAMLIT UI ===
 
-ops = st.sidebar.selectbox("OPS Reduction (%)", [0, 1, 2], index=0, help="Reduction applied when using Onshore Power Supply (max 2%)")
-wind = st.sidebar.selectbox("Wind Correction Factor", [1.00, 0.99, 0.97, 0.95], index=0, help="Wind-assisted reduction factor (e.g., 0.95 = 5% reduction)")
-
 st.title("FuelEU Maritime - GHG Intensity & Penalty Calculator")
 st.sidebar.header("Fuel Inputs")
 selected: list[tuple[str, float]] = []
