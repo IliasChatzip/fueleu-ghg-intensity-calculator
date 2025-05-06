@@ -81,19 +81,7 @@ year = st.sidebar.selectbox(
     index=1,
     help="Select the reporting year to compare against the target intensity.")
 
-# === COMPLIANCE CHART ===
-import matplotlib.pyplot as plt
 
-st.subheader("Sector-wide GHG Intensity Targets")
-fig, ax = plt.subplots(figsize=(8, 4))
-ax.plot(years, targets, linestyle='--', marker='o', label='EU Target')
-ax.axhline(ghg_intensity, color='red', linestyle='-', label='Your GHG Intensity')
-ax.set_xlabel("Year")
-ax.set_ylabel("gCO2eq/MJ")
-ax.set_title("Your Performance vs Sector Target")
-ax.legend()
-ax.grid(True)
-st.pyplot(fig)
 
 # === CALCULATION ENGINE ===
 totE = 0.0
@@ -122,6 +110,18 @@ for name, mt in selected:
 
     rows.append({"Fuel": name, "Mass (MT)": mt, "Energy (MJ)": round(energy), "GHG Factor": round(ef, 2), "Emissions (gCO₂eq)": round(ef * energy)})
 
+# === COMPLIANCE CHART ===
+st.subheader("Sector-wide GHG Intensity Targets")
+fig, ax = plt.subplots(figsize=(8, 4))
+ax.plot(years, targets, linestyle='--', marker='o', label='EU Target')
+ax.axhline(ghg_intensity, color='red', linestyle='-', label='Your GHG Intensity')
+ax.set_xlabel("Year")
+ax.set_ylabel("gCO2eq/MJ")
+ax.set_title("Your Performance vs Sector Target")
+ax.legend()
+ax.grid(True)
+st.pyplot(fig)
+
 # === COMPLIANCE ===
 
 st.subheader("Fuel Breakdown")
@@ -133,6 +133,8 @@ st.metric("Total Emissions (gCO2eq)", f"{emissions:,.0f}")
 st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}")
 st.metric("Compliance Balance", f"{balance:,.0f}")
 st.metric("Penalty (EUR)", f"{penalty:,.2f}")
+
+# === COMPLIANCE & COMPARISON ===
 
 # Benchmark sector-wide targets for comparison
 years = list(range(2020, 2051, 5))
