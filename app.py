@@ -75,9 +75,6 @@ for name, mt in selected:
     fuel = next(f for f in fuels if f["name"] == name)
     mass_g = mt * 1_000_000
     energy = mass_g * fuel["lcv"]
-    if fuel["ttw_co2"] == 0.0:
-        ef = fuel["wtt"]
-    else:
         ttw_g = fuel["ttw_co2"] + fuel["ttw_ch4"] * gwp["CH4"] + fuel["ttw_n20"] * gwp["N2O"]
         ttw_mj = ttw_g / fuel["lcv"]
         ef = ttw_mj + fuel["wtt"]
