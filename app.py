@@ -134,4 +134,17 @@ st.metric("Total Energy (MJ)", f"{totE:,.0f}")
 st.metric("Total Emissions (gCO2eq)", f"{emissions:,.0f}")
 st.metric("GHG Intensity (gCO2eq/MJ)", f"{emissions / totE:.2f}" if totE else "0.00")
 st.metric("Compliance Balance", f"{totE * (target_intensity(year) - (emissions / totE if totE else 0)):,.0f}")
-st.metric("Penalty (EUR)", f"{max(0.0, abs(totE * (target_intensity(year) - (emissions / totE if totE else 0))) * PENALTY_RATE / ((emissions / totE if totE else 1) * VLSFO_ENERGY_CONTENT)):.2f}")
+st.metric("Penalty (EUR)", f"{max(0.0, abs(totE * (target_intensity(year) - (emissions / totE if totE else 0))) * PENALTY_RATE / ((emissions / totE if totE else 1) * VLSFO_ENERGY_CONTENT)):,.2f}")
+
+# === TARGET FORECAST CHART ===
+st.subheader("Target Intensity Forecast")
+fig, ax = plt.subplots(figsize=(8, 4))
+ax.plot(years, targets, linestyle='--', marker='o')
+ax.fill_between(years, targets, alpha=0.2)
+for x, y in zip(years, targets):
+    ax.annotate(f"{y:.2f}", (x, y), xytext=(0, 5), textcoords="offset points", ha='center')
+ax.set_xlabel("Year")
+ax.set_ylabel("gCO2eq/MJ")
+ax.set_title("EU GHG Intensity Targets (2020–2050)")
+ax.grid(True)
+st.pyplot(fig)
