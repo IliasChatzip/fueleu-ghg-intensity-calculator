@@ -21,7 +21,7 @@ fuels = [
     {"name": "Heavy Fuel Oil (HFO)",             "lcv": 0.0405, "wtt": 13.5, "ttw_co2": 3.114, "ttw_ch4": 0.00005, "ttw_n20": 0.00018, "rfnbo": False},
     {"name": "Low Fuel Oil (LFO)",               "lcv": 0.0410, "wtt": 13.2, "ttw_co2": 3.151, "ttw_ch4": 0.00005, "ttw_n20": 0.00018, "rfnbo": False},
     {"name": "Marine Gas Oil (MGO)",             "lcv": 0.0427, "wtt": 14.4, "ttw_co2": 3.206, "ttw_ch4": 0.00005, "ttw_n20": 0.00018, "rfnbo": False},
-    {"name": "Liquefied Natural Gas (LNG)",      "lcv": 0.0491, "wtt": 18.5, "ttw_co2": 2.750, "ttw_ch4": 0.14,    "ttw_n20": 0.00011, "rfnbo": False},
+    {"name": "Liquefied Natural Gas (LNG)",      "lcv": 0.0491, "wtt": 18.5, "ttw_co2": 2.750, "ttw_ch4": 0.10,    "ttw_n20": 0.00011, "rfnbo": False},
     {"name": "Liquefied Petroleum Gas (LPG)",    "lcv": 0.0460, "wtt": 7.8,  "ttw_co2": 3.015, "ttw_ch4": 0.007,   "ttw_n20": 0.0,     "rfnbo": False},
     {"name": "Methanol (Fossil)",                "lcv": 0.0199, "wtt": 31.3, "ttw_co2": 1.375, "ttw_ch4": 0.003,   "ttw_n20": 0.0,     "rfnbo": False},
 
@@ -110,10 +110,8 @@ for name, mt in selected:
     lcv = fuel["lcv"]
     energy = mass_g * lcv
     ttw_g = fuel["ttw_co2"] + fuel["ttw_ch4"] * gwp["CH4"] + fuel["ttw_n20"] * gwp["N2O"]
-    ef = ttw_g / lcv + fuel["wtt"]
-
-  # Apply OPS and wind correction
-    ef *= (1 - ops / 100) * wind
+    ttw_corrected = ttw_g * (1 - ops / 100) * wind / lcv
+    ef = ttw_corrected + fuel["wtt"]
 
     # Apply RFNBO multiplier
     energy_credit = energy * (RFNBO_MULTIPLIER if fuel["rfnbo"] and year <= 2033 else 1)
@@ -134,17 +132,16 @@ st.metric("Total Energy (MJ)", f"{totE:,.0f}")
 st.metric("Total Emissions (gCO2eq)", f"{emissions:,.0f}")
 st.metric("GHG Intensity (gCO2eq/MJ)", f"{emissions / totE:.2f}" if totE else "0.00")
 st.metric("Compliance Balance", f"{totE * (target_intensity(year) - (emissions / totE if totE else 0)):,.0f}")
-st.metric("Penalty (EUR)", f"{max(0.0, abs(totE * (target_intensity(year) - (emissions / totE if totE else 0))) * PENALTY_RATE / ((emissions / totE if totE else 1) * VLSFO_ENERGY_CONTENT)):,.2f}")
+st.metric("Penalty (EUR)", f"{max(0.0, abs(totE * (target_intensity(year) - (emissions / totE if totE else 0))) * PENALTY_RATE / ((emissions / totE if totE else 1) * VLSFO_ENERGY_CONTENT)):.2f}")
 
-# === TARGET FORECAST CHART ===
-st.subheader("Target Intensity Forecast")
+# === COMPLIANCE CHART ===
+st.subheader("Sector-wide GHG Intensity Targets")
 fig, ax = plt.subplots(figsize=(8, 4))
-ax.plot(years, targets, linestyle='--', marker='o')
-ax.fill_between(years, targets, alpha=0.2)
-for x, y in zip(years, targets):
-    ax.annotate(f"{y:.2f}", (x, y), xytext=(0, 5), textcoords="offset points", ha='center')
+ax.plot(years, targets, linestyle='--', marker='o', label='EU Target')
+ax.axhline(ghg_intensity, color='red', linestyle='-', label='Your GHG Intensity')
 ax.set_xlabel("Year")
 ax.set_ylabel("gCO2eq/MJ")
-ax.set_title("EU GHG Intensity Targets (2020–2050)")
+ax.set_title("Your Performance vs Sector Target")
+ax.legend()
 ax.grid(True)
 st.pyplot(fig)
