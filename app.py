@@ -26,6 +26,12 @@ fuels = [
     {"name": "Methanol (Fossil)",                "lcv": 0.0199, "wtt": 31.3, "ttw_co2": 1.375, "ttw_ch4": 0.003,   "ttw_n20": 0.0,     "rfnbo": False},
 
     # Biofuels (TtW CO₂ assumed neutral)
+    {"name": "Biodiesel (Rapeseed Oil)",        "lcv": 0.0430, "wtt": 1.5, "ttw_co2": 2.834,  "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
+    {"name": "Biodiesel (Corn Oil)",            "lcv": 0.0430, "wtt": 31.6, "ttw_co2": 2.834,  "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
+    {"name": "Biodiesel (Wheat Straw)",         "lcv": 0.0430, "wtt": 15.7, "ttw_co2": 0.0,    "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
+    {"name": "Bioethanol (Sugar Beet)",         "lcv": 0.027,  "wtt": 35.0, "ttw_co2": 0.0,    "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
+    {"name": "Bioethanol (Maize)",              "lcv": 0.027,  "wtt": 38.2, "ttw_co2": 0.0,    "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
+    {"name": "Bioethanol (Wheat)",              "lcv": 0.027,  "wtt": 41.0, "ttw_co2": 0.0,    "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
     {"name": "Biodiesel (UCO)",                  "lcv": 0.0430, "wtt": 14.9, "ttw_co2": 0.0,    "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
     {"name": "Biodiesel (Animal Fats)",          "lcv": 0.0430, "wtt": 20.8, "ttw_co2": 0.0,    "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
     {"name": "Biodiesel (Sunflower Oil)",        "lcv": 0.0430, "wtt": 44.7, "ttw_co2": 2.834,  "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
@@ -33,7 +39,11 @@ fuels = [
     {"name": "Biodiesel (Palm Oil)",             "lcv": 0.0430, "wtt": 75.7, "ttw_co2": 2.834,  "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
     {"name": "Hydrotreated Vegetable Oil (HVO)", "lcv": 0.0440, "wtt": 50.1, "ttw_co2": 3.115,  "ttw_ch4": 0.00005,"ttw_n20": 0.00018, "rfnbo": False},
 
-    # RFNBO fuels (zero TtW CO₂, multiplier applies)
+    # Fossil Hydrogen and Ammonia
+    {"name": "Fossil Hydrogen", "lcv": 0.1200, "wtt": 132.7, "ttw_co2": 0.0, "ttw_ch4": 0.0, "ttw_n20": 0.0, "rfnbo": False},
+    {"name": "Fossil Ammonia", "lcv": 0.0186, "wtt": 118.6, "ttw_co2": 0.0, "ttw_ch4": 0.0, "ttw_n20": 0.0, "rfnbo": False},
+
+# RFNBO fuels (zero TtW CO₂, multiplier applies)
     {"name": "E-Methanol",                        "lcv": 0.0199, "wtt": 1.0,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,   "ttw_n20": 0.0,     "rfnbo": True},
     {"name": "E-LNG",                             "lcv": 0.0491, "wtt": 1.0,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,   "ttw_n20": 0.0,     "rfnbo": True},
     {"name": "Green Hydrogen",                    "lcv": 0.1200, "wtt": 0.0,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,   "ttw_n20": 0.0,     "rfnbo": True},
@@ -60,6 +70,7 @@ def target_intensity(year: int) -> float:
     return BASE_TARGET * (1 - red)
 
 # === STREAMLIT UI ===
+cost_estimate = st.sidebar.number_input("Estimated Cost per MT (EUR)", min_value=0.0, value=1000.0, step=100.0)
 
 if st.sidebar.button("🔁 Reset Calculator"):
     st.experimental_rerun()
@@ -145,6 +156,69 @@ st.metric("Total Emissions (gCO2eq)", f"{emissions:,.0f}")
 st.metric("GHG Intensity (gCO2eq/MJ)", f"{emissions / totE:.2f}" if totE else "0.00")
 st.metric("Compliance Balance", f"{totE * (target_intensity(year) - (emissions / totE if totE else 0)):,.0f}")
 st.metric("Penalty (EUR)", f"{(abs(totE * (target_intensity(year) - (emissions / totE))) * PENALTY_RATE / ((emissions / totE) * VLSFO_ENERGY_CONTENT)):,.2f}" if totE and (emissions / totE) > target_intensity(year) else "0.00")
+
+# === BIOFUEL OFFSET SUGGESTION ===
+if totE and (emissions / totE) > target_intensity(year):
+    excess_gCO2_per_MJ = (emissions / totE) - target_intensity(year)
+    total_excess_gCO2 = totE * excess_gCO2_per_MJ
+    st.subheader("Mitigation Options: Fuel Offset")
+    offsets = []
+    for bio in [f for f in fuels if (f['ttw_co2'] == 0.0 or f['rfnbo']) and f['wtt'] >= 0]:
+        bio_ef = bio["wtt"]
+        if bio_ef > 0:
+            required_bio_mj = total_excess_gCO2 / bio_ef
+            required_bio_mt = required_bio_mj / (1_000_000 * bio["lcv"])
+            offsets.append((required_bio_mt, bio["name"], required_bio_mt * cost_estimate))
+    offsets.sort()
+    for required_bio_mt, name, cost in offsets:
+        st.markdown(f"- **{name}**: {required_bio_mt:,.1f} MT (~€{cost:,.0f}) needed to fully offset penalty")
+
+# === EXPORT TO PDF ===
+from fpdf import FPDF
+import tempfile
+
+if st.button("📄 Export Summary to PDF"):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt="FuelEU Maritime Summary", ln=True, align='C')
+    pdf.ln(10)
+
+    for row in rows:
+        pdf.cell(0, 10, txt=f"{row['Fuel']}: {row['Mass (MT)']} MT, {row['Energy (MJ)']} MJ, {row['GHG Factor']} g/MJ, {row['Emissions (gCO2eq)']} g", ln=True)
+
+    pdf.ln(5)
+    pdf.cell(0, 10, txt=f"Total Energy: {totE:,.0f} MJ", ln=True)
+    pdf.cell(0, 10, txt=f"Total Emissions: {emissions:,.0f} gCO2eq", ln=True)
+    pdf.cell(0, 10, txt=f"GHG Intensity: {emissions / totE:.2f} gCO2eq/MJ" if totE else "GHG Intensity: 0.00", ln=True)
+    pdf.cell(0, 10, txt=f"Compliance Balance: {totE * (target_intensity(year) - (emissions / totE if totE else 0)):,.0f} gCO2eq", ln=True)
+    penalty = (abs(totE * (target_intensity(year) - (emissions / totE))) * PENALTY_RATE / ((emissions / totE) * VLSFO_ENERGY_CONTENT)) if totE and (emissions / totE) > target_intensity(year) else 0
+    pdf.cell(0, 10, txt=f"Penalty: €{penalty:,.2f}", ln=True)
+
+    if penalty > 0:
+        pdf.ln(5)
+        pdf.set_font("Arial", 'B', size=12)
+        pdf.cell(0, 10, txt="Mitigation Options:", ln=True)
+        pdf.set_font("Arial", size=12)
+        offsets = []
+        for bio in [f for f in fuels if (f['ttw_co2'] == 0.0 or f['rfnbo']) and f['wtt'] >= 0]:
+            bio_ef = bio["wtt"]
+            if bio_ef > 0:
+                required_bio_mj = total_excess_gCO2 / bio_ef
+                required_bio_mt = required_bio_mj / (1_000_000 * bio["lcv"])
+                offsets.append((required_bio_mt, bio["name"], required_bio_mt * cost_estimate))
+        offsets.sort()
+        for required_bio_mt, name, cost in offsets:
+            pdf.cell(0, 10, txt=f"- {name}: {required_bio_mt:,.1f} MT (~€{cost:,.0f})", ln=True)
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+        # Save the current chart to image
+        chart_path = tmp.name.replace(".pdf", ".png")
+        fig.savefig(chart_path, dpi=200)
+        pdf.image(chart_path, x=10, y=None, w=180)
+        pdf.output(tmp.name)
+        st.download_button("Download PDF", data=open(tmp.name, "rb"), file_name="fueleu_summary.pdf", mime="application/pdf")
+
 
 # === COMPLIANCE CHART ===
 st.subheader("Sector-wide GHG Intensity Targets")
