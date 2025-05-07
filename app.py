@@ -150,7 +150,7 @@ total_energy = 0.0
 emissions = 0.0
 rows = []
 for fuel in FUELS:
-    qty = fuel_inputs[fuel["name"]]
+    qty = fuel_inputs.get(fuel["name"], 0.0)
     if qty > 0:
         mass_g = qty * 1_000_000
         lcv = fuel["lcv"]
