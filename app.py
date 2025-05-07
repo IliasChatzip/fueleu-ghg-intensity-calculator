@@ -216,7 +216,6 @@ ax.grid(True)
 st.pyplot(fig)
 
 # === PDF EXPORT ===
-            pdf.cell(200, 10, txt=f"- {opt['Fuel']}: {opt['Required (t)']:.2f} t, €{opt['Total Cost (€)']:.2f}", ln=True)
 
 if st.button("Export to PDF"):
     pdf = FPDF()
@@ -230,7 +229,19 @@ if st.button("Export to PDF"):
     pdf.ln(10)
     for row in rows:
         pdf.cell(200, 10, txt=str(row), ln=True)
+    if penalty > 0 and mitigation_options:
+        pdf.ln(5)
+        pdf.set_font("Arial", style='B', size=12)
+        pdf.cell(200, 10, txt="Mitigation Options (sorted by cost):", ln=True)
+        pdf.set_font("Arial", size=12)
+        for opt in mitigation_options:
+            pdf.cell(200, 10, txt=f"- {opt['Fuel']}: {opt['Required (t)']:,.2f} t, €{opt['Total Cost (€)']:,.2f}", ln=True)
+
     filename = f"ghg_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
     pdf.output(f"/mnt/data/{filename}")
     st.success(f"PDF exported: {filename}")
+    fig_path = f"/mnt/data/chart_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+    fig.savefig(fig_path, dpi=150)
+    pdf.image(fig_path, x=10, y=None, w=190)
+
     st.download_button("Download PDF", data=open(f"/mnt/data/{filename}", "rb"), file_name=filename, mime="application/pdf")
