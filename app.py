@@ -103,13 +103,13 @@ year = st.sidebar.selectbox(
     [2020, 2025, 2030, 2035, 2040, 2045, 2050],
     index=1,
     help="Select the year for GHG compliance benchmarking."
-)"Select Compliance Year", [2020, 2025, 2030, 2035, 2040, 2045, 2050], index=1)
+)
 gwp_choice = st.sidebar.radio(
     "GWP Standard",
     ["AR4", "AR5"],
     index=0,
     help="Select Global Warming Potential values to apply: AR4 (CH₄: 25, N₂O: 298) or AR5 (CH₄: 29.8, N₂O: 273)."
-)"GWP Standard", ["AR4", "AR5"], index=0)
+)
 gwp = GWP_VALUES[gwp_choice]
 
 if st.sidebar.button("🔁 Reset Calculator"):
@@ -121,13 +121,13 @@ ops = st.sidebar.selectbox(
     [0, 1, 2],
     index=0,
     help="Onshore Power Supply usage: select 1–2% reduction if OPS is utilized while berthed."
-)"OPS Reduction (%)", [0, 1, 2], index=0)
+)
 wind = st.sidebar.selectbox(
     "Wind Reduction Factor",
     [1.00, 0.99, 0.97, 0.95],
     index=0,
     help="Applies wind-assisted propulsion correction factor: lower values imply higher wind assistance."
-)"Wind Reduction Factor", [1.00, 0.99, 0.97, 0.95], index=0)
+)
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("Fuel Inputs")
@@ -216,31 +216,6 @@ ax.grid(True)
 st.pyplot(fig)
 
 # === PDF EXPORT ===
-if st.button("Export to PDF"):
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt="FuelEU Maritime GHG Report", ln=True, align="C")
-    pdf.cell(200, 10, txt=f"Year: {year} | GWP: {gwp_choice}", ln=True)
-    pdf.cell(200, 10, txt=f"GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ", ln=True)
-    pdf.cell(200, 10, txt=f"Compliance Balance: {compliance_balance:,.2f} MJ", ln=True)
-    pdf.cell(200, 10, txt=f"Penalty: €{penalty:,.2f}", ln=True)
-    pdf.ln(10)
-    for row in rows:
-        pdf.cell(200, 10, txt=str(row), ln=True)
-
-    if penalty > 0:
-        pdf.ln(5)
-        pdf.set_font("Arial", style='B', size=12)
-        pdf.cell(200, 10, txt="Mitigation Options (sorted by cost):", ln=True)
-        pdf.set_font("Arial", size=12)
-        for opt in mitigation_options:
-            pdf.cell(200, 10, txt=f"- {opt['Fuel']}: {opt['Required (t)']:.2f} t, €{opt['Total Cost (€)']:.2f}", ln=True)
-
-    filename = f"ghg_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
-    pdf.output(f"/mnt/data/{filename}")
-    st.success(f"PDF exported: {filename}")
-    st.download_button("Download PDF", data=open(f"/mnt/data/{filename}", "rb"), file_name=filename, mime="application/pdf")
             pdf.cell(200, 10, txt=f"- {opt['Fuel']}: {opt['Required (t)']:.2f} t, €{opt['Total Cost (€)']:.2f}", ln=True)
 
 if st.button("Export to PDF"):
