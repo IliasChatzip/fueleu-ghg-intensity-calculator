@@ -107,13 +107,43 @@ categories = {
 }
 
 for category, fuels_in_cat in categories.items():
-    st.sidebar.markdown(f"**{category}**")
-    for fuel in fuels_in_cat:
-        qty = st.sidebar.number_input(f"{fuel['name']} (t)", min_value=0.0, step=1.0, value=0.0, key=f"qty_{fuel['name']}")
-        fuel_inputs[fuel['name']] = qty
+    with st.sidebar.expander(f"{category} Fuels", expanded=False):
+        selected_fuels = st.multiselect(f"Select {category} Fuels", [f["name"] for f in fuels_in_cat], key=f"multiselect_{category}")
+        for selected_fuel in selected_fuels:
+            qty = st.number_input(f"{selected_fuel} (t)", min_value=0.0, step=1.0, value=0.0, key=f"qty_{selected_fuel}")
+            fuel_inputs[selected_fuel] = qty
 
 st.sidebar.markdown("---")
 st.sidebar.header("Input Parameters")
+
+year = st.sidebar.selectbox(
+    "Compliance Year",
+    [2020, 2025, 2030, 2035, 2040, 2045, 2050],
+    index=1,
+    help="Select the reporting year to compare against the target intensity."
+)
+
+gwp_choice = st.sidebar.radio(
+    "GWP Standard",
+    ["AR4", "AR5"],
+    index=0,
+    help="Choose Global Warming Potential values: AR4 (CH₄: 25, N₂O: 298) or AR5 (CH₄: 29.8, N₂O: 273)."
+)
+gwp = GWP_VALUES[gwp_choice]
+
+ops = st.sidebar.selectbox(
+    "OPS Reduction (%)",
+    [0, 1, 2],
+    index=0,
+    help="Reduction for using Onshore Power Supply (max 2%)"
+)
+
+wind = st.sidebar.selectbox(
+    "Wind Correction Factor",
+    [1.00, 0.99, 0.97, 0.95],
+    index=0,
+    help="Wind-assisted propulsion correction (lower = more assistance)"
+)
     
 # === CALCULATIONS ===
 total_energy = 0.0
