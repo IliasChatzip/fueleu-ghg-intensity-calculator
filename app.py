@@ -97,46 +97,20 @@ def target_intensity(year: int) -> float:
 
 # === USER INPUT ===
 st.title("FuelEU Maritime - GHG Intensity & Penalty Calculator")
-st.sidebar.header("Input Parameters")
-year = st.sidebar.selectbox(
-    "Select Compliance Year",
-    [2020, 2025, 2030, 2035, 2040, 2045, 2050],
-    index=1,
-    help="Select the year for GHG compliance benchmarking."
-)
-gwp_choice = st.sidebar.radio(
-    "GWP Standard",
-    ["AR4", "AR5"],
-    index=0,
-    help="Select Global Warming Potential values to apply: AR4 (CH₄: 25, N₂O: 298) or AR5 (CH₄: 29.8, N₂O: 273)."
-)
-gwp = GWP_VALUES[gwp_choice]
-
-if st.sidebar.button("🔁 Reset Calculator"):
-    st.cache_data.clear()
-    st.experimental_rerun()
-
-ops = st.sidebar.selectbox(
-    "OPS Reduction (%)",
-    [0, 1, 2],
-    index=0,
-    help="Onshore Power Supply usage: select 1–2% reduction if OPS is utilized while berthed."
-)
-wind = st.sidebar.selectbox(
-    "Wind Reduction Factor",
-    [1.00, 0.99, 0.97, 0.95],
-    index=0,
-    help="Applies wind-assisted propulsion correction factor: lower values imply higher wind assistance."
-)
-
-st.sidebar.markdown("---")
 st.sidebar.subheader("Fuel Inputs")
 fuel_inputs = {}
 for fuel in FUELS:
     qty = st.sidebar.number_input(f"{fuel['name']} (t)", min_value=0.0, step=1.0, value=0.0, key=f"qty_{fuel['name']}")
     fuel_inputs[fuel['name']] = qty
-    st.session_state[f"qty_{fuel['name']}"] = qty
 
+st.sidebar.markdown("---")
+st.sidebar.header("Input Parameters")
+st.sidebar.subheader("Fuel Inputs")
+fuel_inputs = {}
+for fuel in FUELS:
+    qty = st.sidebar.number_input(f"{fuel['name']} (t)", min_value=0.0, step=1.0, value=0.0, key=f"qty_{fuel['name']}")
+    fuel_inputs[fuel['name']] = qty
+    
 # === CALCULATIONS ===
 total_energy = 0.0
 emissions = 0.0
