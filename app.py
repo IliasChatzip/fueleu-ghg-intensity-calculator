@@ -99,17 +99,21 @@ def target_intensity(year: int) -> float:
 st.title("FuelEU Maritime - GHG Intensity & Penalty Calculator")
 st.sidebar.subheader("Fuel Inputs")
 fuel_inputs = {}
-for fuel in FUELS:
-    qty = st.sidebar.number_input(f"{fuel['name']} (t)", min_value=0.0, step=1.0, value=0.0, key=f"qty_{fuel['name']}")
-    fuel_inputs[fuel['name']] = qty
+
+categories = {
+    "Fossil Fuels": [f for f in FUELS if not f['rfnbo'] and "Bio" not in f['name'] and "Biodiesel" not in f['name'] and "E-" not in f['name'] and "Green" not in f['name']],
+    "Biofuels": [f for f in FUELS if "Bio" in f['name'] or "Biodiesel" in f['name']],
+    "RFNBO Fuels": [f for f in FUELS if f['rfnbo'] or "E-" in f['name'] or "Green" in f['name']]
+}
+
+for category, fuels_in_cat in categories.items():
+    st.sidebar.markdown(f"**{category}**")
+    for fuel in fuels_in_cat:
+        qty = st.sidebar.number_input(f"{fuel['name']} (t)", min_value=0.0, step=1.0, value=0.0, key=f"qty_{fuel['name']}")
+        fuel_inputs[fuel['name']] = qty
 
 st.sidebar.markdown("---")
 st.sidebar.header("Input Parameters")
-st.sidebar.subheader("Fuel Inputs")
-fuel_inputs = {}
-for fuel in FUELS:
-    qty = st.sidebar.number_input(f"{fuel['name']} (t)", min_value=0.0, step=1.0, value=0.0, key=f"qty_{fuel['name']}")
-    fuel_inputs[fuel['name']] = qty
     
 # === CALCULATIONS ===
 total_energy = 0.0
