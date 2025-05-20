@@ -126,19 +126,16 @@ for fuel in FUELS:
         mass_g = qty * 1_000_000
         lcv = fuel["lcv"]
         energy = mass_g * lcv
-
-     if fuel["rfnbo"] and year <= 2033:
+        if fuel["rfnbo"] and year <= 2033:
             energy *= RFNBO_MULTIPLIER
             
-        co2_total = fuel["ttw_co2"] * mass_g * (1 - ops / 100) * wind
-        ch4_total = fuel["ttw_ch4"] * mass_g * gwp["CH4"]
-        n2o_total = fuel["ttw_n20"] * mass_g * gwp["N2O"]
-        ttw_total = co2_total + ch4_total + n2o_total
-       
-        wtt_total = energy * fuel["wtt"]
+            co2_total = fuel["ttw_co2"] * mass_g * (1 - ops / 100) * wind
+            ch4_total = fuel["ttw_ch4"] * mass_g * gwp["CH4"]
+            n2o_total = fuel["ttw_n20"] * mass_g * gwp["N2O"]
+            ttw_total = co2_total + ch4_total + n2o_total
+            wtt_total = energy * fuel["wtt"]
         
         total_emissions = ttw_total + wtt_total
-        
         total_energy += energy
         emissions += total_emissions
 
@@ -151,15 +148,13 @@ for fuel in FUELS:
             "GHG Intensity (gCO2eq/MJ)": ghg_intensity_mj,
             "Emissions (gCO2eq)": total_emissions,
         })
+        ghg_intensity = emissions / total_energy if total_energy else 0.0
+        st.session_state["computed_ghg"] =
 
-ghg_intensity = emissions / total_energy if total_energy else 0.0
-st.session_state["computed_ghg"] = ghg_intensity
-
-# === PENALTY CALCULATION ===
-if ghg_intensity <= target_intensity(year):
-    penalty = 0
+        if ghg_intensity<= target_intensity(year):
+          penalty = 0
 else:
-    excess_intensity = ghg_intensity - target_intensity(year)  # gCO2eq/MJ
+    excess_intensity =   - target_intensity(year)  # gCO2eq/MJ
     excess_g = total_energy * excess_intensity
     excess_tonnes = excess_g / 1_000_000
     vlsfo_tonnes = excess_tonnes / (VLSFO_ENERGY_CONTENT / 1_000_000)
@@ -180,12 +175,12 @@ else:
 with st.expander("Debug Info"):
     st.write(f"Total Energy: {total_energy:,.0f} MJ")
     st.write(f"Total Emissions: {emissions:,.0f} gCO2eq")
-    st.write(f"GHG Intensity: {ghg_intensity:.4f} gCO2eq/MJ")
+    st.write(f"GHG Intensity: { :.4f} gCO2eq/MJ")
     st.write(f"Target Intensity: {target_intensity(year):,.4f} gCO2eq/MJ")
     st.write(f"Penalty: €{penalty:,.2f}")    
 
 st.subheader("Summary")
-st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:,.2f}")
+st.metric("GHG Intensity (gCO2eq/MJ)", f"{ :,.2f}")
 st.metric("Estimated Penalty (€)", f"{penalty:,.2f}")
 
 # === COMPLIANCE CHART ===
@@ -214,8 +209,8 @@ if st.button("Export to PDF"):
         pdf.set_font("Arial", size=12)
         pdf.cell(200, 10, txt="FuelEU Maritime GHG Report", ln=True, align="C")
         pdf.cell(200, 10, txt=f"Year: {year} | GWP: {gwp_choice}", ln=True)
-        pdf.cell(200, 10, txt=f"GHG Intensity: {ghg_intensity:,.2f} gCO2eq/MJ", ln=True)
-        pdf.cell(200, 10, txt=f"Compliance Balance: {target_intensity(year) - ghg_intensity:,.2f} MJ", ln=True)
+        pdf.cell(200, 10, txt=f"GHG Intensity: { :,.2f} gCO2eq/MJ", ln=True)
+        pdf.cell(200, 10, txt=f"Compliance Balance: {target_intensity(year) - :,.2f} MJ", ln=True)
         pdf.cell(200, 10, txt=f"Penalty: €{penalty:,.2f}", ln=True)
         pdf.ln(10)
 
