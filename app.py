@@ -131,7 +131,6 @@ for fuel in FUELS:
         ch4_mj = fuel["ttw_ch4"] * g_per_mj * gwp["CH4"]
         n2o_mj = fuel["ttw_n20"] * g_per_mj * gwp["N2O"]
         ttw_mj = co2_mj + ch4_mj + n2o_mj
-
         ghg_per_mj = fuel["wtt"] + ttw_mj
 
         if fuel["rfnbo"] and year <= 2033:
@@ -151,11 +150,20 @@ for fuel in FUELS:
 ghg_intensity = emissions / total_energy if total_energy else 0.0
 st.session_state["computed_ghg"] = ghg_intensity
 
-compliance_balance = total_energy * (target_intensity(year) - ghg_intensity)
-penalty = 0 if compliance_balance >= 0 else abs(compliance_balance) * PENALTY_RATE / VLSFO_ENERGY_CONTENT
+# === PENALTY CALCULATION ===
+if ghg_intensity <= target_intensity(year):
+    penalty = 0
+else:
+    excess_intensity = ghg_intensity - target_intensity(year)  # gCO2eq/MJ
+    excess_g = total_energy * excess_intensity
+    excess_tonnes = excess_g / 1_000_000
+    vlsfo_tonnes = excess_tonnes / (VLSFO_ENERGY_CONTENT / 1_000_000)
+    penalty = vlsfo_tonnes * PENALTY_RATE
 
+# === OUTPUT ===
 st.subheader("Fuel Breakdown")
-st.dataframe(pd.DataFrame(rows))
+df = pd.DataFrame(rows).sort_values("Emissions (gCO2eq)", ascending=False)
+st.dataframe(df.style.format({"Energy (MJ)": "{:,.0f}", "Emissions (gCO2eq)": "{:,.0f}", "GHG Intensity (gCO2eq/MJ)": "{:,.2f}"}))
 
 st.subheader("Summary")
 st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:,.2f}")
