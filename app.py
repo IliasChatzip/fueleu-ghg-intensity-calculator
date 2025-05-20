@@ -160,7 +160,6 @@ else:
     excess_intensity =  ghg_intensity - target_intensity(year)
     excess_g = total_energy * excess_intensity
     excess_tonnes = excess_g / 1_000_000
-    vlsfo_tonnes = excess_tonnes / (VLSFO_ENERGY_CONTENT / 1_000_000)
     penalty = vlsfo_tonnes * PENALTY_RATE
 
 # === OUTPUT ===
