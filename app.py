@@ -135,8 +135,7 @@ for fuel in FUELS:
             "Quantity (t)": qty,
             "Energy (MJ)": energy,
             "Emissions (gCO2eq)": total,
-            "Price (€/t)": fetch_price(fuel["name"]),
-        })
+            })
 
 ghg_intensity = emissions / total_energy if total_energy else 0.0
 st.session_state["computed_ghg"] = ghg_intensity
@@ -150,15 +149,12 @@ if penalty > 0:
     mitigation_options = []
     for fuel in FUELS:
         if fuel["ttw_co2"] == 0.0 or fuel["rfnbo"]:
-            price = fetch_price(fuel["name"])
             if fuel["wtt"] > 0:
                 required_mj = excess_emissions / fuel["wtt"]
                 required_tonnes = required_mj / (fuel["lcv"] * 1_000_000)
-                total_cost = required_tonnes * price
                 mitigation_options.append({
                     "Fuel": fuel["name"],
                     "Required (t)": required_tonnes,
-                    "Total Cost (€)": total_cost
                 })
 
     if mitigation_options:
