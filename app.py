@@ -159,8 +159,10 @@ if ghg_intensity <= target_intensity(year):
 else:
     excess_intensity =  ghg_intensity - target_intensity(year)
     excess_g = total_energy * excess_intensity
-    excess_tonnes = excess_g / 1_000_000
-    penalty = excess_tonnes * PENALTY_RATE
+    excess_tonnes_co2 = excess_g / 1_000_000  # Convert g to tonnes CO2eq
+
+vlsfo_equiv_tonnes = total_energy / VLSFO_ENERGY_CONTENT  # MJ ÷ MJ/kg = kg → /1000 = tonnes
+penalty = vlsfo_equiv_tonnes * excess_intensity * PENALTY_RATE / 1_000_000
 
 # === OUTPUT ===
 st.subheader("Fuel Breakdown")
