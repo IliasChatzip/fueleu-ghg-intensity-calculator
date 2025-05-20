@@ -124,27 +124,30 @@ for fuel in FUELS:
     qty = fuel_inputs.get(fuel["name"], 0.0)
     if qty > 0:
         mass_g = qty * 1_000_000
-        energy = mass_g * fuel["lcv"]
-        g_per_mj = 1 / fuel["lcv"]
+        lcv = fuel["lcv"]
+        energy = mass_g * lcv
 
         co2_mj = fuel["ttw_co2"] * g_per_mj * (1 - ops / 100) * wind
         ch4_mj = fuel["ttw_ch4"] * g_per_mj * gwp["CH4"]
         n2o_mj = fuel["ttw_n20"] * g_per_mj * gwp["N2O"]
-        ttw_mj = co2_mj + ch4_mj + n2o_mj
-        ghg_per_mj = fuel["wtt"] + ttw_mj
-
+        ttw_total = co2_total + ch4_total + n2o_total
+        wtt_total = energy * fuel["wtt"]
+        total_emissions = ttw_total + wtt_total
+        
         if fuel["rfnbo"] and year <= 2033:
             energy *= RFNBO_MULTIPLIER
 
         total_energy += energy
-        emissions += energy * ghg_per_mj
+        emissions += total_emissions
+
+        ghg_intensity_mj = total_emissions / energy if energy else 0
 
         rows.append({
             "Fuel": fuel["name"],
             "Quantity (t)": qty,
             "Energy (MJ)": energy,
-            "GHG Intensity (gCO2eq/MJ)": ghg_per_mj,
-            "Emissions (gCO2eq)": energy * ghg_per_mj,
+            "GHG Intensity (gCO2eq/MJ)": ghg_intensity_mj,
+            "Emissions (gCO2eq)": total_emissions,
         })
 
 ghg_intensity = emissions / total_energy if total_energy else 0.0
