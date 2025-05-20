@@ -127,9 +127,9 @@ for fuel in FUELS:
         lcv = fuel["lcv"]
         energy = mass_g * lcv
 
-        co2_mj = fuel["ttw_co2"] * g_per_mj * (1 - ops / 100) * wind
-        ch4_mj = fuel["ttw_ch4"] * g_per_mj * gwp["CH4"]
-        n2o_mj = fuel["ttw_n20"] * g_per_mj * gwp["N2O"]
+        co2_total = fuel["ttw_co2"] * mass_g * (1 - ops / 100) * wind
+        ch4_total = fuel["ttw_ch4"] * mass_g * gwp["CH4"]
+        n2o_total = fuel["ttw_n20"] * mass_g * gwp["N2O"]
         ttw_total = co2_total + ch4_total + n2o_total
         wtt_total = energy * fuel["wtt"]
         total_emissions = ttw_total + wtt_total
