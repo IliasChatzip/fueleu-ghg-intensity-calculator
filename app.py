@@ -154,14 +154,14 @@ ghg_intensity = emissions / total_energy if total_energy else 0.0
 st.session_state["computed_ghg"] = ghg_intensity
 
         
-        if ghg_intensity <= target_intensity(year):
-          penalty = 0
-        else:
-            excess_intensity =  ghg_intensity - target_intensity(year)
-            excess_g = total_energy * excess_intensity
-            excess_tonnes = excess_g / 1_000_000
-            vlsfo_tonnes = excess_tonnes / (VLSFO_ENERGY_CONTENT / 1_000_000)
-            penalty = vlsfo_tonnes * PENALTY_RATE
+if ghg_intensity <= target_intensity(year):
+     penalty = 0
+else:
+    excess_intensity =  ghg_intensity - target_intensity(year)
+    excess_g = total_energy * excess_intensity
+    excess_tonnes = excess_g / 1_000_000
+    vlsfo_tonnes = excess_tonnes / (VLSFO_ENERGY_CONTENT / 1_000_000)
+    penalty = vlsfo_tonnes * PENALTY_RATE
 
 # === OUTPUT ===
 st.subheader("Fuel Breakdown")
