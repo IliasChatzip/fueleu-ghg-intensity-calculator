@@ -16,70 +16,38 @@ GWP_VALUES = {
     "AR5": {"CH4": 29.8, "N2O": 273},
 }
 
-# === FALLBACK PRICES ===
-DEFAULT_PRICES = {
-    "Heavy Fuel Oil (HFO)": 469,
-    "Marine Gas Oil (MGO)": 900,
-    "Liquefied Natural Gas (LNG)": 780,
-    "Methanol (Fossil)": 380,
-    "Biodiesel (UCO)": 1175,
-    "Green Hydrogen": 4200,
-    "E-Methanol": 1700,
-    "E-LNG": 1500,
-}
-
 # === FUEL DATABASE ===
 FUELS = [
-    {"name": "Heavy Fuel Oil (HFO)",             "lcv": 0.0405, "wtt": 13.5, "ttw_co2": 3.114, "ttw_ch4": 0.00005, "ttw_n20": 0.00018, "rfnbo": False},
-    {"name": "Low Fuel Oil (LFO)",               "lcv": 0.0410, "wtt": 13.2, "ttw_co2": 3.151, "ttw_ch4": 0.00005, "ttw_n20": 0.00018, "rfnbo": False},
-    {"name": "Marine Gas Oil (MGO)",             "lcv": 0.0427, "wtt": 14.4, "ttw_co2": 3.206, "ttw_ch4": 0.00005, "ttw_n20": 0.00018, "rfnbo": False},
-    {"name": "Liquefied Natural Gas (LNG)",      "lcv": 0.0491, "wtt": 18.5, "ttw_co2": 2.750, "ttw_ch4": 0.001276, "ttw_n20": 0.00011, "rfnbo": False},
-    {"name": "Liquefied Petroleum Gas (LPG)",    "lcv": 0.0460, "wtt": 7.8,  "ttw_co2": 3.015, "ttw_ch4": 0.007,   "ttw_n20": 0.0,     "rfnbo": False},
-    {"name": "Methanol (Fossil)",                "lcv": 0.0199, "wtt": 31.3, "ttw_co2": 1.375, "ttw_ch4": 0.003,   "ttw_n20": 0.0,     "rfnbo": False},
-    {"name": "Biodiesel (Rapeseed Oil)",         "lcv": 0.0430, "wtt": 1.5, "ttw_co2": 2.834,  "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
-    {"name": "Biodiesel (Corn Oil)",             "lcv": 0.0430, "wtt": 31.6, "ttw_co2": 2.834,  "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
-    {"name": "Biodiesel (Wheat Straw)",          "lcv": 0.0430, "wtt": 15.7, "ttw_co2": 0.0,    "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
-    {"name": "Bioethanol (Sugar Beet)",          "lcv": 0.027,  "wtt": 35.0, "ttw_co2": 0.0,    "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
-    {"name": "Bioethanol (Maize)",               "lcv": 0.027,  "wtt": 38.2, "ttw_co2": 0.0,    "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
-    {"name": "Bioethanol (Wheat)",               "lcv": 0.027,  "wtt": 41.0, "ttw_co2": 0.0,    "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
-    {"name": "Biodiesel (UCO)",                  "lcv": 0.0430, "wtt": 14.9, "ttw_co2": 0.0,    "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
-    {"name": "Biodiesel (Animal Fats)",          "lcv": 0.0430, "wtt": 20.8, "ttw_co2": 0.0,    "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
-    {"name": "Biodiesel (Sunflower Oil)",        "lcv": 0.0430, "wtt": 44.7, "ttw_co2": 2.834,  "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
-    {"name": "Biodiesel (Soybean Oil)",          "lcv": 0.0430, "wtt": 47.0, "ttw_co2": 2.834,  "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
-    {"name": "Biodiesel (Palm Oil)",             "lcv": 0.0430, "wtt": 75.7, "ttw_co2": 2.834,  "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
-    {"name": "Hydrotreated Vegetable Oil (HVO)", "lcv": 0.0440, "wtt": 50.1, "ttw_co2": 3.115,  "ttw_ch4": 0.00005,"ttw_n20": 0.00018, "rfnbo": False},  
-    {"name": "Fossil Hydrogen",                  "lcv": 0.1200, "wtt": 132.7, "ttw_co2": 0.0, "ttw_ch4": 0.0, "ttw_n20": 0.0, "rfnbo": False},
-    {"name": "Fossil Ammonia",                   "lcv": 0.0186, "wtt": 118.6, "ttw_co2": 0.0, "ttw_ch4": 0.0, "ttw_n20": 0.0, "rfnbo": False},
-    {"name": "E-Methanol",                       "lcv": 0.0199, "wtt": 1.0,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,   "ttw_n20": 0.0,     "rfnbo": True},
-    {"name": "E-LNG",                            "lcv": 0.0491, "wtt": 1.0,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,   "ttw_n20": 0.0,     "rfnbo": True},
-    {"name": "Green Hydrogen",                   "lcv": 0.1200, "wtt": 0.0,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,   "ttw_n20": 0.0,     "rfnbo": True},
-    {"name": "Green Ammonia",                    "lcv": 0.0186, "wtt": 0.0,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,   "ttw_n20": 0.0,     "rfnbo": True},
-    {"name": "Bio-LNG",                          "lcv": 0.0491, "wtt": 14.1, "ttw_co2": 2.75,   "ttw_ch4": 0.14,  "ttw_n20": 0.00011, "rfnbo": False},
-    {"name": "Bio-Methanol",                     "lcv": 0.0199, "wtt": 13.5, "ttw_co2": 0.0,    "ttw_ch4": 0.003, "ttw_n20": 0.0,     "rfnbo": False},  
+    {"name": "Heavy Fuel Oil (HFO)",                             "lcv": 0.0405, "wtt": 13.5, "ttw_co2": 3.114, "ttw_ch4": 0.00005, "ttw_n20": 0.00018, "rfnbo": False},
+    {"name": "Low Fuel Oil (LFO)",                               "lcv": 0.0410, "wtt": 13.2, "ttw_co2": 3.151, "ttw_ch4": 0.00005, "ttw_n20": 0.00018, "rfnbo": False},
+    {"name": "Marine Gas Oil (MGO)",                             "lcv": 0.0427, "wtt": 14.4, "ttw_co2": 3.206, "ttw_ch4": 0.00005, "ttw_n20": 0.00018, "rfnbo": False},
+    {"name": "Liquefied Natural Gas (LNG)",                      "lcv": 0.0491, "wtt": 18.5, "ttw_co2": 2.750, "ttw_ch4": 0.001276, "ttw_n20": 0.00011, "rfnbo": False},
+    {"name": "Liquefied Petroleum Gas (LPG)",                    "lcv": 0.0460, "wtt": 7.8,  "ttw_co2": 3.015, "ttw_ch4": 0.007,   "ttw_n20": 0.0,     "rfnbo": False},
+    {"name": "Methanol (Fossil)",                                "lcv": 0.0199, "wtt": 31.3, "ttw_co2": 1.375, "ttw_ch4": 0.003,   "ttw_n20": 0.0,     "rfnbo": False},
+    {"name": "Biodiesel (Rapeseed Oil)",                         "lcv": 0.0430, "wtt": 1.5, "ttw_co2": 2.834,  "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
+    {"name": "Biodiesel (Corn Oil)",                             "lcv": 0.0430, "wtt": 31.6, "ttw_co2": 2.834,  "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
+    {"name": "Biodiesel (Wheat Straw)",                          "lcv": 0.0430, "wtt": 15.7, "ttw_co2": 0.0,    "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
+    {"name": "Bioethanol (Sugar Beet)",                          "lcv": 0.027,  "wtt": 35.0, "ttw_co2": 0.0,    "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
+    {"name": "Bioethanol (Maize)",                               "lcv": 0.027,  "wtt": 38.2, "ttw_co2": 0.0,    "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
+    {"name": "Bioethanol (Wheat)",                               "lcv": 0.027,  "wtt": 41.0, "ttw_co2": 0.0,    "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
+    {"name": "Biodiesel (UCO)",                                  "lcv": 0.0430, "wtt": 14.9, "ttw_co2": 0.0,    "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
+    {"name": "Biodiesel (Animal Fats)",                          "lcv": 0.0430, "wtt": 20.8, "ttw_co2": 0.0,    "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
+    {"name": "Biodiesel (Sunflower Oil)",                        "lcv": 0.0430, "wtt": 44.7, "ttw_co2": 2.834,  "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
+    {"name": "Biodiesel (Soybean Oil)",                          "lcv": 0.0430, "wtt": 47.0, "ttw_co2": 2.834,  "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
+    {"name": "Biodiesel (Palm Oil)",                             "lcv": 0.0430, "wtt": 75.7, "ttw_co2": 2.834,  "ttw_ch4": 0.0,    "ttw_n20": 0.0,     "rfnbo": False},
+    {"name": "Hydrotreated Vegetable Oil (HVO from rape seed)",  "lcv": 0.0440, "wtt": 50.1, "ttw_co2": 3.115,  "ttw_ch4": 0.00005,"ttw_n20": 0.00018, "rfnbo": False},
+    {"name": "Hydrotreated Vegetable Oil (HVO from sunflower)",  "lcv": 0.0440, "wtt": 43.6, "ttw_co2": 3.115,  "ttw_ch4": 0.00005,"ttw_n20": 0.00018, "rfnbo": False},    
+    {"name": "Hydrotreated Vegetable Oil (HVO from soybean)",    "lcv": 0.0440, "wtt": 46.5, "ttw_co2": 3.115,  "ttw_ch4": 0.00005,"ttw_n20": 0.00018, "rfnbo": False},  
+    {"name": "Hydrotreated Vegetable Oil (HVO from palm oil)",   "lcv": 0.0440, "wtt": 73.3, "ttw_co2": 0.0,  "ttw_ch4": 0.0,"ttw_n20": 0.0, "rfnbo": False},
+    {"name": "Fossil Hydrogen",                                  "lcv": 0.1200, "wtt": 132.7, "ttw_co2": 0.0, "ttw_ch4": 0.0, "ttw_n20": 0.0, "rfnbo": False},
+    {"name": "Fossil Ammonia",                                   "lcv": 0.0186, "wtt": 118.6, "ttw_co2": 0.0, "ttw_ch4": 0.0, "ttw_n20": 0.0, "rfnbo": False},
+    {"name": "E-Methanol",                                       "lcv": 0.0199, "wtt": 1.0,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,   "ttw_n20": 0.0,     "rfnbo": True},
+    {"name": "E-LNG",                                            "lcv": 0.0491, "wtt": 1.0,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,   "ttw_n20": 0.0,     "rfnbo": True},
+    {"name": "Green Hydrogen",                                   "lcv": 0.1200, "wtt": 0.0,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,   "ttw_n20": 0.0,     "rfnbo": True},
+    {"name": "Green Ammonia",                                    "lcv": 0.0186, "wtt": 0.0,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,   "ttw_n20": 0.0,     "rfnbo": True},
+    {"name": "Bio-LNG",                                          "lcv": 0.0491, "wtt": 14.1, "ttw_co2": 2.75,   "ttw_ch4": 0.14,  "ttw_n20": 0.00011, "rfnbo": False},
+    {"name": "Bio-Methanol",                                     "lcv": 0.0199, "wtt": 13.5, "ttw_co2": 0.0,    "ttw_ch4": 0.003, "ttw_n20": 0.0,     "rfnbo": False},  
 ]
-
-# === API PRICING WITH 24-HOUR CACHE ===
-@st.cache_data(ttl=86400)
-def get_live_prices():
-    prices = DEFAULT_PRICES.copy()
-    try:
-        # This is a placeholder for actual API integration
-        # Example simulated fetch:
-        response = requests.get("https://api.mockfuels.com/prices")  # Replace with real API
-        if response.status_code == 200:
-            data = response.json()
-            for item in data:
-                name = item.get("name")
-                price = item.get("eur_per_ton")
-                if name and price:
-                    prices[name] = price
-    except Exception as e:
-        st.warning("⚠️ Fuel price API fetch failed, using default prices.")
-    return prices
-
-def fetch_price(fuel_name):
-    prices = get_live_prices()
-    return prices.get(fuel_name, 1000)
 
 # === TARGET FUNCTION ===
 def target_intensity(year: int) -> float:
@@ -202,10 +170,7 @@ st.subheader("Fuel Breakdown")
 st.dataframe(pd.DataFrame(rows))
 
 st.subheader("Summary")
-st.metric("Total Energy (MJ)", f"{total_energy:,.0f}")
-st.metric("Total Emissions (gCO2eq)", f"{emissions:,.0f}")
 st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}")
-st.metric("Compliance Balance (MJ)", f"{compliance_balance:,.0f}")
 st.metric("Estimated Penalty (€)", f"{penalty:,.2f}")
 
 # === COMPLIANCE CHART ===
