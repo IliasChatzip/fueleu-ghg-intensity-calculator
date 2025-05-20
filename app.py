@@ -142,26 +142,6 @@ st.session_state["computed_ghg"] = ghg_intensity
 compliance_balance = total_energy * (target_intensity(year) - ghg_intensity)
 penalty = 0 if compliance_balance >= 0 else abs(compliance_balance) * PENALTY_RATE / VLSFO_ENERGY_CONTENT
 
-# === MITIGATION SUGGESTIONS ===
-if penalty > 0:
-    st.subheader("Mitigation Options: Biofuels & RFNBO")
-    excess_emissions = abs(compliance_balance)
-    mitigation_options = []
-    for fuel in FUELS:
-        if fuel["ttw_co2"] == 0.0 or fuel["rfnbo"]:
-            if fuel["wtt"] > 0:
-                required_mj = excess_emissions / fuel["wtt"]
-                required_tonnes = required_mj / (fuel["lcv"] * 1_000_000)
-                mitigation_options.append({
-                    "Fuel": fuel["name"],
-                    "Required (t)": required_tonnes,
-                })
-
-    if mitigation_options:
-        mitigation_df = pd.DataFrame(mitigation_options)
-        mitigation_df.sort_values("Total Cost (€)", inplace=True)
-        st.dataframe(mitigation_df.style.format({"Required (t)": "{:.2f}", "Total Cost (€)": "{:.2f}"}))
-
 st.subheader("Fuel Breakdown")
 st.dataframe(pd.DataFrame(rows))
 
@@ -198,14 +178,6 @@ if st.button("Export to PDF"):
     pdf.ln(10)
     for row in rows:
         pdf.cell(200, 10, txt=str(row), ln=True)
-    if penalty > 0 and mitigation_options:
-        pdf.ln(5)
-        pdf.set_font("Arial", style='B', size=12)
-        pdf.cell(200, 10, txt="Mitigation Options (sorted by cost):", ln=True)
-        pdf.set_font("Arial", size=12)
-        for opt in mitigation_options:
-            pdf.cell(200, 10, txt=f"- {opt['Fuel']}: {opt['Required (t)']:,.2f} t, €{opt['Total Cost (€)']:,.2f}", ln=True)
-
     filename = f"ghg_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
     pdf.output(f"/mnt/data/{filename}")
     st.success(f"PDF exported: {filename}")
