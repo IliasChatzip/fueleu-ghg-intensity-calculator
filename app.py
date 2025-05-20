@@ -149,8 +149,10 @@ for fuel in FUELS:
             "Emissions (gCO2eq)": total_emissions,
         })
         
-        ghg_intensity = emissions / total_energy if total_energy else 0.0
-        st.session_state["computed_ghg"] = ghg_intensity
+# after all fuels processed
+ghg_intensity = emissions / total_energy if total_energy else 0.0
+st.session_state["computed_ghg"] = ghg_intensity
+
         
         if ghg_intensity <= target_intensity(year):
           penalty = 0
