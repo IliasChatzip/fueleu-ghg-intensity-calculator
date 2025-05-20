@@ -213,12 +213,12 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt=f"Compliance Balance: {target_intensity(year) - ghg_intensity:,.2f} MJ", ln=True)
         pdf.cell(200, 10, txt=f"Penalty: €{penalty:,.2f}", ln=True)
         pdf.ln(10)
-
-       for row in rows:
+        
+        for row in rows:
             line = f"{row['Fuel']}: {row['Quantity (t)']:,.1f} t | {row['Energy (MJ)']:,.0f} MJ | {row['Emissions (gCO2eq)']:,.0f} g"
             pdf.cell(200, 10, txt=line, ln=True)
-
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
+            
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
             pdf.output(tmp_pdf.name)
             tmp_pdf_path = tmp_pdf.name
             
