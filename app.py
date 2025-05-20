@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import requests
 from fpdf import FPDF
 from datetime import datetime
+import tempfile
+import os
 
 # === CONFIGURATION ===
 BASE_TARGET = 91.16
@@ -123,26 +125,30 @@ for fuel in FUELS:
     if qty > 0:
         mass_g = qty * 1_000_000
         energy = mass_g * fuel["lcv"]
+        g_per_mj = 1 / fuel["lcv"]
 
-        co2_corr = fuel["ttw_co2"] * (1 - ops / 100) * wind
-        ttw_gco2_per_g = co2_corr + fuel["ttw_ch4"] * gwp["CH4"] + fuel["ttw_n20"] * gwp["N2O"]
-        wtw_gco2_per_g = ttw_gco2_per_g + fuel["wtt"]
-        emissions_g = mass_g * wtw_gco2_per_g
+        co2_mj = fuel["ttw_co2"] * g_per_mj * (1 - ops / 100) * wind
+        ch4_mj = fuel["ttw_ch4"] * g_per_mj * gwp["CH4"]
+        n2o_mj = fuel["ttw_n20"] * g_per_mj * gwp["N2O"]
+        ttw_mj = co2_mj + ch4_mj + n2o_mj
+
+        ghg_per_mj = fuel["wtt"] + ttw_mj
 
         if fuel["rfnbo"] and year <= 2033:
             energy *= RFNBO_MULTIPLIER
 
         total_energy += energy
-        emissions += emissions_g
+        emissions += energy * ghg_per_mj
 
         rows.append({
             "Fuel": fuel["name"],
             "Quantity (t)": qty,
             "Energy (MJ)": energy,
-            "Emissions (gCO2eq)": emissions_g,
+            "GHG Intensity (gCO2eq/MJ)": ghg_per_mj,
+            "Emissions (gCO2eq)": energy * ghg_per_mj,
         })
 
-ghg_intensity = emissions / total_energy if total_energy > 0 else 0.0
+ghg_intensity = emissions / total_energy if total_energy else 0.0
 st.session_state["computed_ghg"] = ghg_intensity
 
 compliance_balance = total_energy * (target_intensity(year) - ghg_intensity)
@@ -152,7 +158,7 @@ st.subheader("Fuel Breakdown")
 st.dataframe(pd.DataFrame(rows))
 
 st.subheader("Summary")
-st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}")
+st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:,.2f}")
 st.metric("Estimated Penalty (€)", f"{penalty:,.2f}")
 
 # === COMPLIANCE CHART ===
