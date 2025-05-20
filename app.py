@@ -160,7 +160,7 @@ else:
     excess_intensity =  ghg_intensity - target_intensity(year)
     excess_g = total_energy * excess_intensity
     excess_tonnes = excess_g / 1_000_000
-    penalty = vlsfo_tonnes * PENALTY_RATE
+    penalty = excess_tonnes * PENALTY_RATE
 
 # === OUTPUT ===
 st.subheader("Fuel Breakdown")
