@@ -151,10 +151,11 @@ for fuel in FUELS:
         
         ghg_intensity = emissions / total_energy if total_energy else 0.0
         st.session_state["computed_ghg"] = ghg_intensity
+        
         if ghg_intensity <= target_intensity(year):
           penalty = 0
         else:
-            excess_intensity =   - target_intensity(year)  # gCO2eq/MJ
+            excess_intensity =  ghg_intensity - target_intensity(year)
             excess_g = total_energy * excess_intensity
             excess_tonnes = excess_g / 1_000_000
             vlsfo_tonnes = excess_tonnes / (VLSFO_ENERGY_CONTENT / 1_000_000)
@@ -212,15 +213,12 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt=f"GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ", ln=True)
         pdf.cell(200, 10, txt=f"Compliance Balance: {target_intensity(year) - ghg_intensity:,.2f} MJ", ln=True)
         pdf.cell(200, 10, txt=f"Penalty: €{penalty:,.2f}", ln=True)
-        pdf.ln(10)
-        
+        pdf.ln(10)        
         for row in rows:
             line = f"{row['Fuel']}: {row['Quantity (t)']:,.1f} t | {row['Energy (MJ)']:,.0f} MJ | {row['Emissions (gCO2eq)']:,.0f} g"
-            pdf.cell(200, 10, txt=line, ln=True)
-            
+            pdf.cell(200, 10, txt=line, ln=True)            
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
             pdf.output(tmp_pdf.name)
-            tmp_pdf_path = tmp_pdf.name
-            
+            tmp_pdf_path = tmp_pdf.name            
         st.success(f"PDF exported: {os.path.basename(tmp_pdf_path)}")
         st.download_button("Download PDF", data=open(tmp_pdf_path, "rb"), file_name="ghg_report.pdf", mime="application/pdf")
