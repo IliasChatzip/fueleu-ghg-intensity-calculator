@@ -127,16 +127,18 @@ for fuel in FUELS:
         lcv = fuel["lcv"]
         energy = mass_g * lcv
 
+     if fuel["rfnbo"] and year <= 2033:
+            energy *= RFNBO_MULTIPLIER
+            
         co2_total = fuel["ttw_co2"] * mass_g * (1 - ops / 100) * wind
         ch4_total = fuel["ttw_ch4"] * mass_g * gwp["CH4"]
         n2o_total = fuel["ttw_n20"] * mass_g * gwp["N2O"]
         ttw_total = co2_total + ch4_total + n2o_total
+       
         wtt_total = energy * fuel["wtt"]
+        
         total_emissions = ttw_total + wtt_total
         
-        if fuel["rfnbo"] and year <= 2033:
-            energy *= RFNBO_MULTIPLIER
-
         total_energy += energy
         emissions += total_emissions
 
@@ -174,7 +176,14 @@ if rows:
     }))
 else:
     st.info("No fuel data provided yet. Please select fuel(s) and enter quantity.")
-    
+
+with st.expander("Debug Info"):
+    st.write(f"Total Energy: {total_energy:,.0f} MJ")
+    st.write(f"Total Emissions: {emissions:,.0f} gCO2eq")
+    st.write(f"GHG Intensity: {ghg_intensity:.4f} gCO2eq/MJ")
+    st.write(f"Target Intensity: {target_intensity(year):,.4f} gCO2eq/MJ")
+    st.write(f"Penalty: €{penalty:,.2f}")    
+
 st.subheader("Summary")
 st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:,.2f}")
 st.metric("Estimated Penalty (€)", f"{penalty:,.2f}")
