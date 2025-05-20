@@ -64,7 +64,7 @@ def target_intensity(year: int) -> float:
     return BASE_TARGET * (1 - red)
 
 # === USER INPUT ===
-st.title("FuelEU Maritime - GHG Intensity & Penalty Calculator")
+st.title("FuelEU - GHG Intensity & Penalty Calculator")
 st.sidebar.subheader("Fuel Inputs")
 fuel_inputs = {}
 
