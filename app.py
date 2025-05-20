@@ -162,9 +162,16 @@ else:
 
 # === OUTPUT ===
 st.subheader("Fuel Breakdown")
-df = pd.DataFrame(rows).sort_values("Emissions (gCO2eq)", ascending=False)
-st.dataframe(df.style.format({"Energy (MJ)": "{:,.0f}", "Emissions (gCO2eq)": "{:,.0f}", "GHG Intensity (gCO2eq/MJ)": "{:,.2f}"}))
-
+if rows:
+    df = pd.DataFrame(rows).sort_values("Emissions (gCO2eq)", ascending=False)
+    st.dataframe(df.style.format({
+        "Energy (MJ)": "{:,.0f}",
+        "Emissions (gCO2eq)": "{:,.0f}",
+        "GHG Intensity (gCO2eq/MJ)": "{:,.2f}"
+    }))
+else:
+    st.info("No fuel data provided yet. Please select fuel(s) and enter quantity.")
+    
 st.subheader("Summary")
 st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:,.2f}")
 st.metric("Estimated Penalty (€)", f"{penalty:,.2f}")
@@ -187,22 +194,26 @@ st.pyplot(fig)
 # === PDF EXPORT ===
 
 if st.button("Export to PDF"):
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt="FuelEU Maritime GHG Report", ln=True, align="C")
-    pdf.cell(200, 10, txt=f"Year: {year} | GWP: {gwp_choice}", ln=True)
-    pdf.cell(200, 10, txt=f"GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ", ln=True)
-    pdf.cell(200, 10, txt=f"Compliance Balance: {compliance_balance:,.2f} MJ", ln=True)
-    pdf.cell(200, 10, txt=f"Penalty: €{penalty:,.2f}", ln=True)
-    pdf.ln(10)
-    for row in rows:
-        pdf.cell(200, 10, txt=str(row), ln=True)
-    filename = f"ghg_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
-    pdf.output(f"/mnt/data/{filename}")
-    st.success(f"PDF exported: {filename}")
-    fig_path = f"/mnt/data/chart_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
-    fig.savefig(fig_path, dpi=150)
-    pdf.image(fig_path, x=10, y=None, w=190)
+    if not rows:
+        st.warning("No data to export.")
+    else:
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        pdf.cell(200, 10, txt="FuelEU Maritime GHG Report", ln=True, align="C")
+        pdf.cell(200, 10, txt=f"Year: {year} | GWP: {gwp_choice}", ln=True)
+        pdf.cell(200, 10, txt=f"GHG Intensity: {ghg_intensity:,.2f} gCO2eq/MJ", ln=True)
+        pdf.cell(200, 10, txt=f"Compliance Balance: {target_intensity(year) - ghg_intensity:,.2f} MJ", ln=True)
+        pdf.cell(200, 10, txt=f"Penalty: €{penalty:,.2f}", ln=True)
+        pdf.ln(10)
 
-    st.download_button("Download PDF", data=open(f"/mnt/data/{filename}", "rb"), file_name=filename, mime="application/pdf")
+        for row in rows:
+            line = f"{row['Fuel']}: {row['Quantity (t)']:,.1f} t | {row['Energy (MJ)']:,.0f} MJ | {row['Emissions (gCO2eq)']:,.0f} g"
+            pdf.cell(200, 10, txt=line, ln=True)
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
+            pdf.output(tmp_pdf.name)
+            tmp_pdf_path = tmp_pdf.name
+
+        st.success(f"PDF exported: {os.path.basename(tmp_pdf_path)}")
+        st.download_button("Download PDF", data=open(tmp_pdf_path, "rb"), file_name="ghg_report.pdf", mime="application/pdf")
