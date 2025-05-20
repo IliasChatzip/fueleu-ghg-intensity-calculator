@@ -218,9 +218,9 @@ if st.button("Export to PDF"):
             line = f"{row['Fuel']}: {row['Quantity (t)']:,.1f} t | {row['Energy (MJ)']:,.0f} MJ | {row['Emissions (gCO2eq)']:,.0f} g"
             pdf.cell(200, 10, txt=line, ln=True)
             
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
             pdf.output(tmp_pdf.name)
             tmp_pdf_path = tmp_pdf.name
             
-            st.success(f"PDF exported: {os.path.basename(tmp_pdf_path)}")
-            st.download_button("Download PDF", data=open(tmp_pdf_path, "rb"), file_name="ghg_report.pdf", mime="application/pdf")
+        st.success(f"PDF exported: {os.path.basename(tmp_pdf_path)}")
+        st.download_button("Download PDF", data=open(tmp_pdf_path, "rb"), file_name="ghg_report.pdf", mime="application/pdf")
