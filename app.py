@@ -129,18 +129,18 @@ for fuel in FUELS:
         if fuel["rfnbo"] and year <= 2033:
             energy *= RFNBO_MULTIPLIER
             
-            co2_total = fuel["ttw_co2"] * mass_g * (1 - ops / 100) * wind
-            ch4_total = fuel["ttw_ch4"] * mass_g * gwp["CH4"]
-            n2o_total = fuel["ttw_n20"] * mass_g * gwp["N2O"]
-            ttw_total = co2_total + ch4_total + n2o_total
-            wtt_total = energy * fuel["wtt"]
-        
+        co2_total = fuel["ttw_co2"] * mass_g * (1 - ops / 100) * wind
+        ch4_total = fuel["ttw_ch4"] * mass_g * gwp["CH4"]
+        n2o_total = fuel["ttw_n20"] * mass_g * gwp["N2O"]
+        ttw_total = co2_total + ch4_total + n2o_total
+        wtt_total = energy * fuel["wtt"]
         total_emissions = ttw_total + wtt_total
+            
         total_energy += energy
         emissions += total_emissions
-
+        
         ghg_intensity_mj = total_emissions / energy if energy else 0
-
+        
         rows.append({
             "Fuel": fuel["name"],
             "Quantity (t)": qty,
@@ -148,17 +148,17 @@ for fuel in FUELS:
             "GHG Intensity (gCO2eq/MJ)": ghg_intensity_mj,
             "Emissions (gCO2eq)": total_emissions,
         })
+        
         ghg_intensity = emissions / total_energy if total_energy else 0.0
-        st.session_state["computed_ghg"] =
-
-        if ghg_intensity<= target_intensity(year):
+        st.session_state["computed_ghg"] = ghg_intensity
+        if ghg_intensity <= target_intensity(year):
           penalty = 0
-else:
-    excess_intensity =   - target_intensity(year)  # gCO2eq/MJ
-    excess_g = total_energy * excess_intensity
-    excess_tonnes = excess_g / 1_000_000
-    vlsfo_tonnes = excess_tonnes / (VLSFO_ENERGY_CONTENT / 1_000_000)
-    penalty = vlsfo_tonnes * PENALTY_RATE
+        else:
+            excess_intensity =   - target_intensity(year)  # gCO2eq/MJ
+            excess_g = total_energy * excess_intensity
+            excess_tonnes = excess_g / 1_000_000
+            vlsfo_tonnes = excess_tonnes / (VLSFO_ENERGY_CONTENT / 1_000_000)
+            penalty = vlsfo_tonnes * PENALTY_RATE
 
 # === OUTPUT ===
 st.subheader("Fuel Breakdown")
@@ -172,16 +172,16 @@ if rows:
 else:
     st.info("No fuel data provided yet. Please select fuel(s) and enter quantity.")
 
+st.subheader("Summary")
+st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:,.2f}")
+st.metric("Estimated Penalty (€)", f"{penalty:,.2f}")
+
+# === DEBUG INFO ===
 with st.expander("Debug Info"):
     st.write(f"Total Energy: {total_energy:,.0f} MJ")
     st.write(f"Total Emissions: {emissions:,.0f} gCO2eq")
-    st.write(f"GHG Intensity: { :.4f} gCO2eq/MJ")
-    st.write(f"Target Intensity: {target_intensity(year):,.4f} gCO2eq/MJ")
-    st.write(f"Penalty: €{penalty:,.2f}")    
-
-st.subheader("Summary")
-st.metric("GHG Intensity (gCO2eq/MJ)", f"{ :,.2f}")
-st.metric("Estimated Penalty (€)", f"{penalty:,.2f}")
+    st.write(f"Target Intensity: {target_intensity(year):.2f} gCO2eq/MJ")
+    st.write(f"Penalty: €{penalty:,.2f}")
 
 # === COMPLIANCE CHART ===
 years = list(range(2020, 2051, 5))
@@ -214,13 +214,13 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt=f"Penalty: €{penalty:,.2f}", ln=True)
         pdf.ln(10)
 
-        for row in rows:
+       for row in rows:
             line = f"{row['Fuel']}: {row['Quantity (t)']:,.1f} t | {row['Energy (MJ)']:,.0f} MJ | {row['Emissions (gCO2eq)']:,.0f} g"
             pdf.cell(200, 10, txt=line, ln=True)
 
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
             pdf.output(tmp_pdf.name)
             tmp_pdf_path = tmp_pdf.name
-
-        st.success(f"PDF exported: {os.path.basename(tmp_pdf_path)}")
-        st.download_button("Download PDF", data=open(tmp_pdf_path, "rb"), file_name="ghg_report.pdf", mime="application/pdf")
+            
+            st.success(f"PDF exported: {os.path.basename(tmp_pdf_path)}")
+            st.download_button("Download PDF", data=open(tmp_pdf_path, "rb"), file_name="ghg_report.pdf", mime="application/pdf")
