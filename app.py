@@ -117,28 +117,34 @@ wind = st.sidebar.selectbox(
 total_energy = 0.0
 emissions = 0.0
 rows = []
+
 for fuel in FUELS:
     qty = fuel_inputs.get(fuel["name"], 0.0)
     if qty > 0:
         mass_g = qty * 1_000_000
-        lcv = fuel["lcv"]
-        energy = mass_g * lcv
+        energy = mass_g * fuel["lcv"]
+
         co2_corr = fuel["ttw_co2"] * (1 - ops / 100) * wind
-        ttw = co2_corr + fuel["ttw_ch4"] * gwp["CH4"] + fuel["ttw_n20"] * gwp["N2O"]
-        total = energy * (ttw + fuel["wtt"])
+        ttw_gco2_per_g = co2_corr + fuel["ttw_ch4"] * gwp["CH4"] + fuel["ttw_n20"] * gwp["N2O"]
+        wtw_gco2_per_g = ttw_gco2_per_g + fuel["wtt"]
+        emissions_g = mass_g * wtw_gco2_per_g
+
         if fuel["rfnbo"] and year <= 2033:
             energy *= RFNBO_MULTIPLIER
+
         total_energy += energy
-        emissions += total
+        emissions += emissions_g
+
         rows.append({
             "Fuel": fuel["name"],
             "Quantity (t)": qty,
             "Energy (MJ)": energy,
-            "Emissions (gCO2eq)": total,
-            })
+            "Emissions (gCO2eq)": emissions_g,
+        })
 
-ghg_intensity = emissions / total_energy if total_energy else 0.0
+ghg_intensity = emissions / total_energy if total_energy > 0 else 0.0
 st.session_state["computed_ghg"] = ghg_intensity
+
 compliance_balance = total_energy * (target_intensity(year) - ghg_intensity)
 penalty = 0 if compliance_balance >= 0 else abs(compliance_balance) * PENALTY_RATE / VLSFO_ENERGY_CONTENT
 
