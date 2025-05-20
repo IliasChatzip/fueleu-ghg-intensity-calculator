@@ -173,7 +173,7 @@ else:
     st.info("No fuel data provided yet. Please select fuel(s) and enter quantity.")
 
 st.subheader("Summary")
-st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:,.2f}")
+st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}")
 st.metric("Estimated Penalty (€)", f"{penalty:,.2f}")
 
 # === DEBUG INFO ===
