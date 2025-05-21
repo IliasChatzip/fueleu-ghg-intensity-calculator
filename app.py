@@ -16,8 +16,7 @@ def reset_app():
     for key in list(st.session_state.keys()):
         del st.session_state[key]  # Clear all session state
     st.session_state["trigger_reset"] = False
-    st.stop()  # Halt this run; will auto-rerun clean
-
+    
 # === Check if Reset Was Triggered
 if st.session_state.get("trigger_reset", False):
     reset_app()
