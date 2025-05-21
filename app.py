@@ -112,7 +112,7 @@ wind = st.sidebar.selectbox(
     "Wind Reward Factor",
     [1.00, 0.99, 0.97, 0.95],
     index=0,
-    help="Wind-assisted propulsion correction (lower = more assistance)"
+    help="This is a reward factor wind-assisted propulsion if it is installed onboard. Reference can be made to the Regulation (EU) 2023/1805 of The European Parliament and of The Counsil. In case of no wind-assisted propulsion onboard, Wind Reward Factor of 1 can be selected (lower = more assistance)."
 )
     
 # === CALCULATIONS ===
