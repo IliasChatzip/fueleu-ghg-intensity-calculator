@@ -272,9 +272,14 @@ if st.button("Export to PDF"):
         st.success(f"PDF exported: {os.path.basename(tmp_pdf_path)}")
         st.download_button("Download PDF", data=open(tmp_pdf_path, "rb"), file_name="ghg_report.pdf", mime="application/pdf")
 
+if st.sidebar.button("🔁 Reset Calculator"):
+    st.session_state["reset_triggered"] = True
+     st.experimental_rerun()
+
 if st.session_state.get("reset_triggered", False):
     keys_to_keep = ["reset_triggered"]
     for key in list(st.session_state.keys()):
         if key not in keys_to_keep:
             del st.session_state[key]
     st.session_state["reset_triggered"] = False
+    
