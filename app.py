@@ -13,6 +13,10 @@ st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
 
 # === Reset Button
 st.sidebar.button("🔁 Reset Calculator", on_click=lambda: st.session_state.update({"reset_triggered": True}))
+if st.sidebar.button("🔁 Reset Calculator"):
+    st.session_state["reset_triggered"] = True
+    st.experimental_rerun()
+
 
 # === CONFIGURATION ===
 BASE_TARGET = 91.16
@@ -269,10 +273,10 @@ if st.button("Export to PDF"):
         st.success(f"PDF exported: {os.path.basename(tmp_pdf_path)}")
         st.download_button("Download PDF", data=open(tmp_pdf_path, "rb"), file_name="ghg_report.pdf", mime="application/pdf")
 
-# === Rerun only after full render ===
+# === FINAL CLEANUP AFTER RERUN ===
 if st.session_state.get("reset_triggered", False):
+    keys_to_keep = ["reset_triggered"]
     for k in list(st.session_state.keys()):
-        if k != "reset_triggered":
+        if k not in keys_to_keep:
             del st.session_state[k]
     st.session_state["reset_triggered"] = False
-    st.experimental_rerun()
