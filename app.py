@@ -159,7 +159,7 @@ compliance_balance = total_energy * (target_intensity(year) - ghg_intensity)
 if compliance_balance >= 0:
      penalty = 0
 else:
-     penalty = (abs(compliance_balance) / ghg_intensity * 41000) * 2400
+     penalty = (abs(compliance_balance) / (ghg_intensity * 41000)) * 2400
 
 # === OUTPUT ===
 st.subheader("Fuel Breakdown")
@@ -176,13 +176,6 @@ else:
 st.subheader("Summary")
 st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}")
 st.metric("Estimated Penalty (€)", f"{penalty:,.2f}")
-
-# === DEBUG INFO ===
-with st.expander("Debug Info"):
-    st.write(f"Total Energy: {total_energy:,.0f} MJ")
-    st.write(f"Total Emissions: {emissions:,.0f} gCO2eq")
-    st.write(f"Target Intensity: {target_intensity(year):.2f} gCO2eq/MJ")
-    st.write(f"Penalty: €{penalty:,.2f}")
 
 # === COMPLIANCE CHART ===
 years = list(range(2020, 2051, 5))
