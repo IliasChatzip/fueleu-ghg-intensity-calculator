@@ -154,7 +154,6 @@ ghg_intensity = emissions / total_energy if total_energy else 0.0
 st.session_state["computed_ghg"] = ghg_intensity
 
 compliance_balance = total_energy * (target_intensity(year) - ghg_intensity)
-
         
 if compliance_balance >= 0:
      penalty = 0
@@ -212,11 +211,10 @@ if penalty > 0:
         })
 
     if mitigation_rows:
-        df_mitigation = pd.DataFrame(mitigation_rows).sort_values("Required Amount (t)")
-        st.dataframe(df_mitigation.style.format({"Required Amount (t)": "{:,.2f}"}))
+        df_mitigation = pd.DataFrame(mitigation_options).sort_values("Required Tonnes").reset_index(drop=True)
+        st.dataframe(df_mitigation.style.format({"Required Amount (t)": "{:,.0f}"}))
     else:
         st.info("No effective fuels found to offset the penalty based on current configuration.")
-
 
 # === COMPLIANCE CHART ===
 years = list(range(2020, 2051, 5))
@@ -234,7 +232,6 @@ ax.grid(True)
 st.pyplot(fig)
 
 # === PDF EXPORT ===
-
 if st.button("Export to PDF"):
     if not rows:
         st.warning("No data to export.")
