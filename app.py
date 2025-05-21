@@ -205,31 +205,42 @@ st.metric("Estimated Penalty (Eur)", f"{penalty:,.2f}")
 if penalty > 0:
     st.subheader("Mitigation Options (Penalty Offset)")
     mitigation_rows = []
+    original_energy = total_energy
+    original_emissions = emissions
+
+    target = target_intensity(year)
+
 
     for fuel in FUELS:
-        # Skip fuels already used in input
         if fuel_inputs.get(fuel["name"], 0) > 0:
             continue
-
-        # Calculate GHG intensity of the fuel
+# Simulate adding mitigation fuel
         co2_mj = fuel["ttw_co2"] * (1 - ops / 100) * wind
         ch4_mj = fuel["ttw_ch4"] * gwp["CH4"]
         n2o_mj = fuel["ttw_n20"] * gwp["N2O"]
-        ttw = co2_mj + ch4_mj + n2o_mj
-        total_ghg_per_mj = fuel["wtt"] + ttw
+        total_ghg_mj = fuel["wtt"] + co2_mj + ch4_mj + n2o_mj
 
-        delta = target_intensity(year) - total_ghg_per_mj
-        if delta <= 0:
-            continue  # Not helpful for mitigation
+        # Required energy to close the compliance gap
+        deficit = abs(compliance_balance)
+        added_energy_mj = deficit / (target - total_ghg_mj) if (target - total_ghg_mj) > 0 else None
+        if added_energy_mj is None or added_energy_mj < 0:
+            continue
 
-        req_energy_mj = abs(compliance_balance) / delta
-        required_mass_g = req_energy_mj / fuel["lcv"]
-        required_tonnes = required_mass_g / 1_000_000
-        mitigation_rows.append({
-            "Fuel": fuel["name"],
-            "Required Amount (t)": required_tonnes,
-        })
+        added_mass_g = added_energy_mj / fuel["lcv"]
+        added_qty_t = added_mass_g / 1_000_000
 
+        # Recalculate emissions
+        added_emissions = (co2_mj + ch4_mj + n2o_mj) * added_mass_g + added_energy_mj * fuel["wtt"]
+        new_total_energy = original_energy + added_energy_mj
+        new_total_emissions = original_emissions + added_emissions
+        new_ghg_intensity = new_total_emissions / new_total_energy
+        new_balance = new_total_energy * (target - new_ghg_intensity)
+
+        if new_balance >= 0:
+            mitigation_rows.append({
+                "Fuel": fuel["name"],
+                "Required Amount (t)": added_qty_t
+            })
 
     if mitigation_rows:
         df_mitigation = pd.DataFrame(mitigation_rows).sort_values("Required Amount (t)").reset_index(drop=True)
