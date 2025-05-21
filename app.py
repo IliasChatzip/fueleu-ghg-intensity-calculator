@@ -12,8 +12,12 @@ import os
 st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
 
 if "reset_triggered" in st.session_state and st.session_state["reset_triggered"]:
-    st.session_state.clear()
+    # Clear everything except the reset trigger flag
+    keys_to_delete = [k for k in st.session_state.keys() if k != "reset_triggered"]
+    for k in keys_to_delete:
+        del st.session_state[k]
     st.session_state["reset_triggered"] = False
+
     st.experimental_rerun()
 
 # === Reset Button
