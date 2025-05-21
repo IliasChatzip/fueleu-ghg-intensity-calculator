@@ -80,7 +80,7 @@ for category, fuels_in_cat in categories.items():
     with st.sidebar.expander(f"{category} Fuels", expanded=False):
         selected_fuels = st.multiselect(f"Select {category} Fuels", [f["name"] for f in fuels_in_cat], key=f"multiselect_{category}")
         for selected_fuel in selected_fuels:
-            qty = st.number_input(f"{selected_fuel} (t)", min_value=0.0, step=1.0, value=0.0, key=f"qty_{selected_fuel}")
+            qty = st.number_input(f"{selected_fuel} (t)", min_value=0, step=1, value=0, format="%d", key=f"qty_{selected_fuel}")
             fuel_inputs[selected_fuel] = qty
 
 st.sidebar.markdown("---")
@@ -166,7 +166,7 @@ st.subheader("Fuel Breakdown")
 if rows:
     df = pd.DataFrame(rows).sort_values("Emissions (gCO2eq)", ascending=False).reset_index(drop=True)
     st.dataframe(df.style.format({
-        "Quantity (t)": "{:,.02f}",
+        "Quantity (t)": "{:,.0f}",
         "Energy (MJ)": "{:,.0f}",
         "Emissions (gCO2eq)": "{:,.0f}",
         "GHG Intensity (gCO2eq/MJ)": "{:,.2f}"
@@ -177,7 +177,7 @@ else:
 st.subheader("Summary")
 st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}")
 balance_label = "Surplus" if compliance_balance >= 0 else "Deficit"
-st.metric("Compliance Balance (MJ)", f"{compliance_balance:,.2f}")
+st.metric("Compliance Balance (MJ)", f"{compliance_balance:,.0f}")
 st.metric("Estimated Penalty (€)", f"{penalty:,.2f}")
 
 # === COMPLIANCE CHART ===
@@ -207,11 +207,11 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt="FuelEU Maritime GHG Report", ln=True, align="C")
         pdf.cell(200, 10, txt=f"Year: {year} | GWP: {gwp_choice}", ln=True)
         pdf.cell(200, 10, txt=f"GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ", ln=True)
-        pdf.cell(200, 10, txt=f"Compliance Balance: {compliance_balance:,.2f} MJ", ln=True)
+        pdf.cell(200, 10, txt=f"Compliance Balance: {compliance_balance:,.0f} MJ", ln=True)
         pdf.cell(200, 10, txt=f"Penalty: €{penalty:,.2f}", ln=True)
         pdf.ln(10)        
         for row in rows:
-            line = f"{row['Fuel']}: {row['Quantity (t)']:,.1f} t | {row['Energy (MJ)']:,.0f} MJ | {row['Emissions (gCO2eq)']:,.0f} g"
+            line = f"{row['Fuel']}: {row['Quantity (t)']:,.0f} t | {row['Energy (MJ)']:,.0f} MJ | {row['Emissions (gCO2eq)']:,.0f} g"
             pdf.cell(200, 10, txt=line, ln=True)            
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
             pdf.output(tmp_pdf.name)
