@@ -274,7 +274,7 @@ if st.button("Export to PDF"):
 
 if st.sidebar.button("🔁 Reset Calculator"):
     st.session_state["reset_triggered"] = True
-     st.experimental_rerun()
+    st.experimental_rerun()
 
 if st.session_state.get("reset_triggered", False):
     keys_to_keep = ["reset_triggered"]
