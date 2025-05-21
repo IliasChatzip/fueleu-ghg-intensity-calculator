@@ -159,13 +159,14 @@ compliance_balance = total_energy * (target_intensity(year) - ghg_intensity)
 if compliance_balance >= 0:
      penalty = 0
 else:
-     penalty = (abs(compliance_balance) / (ghg_intensity * 41000)) * 2400
+     penalty = (abs(compliance_balance) / (ghg_intensity * VLSFO_ENERGY_CONTENT)) * PENALTY_RATE
 
 # === OUTPUT ===
 st.subheader("Fuel Breakdown")
 if rows:
     df = pd.DataFrame(rows).sort_values("Emissions (gCO2eq)", ascending=False)
     st.dataframe(df.style.format({
+        "Quantity (t)": "{:,.02f}",
         "Energy (MJ)": "{:,.0f}",
         "Emissions (gCO2eq)": "{:,.0f}",
         "GHG Intensity (gCO2eq/MJ)": "{:,.2f}"
