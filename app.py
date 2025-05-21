@@ -156,7 +156,7 @@ st.session_state["computed_ghg"] = ghg_intensity
 compliance_balance = total_energy * (target_intensity(year) - ghg_intensity)
 
         
-if compliance_balance => 0:
+if compliance_balance=>0:
      penalty = 0
 else:
      vlsfo_equiv_tonnes = abs(compliance_balance) / 41000
