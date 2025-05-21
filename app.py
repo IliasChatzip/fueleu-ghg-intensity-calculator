@@ -213,6 +213,7 @@ if penalty > 0:
     base_intensity = ghg_intensity
 
      # Start testing incremental amounts
+    tolerance = 1  # penalty margin allowed for rounding/precision
     current_tonnes = 0.1
     step = 0.1
     max_tonnes = 5000
@@ -226,21 +227,24 @@ if penalty > 0:
         while current_tonnes <= max_tonnes:
             added_mass = current_tonnes * 1_000_000  # g
             added_energy = added_mass * fuel["lcv"]
+            if fuel["nbo"] and year <= 2033:
+                added_energy *= REWARD_FACTOR_NBO_MULTIPLIER
             added_emissions = added_energy * fuel["wtt"] + added_mass * (
                 fuel["ttw_co2"] * (1 - ops / 100) * wind +
                 fuel["ttw_ch4"] * gwp["CH4"] +
                 fuel["ttw_n20"] * gwp["N2O"]
             )
-            # If NBO and before 2034, apply bonus
-        if fuel["nbo"] and year <= 2033:
-            added_energy *= REWARD_FACTOR_NBO_MULTIPLIER
 
         new_total_energy = base_energy + added_energy
         new_total_emissions = base_emissions + added_emissions
         new_ghg_intensity = new_total_emissions / new_total_energy
         new_balance = new_total_energy * (target_intensity(year) - new_ghg_intensity)
 
-        if new_balance >= 0:
+        new_penalty = 0 if new_compliance_balance >= 0 else (
+            abs(new_compliance_balance) / (new_intensity * VLSFO_ENERGY_CONTENT) * PENALTY_RATE
+        )
+
+        if new_penalty <= tolerance:
             mitigation_rows.append({
                 "Fuel": fuel["name"],
                 "Required Amount (t)": current_tonnes
