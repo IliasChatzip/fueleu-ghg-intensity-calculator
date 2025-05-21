@@ -230,6 +230,7 @@ if penalty > 0:
             
         # Start testing incremental amounts
         current_tonnes = 0.1
+        step = 0.1
         max_tonnes = 5000
         found = False
 
