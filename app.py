@@ -251,10 +251,9 @@ if st.button("Export to PDF"):
             if penalty > 0 and 'df_mitigation' in locals():
                 pdf.ln(5)
                 pdf.cell(200, 10, txt="--- Mitigation Options ---", ln=True)
-                for index, row in df_mitigation.iterrows():
-                    fuel = row["Fuel"]
-                    required_tonnes = row["Required Amount (t)"]
-                    pdf.cell(200, 10, txt=f"{fuel}: {required_tonnes:,.0f} t required to offset deficit", ln=True)
+                for row in mitigation_rows:
+                    mit_line = f"{row['Fuel']}: {row['Required Amount (t)']:,.2f} t"
+                    pdf.cell(200, 10, txt=mit_line, ln=True)
 
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
             pdf.output(tmp_pdf.name)
