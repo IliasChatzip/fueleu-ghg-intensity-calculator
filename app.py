@@ -12,14 +12,19 @@ import os
 st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
 
 # === STABLE RESET HANDLER ===
-if st.session_state.get("trigger_reset", False):
+def reset_app():
     for key in list(st.session_state.keys()):
-        del st.session_state[key]  # Clear all keys
+        del st.session_state[key]  # Clear all session state
     st.session_state["trigger_reset"] = False
-    st.stop()
+    st.stop()  # Halt this run; will auto-rerun clean
 
-# === Reset Button in Sidebar ===
-st.sidebar.button("🔁 Reset Calculator", on_click=reset_app)
+# === Check if Reset Was Triggered
+if st.session_state.get("trigger_reset", False):
+    reset_app()
+
+# === Sidebar Reset Button
+st.sidebar.button("🔁 Reset Calculator", on_click=lambda: st.session_state.update({"trigger_reset": True}))
+
 
 # === CONFIGURATION ===
 BASE_TARGET = 91.16
