@@ -11,11 +11,8 @@ import os
 st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
 
 # === RESET HANDLER ===
-if st.session_state.get("reset_triggered", False):
-    for k in list(st.session_state.keys()):
-        if k != "reset_triggered":
-            del st.session_state[k]
-    st.session_state["reset_triggered"] = False
+if "reset_triggered" in st.session_state and st.session_state.reset_triggered:
+    st.session_state.clear()
     st.experimental_rerun()
 
 # === Reset Button
