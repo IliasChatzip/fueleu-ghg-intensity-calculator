@@ -212,33 +212,21 @@ if penalty > 0:
     base_emissions = emissions
     base_intensity = ghg_intensity
 
+     # Start testing incremental amounts
+    current_tonnes = 0.1
+    step = 0.1
+    max_tonnes = 5000
+    valid_mitigations = []
+
     for fuel in FUELS:
-        # Skip fuels already used in input
         if fuel["name"] in fuel_inputs and fuel_inputs[fuel["name"]] > 0:
             continue
             
-        # Setup fuel-specific values
-        co2_mj = fuel["ttw_co2"] * (1 - ops / 100) * wind
-        ch4_mj = fuel["ttw_ch4"] * gwp["CH4"]
-        n2o_mj = fuel["ttw_n20"] * gwp["N2O"]
-        ttw = co2_mj + ch4_mj + n2o_mj
-        total_ghg_per_mj = fuel["wtt"] + ttw
-
-        delta = base_intensity - total_ghg_per_mj
-        if delta <= 0:
-            continue  # Skip non-beneficial fuel
-            
-        # Start testing incremental amounts
-        current_tonnes = 0.1
-        step = 0.1
-        max_tonnes = 5000
-        
-    
-    current_tonnes = step   
-    while current_tonnes <= max_tonnes:
-        added_mass = current_tonnes * 1_000_000  # g
-        added_energy = added_mass * fuel["lcv"]
-        added_emissions = added_energy * fuel["wtt"] + added_mass * (
+        current_tonnes = step
+        while current_tonnes <= max_tonnes:
+            added_mass = current_tonnes * 1_000_000  # g
+            added_energy = added_mass * fuel["lcv"]
+            added_emissions = added_energy * fuel["wtt"] + added_mass * (
                 fuel["ttw_co2"] * (1 - ops / 100) * wind +
                 fuel["ttw_ch4"] * gwp["CH4"] +
                 fuel["ttw_n20"] * gwp["N2O"]
