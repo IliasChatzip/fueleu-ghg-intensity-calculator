@@ -164,7 +164,7 @@ else:
 # === OUTPUT ===
 st.subheader("Fuel Breakdown")
 if rows:
-    df = pd.DataFrame(rows).sort_values("Emissions (gCO2eq)", ascending=False).reset_index(drop=True)
+    df_raw = pd.DataFrame(rows).sort_values("Emissions (gCO2eq)", ascending=False).reset_index(drop=True)
     df_formatted = df_raw.style.format({
         "Quantity (t)": "{:,.0f}",
         "Energy (MJ)": "{:,.0f}",
