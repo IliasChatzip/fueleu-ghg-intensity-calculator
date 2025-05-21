@@ -181,6 +181,43 @@ balance_label = "Surplus" if compliance_balance >= 0 else "Deficit"
 st.metric("Compliance Balance (MJ)", f"{compliance_balance:,.0f}")
 st.metric("Estimated Penalty (€)", f"{penalty:,.2f}")
 
+# === MITIGATION OPTIONS ===
+if penalty > 0:
+    st.subheader("Mitigation Options (Penalty Offset)")
+    mitigation_rows = []
+
+    for fuel in FUELS:
+        # Skip fuels already used in input
+        if fuel["name"] in fuel_inputs and fuel_inputs[fuel["name"]] > 0:
+            continue
+        
+        # Calculate GHG intensity of the fuel
+        co2_mj = fuel["ttw_co2"] * (1 - ops / 100) * wind
+        ch4_mj = fuel["ttw_ch4"] * gwp["CH4"]
+        n2o_mj = fuel["ttw_n20"] * gwp["N2O"]
+        ttw = co2_mj + ch4_mj + n2o_mj
+        total_ghg_per_mj = fuel["wtt"] + ttw
+
+        delta = ghg_intensity - total_ghg_per_mj
+        if delta <= 0:
+            continue  # Not a beneficial fuel
+
+        req_energy_mj = abs(compliance_balance) / delta
+        required_mass_g = req_energy_mj / fuel["lcv"]
+        required_tonnes = required_mass_g / 1_000_000
+
+        mitigation_rows.append({
+            "Fuel": fuel["name"],
+            "Required Amount (t)": required_tonnes,
+        })
+
+    if mitigation_rows:
+        df_mitigation = pd.DataFrame(mitigation_rows).sort_values("Required Amount (t)")
+        st.dataframe(df_mitigation.style.format({"Required Amount (t)": "{:,.2f}"}))
+    else:
+        st.info("No effective fuels found to offset the penalty based on current configuration.")
+
+
 # === COMPLIANCE CHART ===
 years = list(range(2020, 2051, 5))
 targets = [target_intensity(y) for y in years]
