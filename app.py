@@ -160,7 +160,7 @@ if compliance_balance >= 0:
      penalty = 0
 else:
      vlsfo_equiv_tonnes = abs(compliance_balance) / 41000
-     penalty = (vlsfo_equiv_tonnes / 1000000) * 2400
+     penalty = vlsfo_equiv_tonnes * 2400
 
 # === OUTPUT ===
 st.subheader("Fuel Breakdown")
