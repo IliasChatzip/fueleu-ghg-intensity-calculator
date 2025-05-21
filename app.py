@@ -69,11 +69,15 @@ def target_intensity(year: int) -> float:
 st.session_state.clear()
 st.experimental_rerun()
 st.title("FuelEU - GHG Intensity & Penalty Calculator")
-col_reset, col_spacer = st.columns([1, 9])
-with col_reset:
+col1, col2 = st.columns([1, 9])
+with col1:
     if st.button("🔁 Reset Calculator"):
         st.session_state.clear()
         st.experimental_rerun()
+        if st.button("🔁 Reset Calculator"):
+    st.session_state.clear()
+    st.experimental_rerun()
+    st.stop()
 
 st.sidebar.subheader("Fuel Inputs")
 fuel_inputs = {}
