@@ -238,7 +238,7 @@ if st.button("Export to PDF"):
     else:
         pdf = FPDF()
         pdf.add_page()
-        pdf.set_font("Calibri", size=12)
+        pdf.set_font("Arial", size=12)
         pdf.cell(200, 10, txt="FuelEU Maritime GHG Report", ln=True, align="C")
         pdf.cell(200, 10, txt=f"Year: {year} | GWP: {gwp_choice}", ln=True)
         pdf.cell(200, 10, txt=f"GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ", ln=True)
