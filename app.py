@@ -206,6 +206,12 @@ if penalty > 0:
     st.subheader("Mitigation Options (Penalty Offset)")
     mitigation_rows = []
 
+    # Store the current fuel inputs for baseline
+    base_inputs = fuel_inputs.copy()
+    base_energy = total_energy
+    base_emissions = emissions
+    base_intensity = ghg_intensity
+
     for fuel in FUELS:
         # Skip fuels already used in input
         if fuel["name"] in fuel_inputs and fuel_inputs[fuel["name"]] > 0:
@@ -216,12 +222,15 @@ if penalty > 0:
         ch4_mj = fuel["ttw_ch4"] * gwp["CH4"]
         n2o_mj = fuel["ttw_n20"] * gwp["N2O"]
         ttw = co2_mj + ch4_mj + n2o_mj
-        ghg_per_mj = fuel["wtt"] + ttw
+        total_ghg_per_mj = fuel["wtt"] + ttw
 
-        # Simulate adding this fuel to current scenario
+        delta = base_intensity - total_ghg_per_mj
+        if delta <= 0:
+            continue  # Skip non-beneficial fuel
+            
+        # Start testing incremental amounts
         current_tonnes = 0.1
-        max_tonnes = 10000
-        step = 0.1
+        max_tonnes = 5000
         found = False
 
     while current_tonnes <= max_tonnes:
@@ -236,15 +245,15 @@ if penalty > 0:
         if fuel["nbo"] and year <= 2033:
             added_energy *= REWARD_FACTOR_NBO_MULTIPLIER
 
-        new_total_energy = total_energy + added_energy
-        new_total_emissions = emissions + added_emissions
-        new_intensity = new_total_emissions / new_total_energy
-        new_balance = new_total_energy * (target_intensity(year) - new_intensity)
+        new_total_energy = base_energy + added_energy
+        new_total_emissions = base_emissions + added_emissions
+        new_ghg_intensity = new_total_emissions / new_total_energy
+        new_balance = new_total_energy * (target_intensity(year) - new_ghg_intensity)
 
         if new_balance >= 0:
             mitigation_rows.append({
                 "Fuel": fuel["name"],
-                "Required Amount (t)": round(current_tonnes, 2)
+                "Required Amount (t)": current_tonnes
                 })
             found = True
             break
