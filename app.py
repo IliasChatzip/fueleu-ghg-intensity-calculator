@@ -11,27 +11,16 @@ import os
 # === PAGE CONFIG ===
 st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
 
-# === RESET BUTTON: CLEAR ALL USER ENTRIES ===
-if st.sidebar.button("🔁 Reset Calculator"):
-    # Define what to reset
-    keys_to_delete = [
-        k for k in st.session_state.keys()
-        if k.startswith("qty_") or k in ["ops", "wind", "gwp_choice", "year"]
-    ]
-    
-    # Clear quantities and other numeric inputs
+# === STABLE RESET HANDLER ===
+def reset_app():
+    keys_to_keep = set()  # keep nothing to reset all
+    keys_to_delete = [k for k in st.session_state.keys() if k not in keys_to_keep]
     for k in keys_to_delete:
-        if k in st.session_state:
-            del st.session_state[k]
-
-    # Clear multiselects explicitly
-    for cat in ["Fossil ", "Bio", "NBO"]:
-        multi_key = f"multiselect_{cat}"
-        if multi_key in st.session_state:
-            st.session_state[multi_key] = []
-
-    st.toast("Calculator fully reset 🧼", icon="🔄")
+        del st.session_state[k]
     st.experimental_rerun()
+
+# === Reset Button in Sidebar ===
+st.sidebar.button("🔁 Reset Calculator", on_click=reset_app)
 
 # === CONFIGURATION ===
 BASE_TARGET = 91.16
