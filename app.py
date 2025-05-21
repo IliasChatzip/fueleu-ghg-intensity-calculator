@@ -11,14 +11,14 @@ import os
 # === PAGE CONFIG ===
 st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
 
-if "reset_triggered" in st.session_state and st.session_state["reset_triggered"]:
-    # Clear everything except the reset trigger flag
-    keys_to_delete = [k for k in st.session_state.keys() if k != "reset_triggered"]
+if st.session_state.get("reset_triggered", False):
+    keys_to_delete = [k for k in list(st.session_state.keys()) if k != "reset_triggered"]
     for k in keys_to_delete:
         del st.session_state[k]
     st.session_state["reset_triggered"] = False
-
-    st.experimental_rerun()
+    
+# ✨ Delay the rerun to next script cycle
+    st.stop()
 
 # === Reset Button
 st.sidebar.button("🔁 Reset Calculator", on_click=lambda: st.session_state.update({"reset_triggered": True}))
