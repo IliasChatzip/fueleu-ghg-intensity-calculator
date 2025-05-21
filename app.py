@@ -7,6 +7,14 @@ from datetime import datetime
 import tempfile
 import os
 
+# === PAGE CONFIG & RESET BUTTON ===
+st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
+
+# === Safe Reset Implementation BEFORE any rendering
+if st.sidebar.button("🔁 Reset Calculator", use_container_width=True):
+    st.session_state.clear()
+    st.experimental_rerun()
+
 # === CONFIGURATION ===
 BASE_TARGET = 91.16
 REDUCTIONS = {2025: 0.02, 2030: 0.06, 2035: 0.14, 2050: 0.80}
@@ -67,12 +75,6 @@ def target_intensity(year: int) -> float:
 
 # === USER INPUT ===
 st.title("FuelEU - GHG Intensity & Penalty Calculator")
-col1, _ = st.columns([1, 2])
-with col1:
-    if st.button("🔁 Reset Calculator", key="reset_button"):
-        st.session_state.clear()
-        st.experimental_rerun()
-
 st.sidebar.subheader("Fuel Inputs")
 fuel_inputs = {}
 
