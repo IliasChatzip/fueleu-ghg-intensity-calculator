@@ -7,13 +7,12 @@ from datetime import datetime
 import tempfile
 import os
 
-# === PAGE CONFIG ===
-st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
-
-# === RESET HANDLER ===
-if "reset_triggered" in st.session_state and st.session_state.reset_triggered:
+if st.session_state.get("reset_triggered", False):
     st.session_state.clear()
     st.experimental_rerun()
+    
+# === PAGE CONFIG ===
+st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
 
 # === Reset Button
 st.sidebar.button("🔁 Reset Calculator", on_click=lambda: st.session_state.update({"reset_triggered": True}))
