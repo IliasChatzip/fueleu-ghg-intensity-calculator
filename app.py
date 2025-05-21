@@ -13,16 +13,26 @@ st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
 
 # === RESET BUTTON: CLEAR ALL USER ENTRIES ===
 if st.sidebar.button("🔁 Reset Calculator"):
+    # Define what to reset
     keys_to_delete = [
         k for k in st.session_state.keys()
-        if k.startswith("qty_") or k.startswith("multiselect_") or k in ["ops", "wind", "gwp_choice", "year"]
+        if k.startswith("qty_") or k in ["ops", "wind", "gwp_choice", "year"]
     ]
     
+    # Clear quantities and other numeric inputs
     for k in keys_to_delete:
         if k in st.session_state:
             del st.session_state[k]
-    
-    st.toast("Inputs & fuels reset ✅", icon="🧼")
+
+    # Clear multiselects explicitly
+    for cat in ["Fossil ", "Bio", "NBO"]:
+        multi_key = f"multiselect_{cat}"
+        if multi_key in st.session_state:
+            st.session_state[multi_key] = []
+
+    st.toast("Calculator fully reset 🧼", icon="🔄")
+    st.experimental_rerun()
+
 # === CONFIGURATION ===
 BASE_TARGET = 91.16
 REDUCTIONS = {2025: 0.02, 2030: 0.06, 2035: 0.14, 2050: 0.80}
