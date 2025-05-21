@@ -13,13 +13,13 @@ if "reset_triggered" in st.session_state:
     del st.session_state["reset_triggered"]
     st.experimental_rerun()
 
-# === PAGE CONFIG & RESET BUTTON ===
-st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
-
 # === Safe Reset Implementation BEFORE any rendering
 if st.sidebar.button("🔁 Reset Calculator", use_container_width=True):
     st.session_state.clear()
     st.experimental_rerun()
+
+# === PAGE CONFIG & RESET BUTTON ===
+st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
 
 # === CONFIGURATION ===
 BASE_TARGET = 91.16
