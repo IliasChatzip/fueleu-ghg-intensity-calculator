@@ -210,11 +210,11 @@ if penalty > 0:
         # Skip fuels already used in input
         if fuel["name"] in fuel_inputs and fuel_inputs[fuel["name"]] > 0:
             continue
-        
-         step = 0.1  # tonnes
-    max_tonnes = 5000  # upper bound to prevent infinite loop
-    current_tonnes = 0
-    found = False
+            
+            step = 0.1  # tonnes
+            max_tonnes = 5000  # upper bound to prevent infinite loop
+            current_tonnes = 0
+            found = False
 
     while current_tonnes <= max_tonnes:
         added_mass = current_tonnes * 1_000_000  # g
