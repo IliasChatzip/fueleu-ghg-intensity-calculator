@@ -7,6 +7,12 @@ from datetime import datetime
 import tempfile
 import os
 
+# === RESET HANDLER ===
+if "reset_triggered" in st.session_state:
+    st.session_state.clear()
+    del st.session_state["reset_triggered"]
+    st.experimental_rerun()
+
 # === PAGE CONFIG & RESET BUTTON ===
 st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
 
