@@ -215,8 +215,8 @@ if penalty > 0:
      # Start testing incremental amounts
     tolerance = 1  # penalty margin allowed for rounding/precision
     current_tonnes = 0.1
-    step = 0.1
-    max_tonnes = 5000
+    step = 10
+    max_tonnes = 2000
     mitigation_rows = []
 
     for fuel in FUELS:
