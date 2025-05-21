@@ -12,12 +12,11 @@ import os
 st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
 
 # === STABLE RESET HANDLER ===
-def reset_app():
-    keys_to_keep = set()  # keep nothing to reset all
-    keys_to_delete = [k for k in st.session_state.keys() if k not in keys_to_keep]
-    for k in keys_to_delete:
-        del st.session_state[k]
-    st.experimental_rerun()
+if st.session_state.get("trigger_reset", False):
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]  # Clear all keys
+    st.session_state["trigger_reset"] = False
+    st.stop()
 
 # === Reset Button in Sidebar ===
 st.sidebar.button("🔁 Reset Calculator", on_click=reset_app)
