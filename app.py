@@ -211,8 +211,7 @@ if penalty > 0:
         })
 
     if mitigation_rows:
-        mitigation_options = [m for m in mitigation_options if "Required Tonnes" in m]
-        df_mitigation = pd.DataFrame(mitigation_options).sort_values("Required Tonnes").reset_index(drop=True)
+        df_mitigation = pd.DataFrame(mitigation_rows).sort_values("Required Tonnes").reset_index(drop=True)
         st.dataframe(df_mitigation.style.format({"Required Amount (t)": "{:,.0f}"}))
     else:
         st.info("No effective fuels found to offset the penalty based on current configuration.")
