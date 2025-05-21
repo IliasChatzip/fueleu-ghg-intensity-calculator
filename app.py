@@ -66,8 +66,6 @@ def target_intensity(year: int) -> float:
     return BASE_TARGET * (1 - red)
 
 # === USER INPUT ===
-st.session_state.clear()
-st.experimental_rerun()
 st.title("FuelEU - GHG Intensity & Penalty Calculator")
 col1, col2 = st.columns([1, 9])
 with col1:
