@@ -74,10 +74,10 @@ with col1:
     if st.button("🔁 Reset Calculator"):
         st.session_state.clear()
         st.experimental_rerun()
-        if st.button("🔁 Reset Calculator"):
-    st.session_state.clear()
-    st.experimental_rerun()
-    st.stop()
+    if st.button("🔁 Reset Calculator"):
+        st.session_state.clear()
+        st.experimental_rerun()
+        st.stop()
 
 st.sidebar.subheader("Fuel Inputs")
 fuel_inputs = {}
