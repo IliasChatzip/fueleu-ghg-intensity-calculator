@@ -11,10 +11,6 @@ import os
 # === PAGE CONFIG ===
 st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
 
-# === Reset Button ===
-if st.sidebar.button("🔁 Reset Calculator"):
-    st.session_state["reset_triggered"] = True
-
 # === CONFIGURATION ===
 BASE_TARGET = 91.16
 REDUCTIONS = {2025: 0.02, 2030: 0.06, 2035: 0.14, 2050: 0.80}
