@@ -73,7 +73,6 @@ def target_intensity(year: int) -> float:
 # === Reset Button
 if st.sidebar.button("🔁 Reset Calculator"):
     st.session_state["reset_triggered"] = True
-    st.experimental_rerun()
     
 # === USER INPUT ===
 st.title("FuelEU - GHG Intensity & Penalty Calculator")
