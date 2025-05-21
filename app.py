@@ -11,6 +11,13 @@ import os
 # === PAGE CONFIG ===
 st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
 
+# === RESET BUTTON: CLEAR USER INPUTS ONLY ===
+if st.sidebar.button("🔁 Reset Calculator"):
+    for key in list(st.session_state.keys()):
+        if key.startswith("qty_") or key.startswith("multiselect_") or key in ["ops", "wind", "gwp_choice", "year"]:
+            del st.session_state[key]
+    st.toast("Inputs reset ✅", icon="♻️")
+
 # === CONFIGURATION ===
 BASE_TARGET = 91.16
 REDUCTIONS = {2025: 0.02, 2030: 0.06, 2035: 0.14, 2050: 0.80}
@@ -69,10 +76,6 @@ def target_intensity(year: int) -> float:
     red = REDUCTIONS[2035] + frac * (REDUCTIONS[2050] - REDUCTIONS[2035])
     return BASE_TARGET * (1 - red)
 
-
-# === Reset Button
-if st.sidebar.button("🔁 Reset Calculator"):
-    st.session_state["reset_triggered"] = True
     
 # === USER INPUT ===
 st.title("FuelEU - GHG Intensity & Penalty Calculator")
@@ -271,13 +274,3 @@ if st.button("Export to PDF"):
             tmp_pdf_path = tmp_pdf.name            
         st.success(f"PDF exported: {os.path.basename(tmp_pdf_path)}")
         st.download_button("Download PDF", data=open(tmp_pdf_path, "rb"), file_name="ghg_report.pdf", mime="application/pdf")
-
-
-if st.session_state.get("reset_triggered", False):
-    keys_to_keep = ["reset_triggered"]
-    for key in list(st.session_state.keys()):
-        if key not in keys_to_keep:
-            del st.session_state[key]
-    st.session_state["reset_triggered"] = False
-    
-    st.experimental_rerun()
