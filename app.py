@@ -109,7 +109,7 @@ ops = st.sidebar.selectbox(
 )
 
 wind = st.sidebar.selectbox(
-    "Wind Correction Factor",
+    "Wind Reward Factor",
     [1.00, 0.99, 0.97, 0.95],
     index=0,
     help="Wind-assisted propulsion correction (lower = more assistance)"
