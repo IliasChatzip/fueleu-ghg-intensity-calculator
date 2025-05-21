@@ -233,7 +233,8 @@ if penalty > 0:
         step = 0.1
         max_tonnes = 5000
         found = False
-
+    
+    current_tonnes = step   
     while current_tonnes <= max_tonnes:
         added_mass = current_tonnes * 1_000_000  # g
         added_energy = added_mass * fuel["lcv"]
