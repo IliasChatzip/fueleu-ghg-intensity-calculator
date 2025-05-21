@@ -216,7 +216,7 @@ if penalty > 0:
     current_tonnes = 0.1
     step = 0.1
     max_tonnes = 5000
-    valid_mitigations = []
+    mitigation_rows = []
 
     for fuel in FUELS:
         if fuel["name"] in fuel_inputs and fuel_inputs[fuel["name"]] > 0:
