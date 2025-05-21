@@ -178,7 +178,7 @@ st.subheader("Summary")
 st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}")
 balance_label = "Surplus" if compliance_balance >= 0 else "Deficit"
 st.metric("Compliance Balance (MJ)", f"{compliance_balance:,.0f}")
-st.metric("Estimated Penalty (€)", f"{penalty:,.2f}")
+st.metric("Estimated Penalty (Eur)", f"{penalty:,.2f}")
 
 # === MITIGATION OPTIONS ===
 if penalty > 0:
@@ -243,7 +243,7 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt=f"Year: {year} | GWP: {gwp_choice}", ln=True)
         pdf.cell(200, 10, txt=f"GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ", ln=True)
         pdf.cell(200, 10, txt=f"Compliance Balance: {compliance_balance:,.0f} MJ", ln=True)
-        pdf.cell(200, 10, txt=f"Penalty: €{penalty:,.2f}", ln=True)
+        pdf.cell(200, 10, txt=f"Penalty: Eur{penalty:,.2f}", ln=True)
         pdf.ln(10)        
         for row in rows:
             line = f"{row['Fuel']}: {row['Quantity (t)']:,.0f} t | {row['Energy (MJ)']:,.0f} MJ | {row['Emissions (gCO2eq)']:,.0f} g"
