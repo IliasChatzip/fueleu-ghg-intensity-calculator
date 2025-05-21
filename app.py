@@ -19,8 +19,6 @@ def safe_rerun():
         st.session_state["reset_triggered"] = False
         st.experimental_rerun()
 
-if st.session_state.get("reset_triggered", False):
-    st.stop()
 
 # === Reset Button
 st.sidebar.button("🔁 Reset Calculator", on_click=lambda: st.session_state.update({"reset_triggered": True}))
