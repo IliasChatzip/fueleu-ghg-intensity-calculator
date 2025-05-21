@@ -232,7 +232,7 @@ if penalty > 0:
         current_tonnes = 0.1
         step = 0.1
         max_tonnes = 5000
-        found = False
+        
     
     current_tonnes = step   
     while current_tonnes <= max_tonnes:
