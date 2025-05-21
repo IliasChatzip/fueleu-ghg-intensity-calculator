@@ -159,8 +159,7 @@ compliance_balance = total_energy * (target_intensity(year) - ghg_intensity)
 if compliance_balance >= 0:
      penalty = 0
 else:
-     vlsfo_equiv_tonnes = abs(compliance_balance) / 41000
-     penalty = vlsfo_equiv_tonnes * 2400
+     penalty = (abs(compliance_balance) / ghg_intensity * 41000) * 2400
 
 # === OUTPUT ===
 st.subheader("Fuel Breakdown")
@@ -212,7 +211,7 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt="FuelEU Maritime GHG Report", ln=True, align="C")
         pdf.cell(200, 10, txt=f"Year: {year} | GWP: {gwp_choice}", ln=True)
         pdf.cell(200, 10, txt=f"GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ", ln=True)
-        pdf.cell(200, 10, txt=f"Compliance Balance: {target_intensity(year) - ghg_intensity:,.2f} MJ", ln=True)
+        pdf.cell(200, 10, txt=f"Compliance Balance: {compliance_balance:,.2f} MJ", ln=True)
         pdf.cell(200, 10, txt=f"Penalty: €{penalty:,.2f}", ln=True)
         pdf.ln(10)        
         for row in rows:
