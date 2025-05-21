@@ -30,8 +30,7 @@ VLSFO_ENERGY_CONTENT = 41_000
 REWARD_FACTOR_NBO_MULTIPLIER = 2
 GWP_VALUES = {
     "AR4": {"CH4": 25, "N2O": 298},
-    "AR5": {"CH4": 29.8, "N2O": 273},
-}
+    "AR5": {"CH4": 29.8, "N2O": 273},}
 
 # === FUEL DATABASE ===
 FUELS = [
