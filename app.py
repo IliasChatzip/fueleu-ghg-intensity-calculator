@@ -211,25 +211,38 @@ if penalty > 0:
         if fuel["name"] in fuel_inputs and fuel_inputs[fuel["name"]] > 0:
             continue
         
-        # Calculate GHG intensity of the fuel
-        co2_mj = fuel["ttw_co2"] * (1 - ops / 100) * wind
-        ch4_mj = fuel["ttw_ch4"] * gwp["CH4"]
-        n2o_mj = fuel["ttw_n20"] * gwp["N2O"]
-        ttw = co2_mj + ch4_mj + n2o_mj
-        total_ghg_per_mj = fuel["wtt"] + ttw
+         step = 0.1  # tonnes
+    max_tonnes = 5000  # upper bound to prevent infinite loop
+    current_tonnes = 0
+    found = False
 
-        delta = ghg_intensity - total_ghg_per_mj
-        if delta <= 0:
-            continue  # Not a beneficial fuel
+    while current_tonnes <= max_tonnes:
+        added_mass = current_tonnes * 1_000_000  # g
+        added_energy = added_mass * fuel["lcv"]
+        if fuel["nbo"] and year <= 2033:
+            added_energy *= REWARD_FACTOR_NBO_MULTIPLIER
 
-        req_energy_mj = abs(compliance_balance) / delta
-        required_mass_g = req_energy_mj / fuel["lcv"]
-        required_tonnes = required_mass_g / 1_000_000
+        added_co2 = fuel["ttw_co2"] * added_mass * (1 - ops / 100) * wind
+        added_ch4 = fuel["ttw_ch4"] * added_mass * gwp["CH4"]
+        added_n2o = fuel["ttw_n20"] * added_mass * gwp["N2O"]
+        added_ttw = added_co2 + added_ch4 + added_n2o
+        added_wtt = added_energy * fuel["wtt"]
+        added_emissions = added_ttw + added_wtt
 
-        mitigation_rows.append({
-            "Fuel": fuel["name"],
-            "Required Amount (t)": required_tonnes,
-        })
+        new_energy = total_energy + added_energy
+        new_emissions = emissions + added_emissions
+        new_intensity = new_emissions / new_energy
+        new_balance = new_energy * (target_intensity(year) - new_intensity)
+
+        if new_balance >= 0:  # neutralized
+            mitigation_rows.append({
+                "Fuel": fuel["name"],
+                "Required Amount (t)": round(current_tonnes, 2)
+            })
+            found = True
+            break
+
+        current_tonnes += step
 
     if mitigation_rows:
         df_mitigation = pd.DataFrame(mitigation_rows).sort_values("Required Amount (t)").reset_index(drop=True)
