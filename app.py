@@ -11,12 +11,15 @@ import os
 # === PAGE CONFIG ===
 st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
 
-# === RESET BUTTON: CLEAR USER INPUTS ONLY ===
+# === RESET BUTTON: CLEAR ALL USER ENTRIES ===
 if st.sidebar.button("🔁 Reset Calculator"):
-    for key in list(st.session_state.keys()):
-        if key.startswith("qty_") or key.startswith("multiselect_") or key in ["ops", "wind", "gwp_choice", "year"]:
-            del st.session_state[key]
-    st.toast("Inputs reset ✅", icon="♻️")
+    keys_to_delete = [k for k in st.session_state.keys() if k.startswith("qty_") or k.startswith("multiselect_")]
+    keys_to_delete += ["ops", "wind", "gwp_choice", "year"]
+    
+    for k in keys_to_delete:
+        del st.session_state[k]
+    
+    st.toast("Inputs & fuels reset ✅", icon="🧼")
 
 # === CONFIGURATION ===
 BASE_TARGET = 91.16
