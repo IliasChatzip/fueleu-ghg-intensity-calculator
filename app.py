@@ -18,7 +18,7 @@ if st.sidebar.button("🔁 Reset Calculator", use_container_width=True):
     st.session_state.clear()
     st.experimental_rerun()
 
-# === PAGE CONFIG & RESET BUTTON ===
+# === PAGE CONFIG ===
 st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
 
 # === CONFIGURATION ===
