@@ -11,6 +11,10 @@ import os
 # === PAGE CONFIG ===
 st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
 
+# === Reset Button ===
+if st.sidebar.button("🔁 Reset Calculator"):
+    st.session_state["reset_triggered"] = True
+
 # === CONFIGURATION ===
 BASE_TARGET = 91.16
 REDUCTIONS = {2025: 0.02, 2030: 0.06, 2035: 0.14, 2050: 0.80}
@@ -272,9 +276,6 @@ if st.button("Export to PDF"):
         st.success(f"PDF exported: {os.path.basename(tmp_pdf_path)}")
         st.download_button("Download PDF", data=open(tmp_pdf_path, "rb"), file_name="ghg_report.pdf", mime="application/pdf")
 
-if st.sidebar.button("🔁 Reset Calculator"):
-    st.session_state["reset_triggered"] = True
-    st.experimental_rerun()
 
 if st.session_state.get("reset_triggered", False):
     keys_to_keep = ["reset_triggered"]
@@ -283,3 +284,4 @@ if st.session_state.get("reset_triggered", False):
             del st.session_state[key]
     st.session_state["reset_triggered"] = False
     
+    st.experimental_rerun()
