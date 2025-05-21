@@ -268,7 +268,7 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt=f"Penalty: {penalty:,.2f} Eur", ln=True)
         pdf.ln(10)        
         for row in rows:
-            line = f"{row['Fuel']}: {row['Quantity (t)']:,.0f} t | {row['Energy (MJ)']:,.0f} MJ | {row['Emissions (gCO2eq)']:,.0f} g"
+            line = f"{row['Fuel']}: {row['Quantity (t)']:,.0f} t | {row['Energy (MJ)']:,.0f} MJ | {row['Emissions (gCO2eq)']:,.0f} gCO2eq"
             pdf.cell(200, 10, txt=line, ln=True)
             
         if penalty > 0 and mitigation_rows:
