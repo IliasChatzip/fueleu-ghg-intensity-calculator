@@ -257,7 +257,7 @@ if penalty > 0:
                 "Fuel": fuel["name"],
                 "Required Amount (t)": current_tonnes
                 })
-            found = True
+            
             break
             
         current_tonnes += step
