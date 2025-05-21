@@ -271,11 +271,11 @@ if st.button("Export to PDF"):
             line = f"{row['Fuel']}: {row['Quantity (t)']:,.0f} t | {row['Energy (MJ)']:,.0f} MJ | {row['Emissions (gCO2eq)']:,.0f} g"
             pdf.cell(200, 10, txt=line, ln=True)
             
-        if penalty > 0 and 'df_mitigation' in locals():
+        if penalty > 0 and mitigation_rows:
              pdf.ln(5)
              pdf.cell(200, 10, txt="--- Mitigation Options ---", ln=True)
              mitigation_rows_sorted = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
-             for row in mitigation_rows:
+             for row in mitigation_rows_sorted:
                  mit_line = f"{row['Fuel']}: {row['Required Amount (t)']:,.2f} t"
                  pdf.cell(200, 10, txt=mit_line, ln=True)
 
