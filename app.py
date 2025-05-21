@@ -12,7 +12,6 @@ import os
 st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
 
 # === Reset Button
-st.sidebar.button("🔁 Reset Calculator", on_click=lambda: st.session_state.update({"reset_triggered": True}))
 if st.sidebar.button("🔁 Reset Calculator"):
     st.session_state["reset_triggered"] = True
     st.experimental_rerun()
