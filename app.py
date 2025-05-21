@@ -227,7 +227,7 @@ if penalty > 0:
     while current_tonnes <= max_tonnes:
         added_mass = current_tonnes * 1_000_000  # g
         added_energy = added_mass * fuel["lcv"]
-        added_emissions = added_energy * fuel["wtt"] + added_mass_g * (
+        added_emissions = added_energy * fuel["wtt"] + added_mass * (
                 fuel["ttw_co2"] * (1 - ops / 100) * wind +
                 fuel["ttw_ch4"] * gwp["CH4"] +
                 fuel["ttw_n20"] * gwp["N2O"]
