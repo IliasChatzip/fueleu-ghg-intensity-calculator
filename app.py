@@ -233,23 +233,23 @@ if penalty > 0:
                 fuel["ttw_n20"] * gwp["N2O"]
             )
             # If NBO and before 2034, apply bonus
-            if fuel["nbo"] and year <= 2033:
-                added_energy *= REWARD_FACTOR_NBO_MULTIPLIER
+        if fuel["nbo"] and year <= 2033:
+            added_energy *= REWARD_FACTOR_NBO_MULTIPLIER
 
-            new_total_energy = total_energy + added_energy
-            new_total_emissions = emissions + added_emissions
-            new_intensity = new_total_emissions / new_total_energy
-            new_balance = new_total_energy * (target_intensity(year) - new_intensity)
+        new_total_energy = total_energy + added_energy
+        new_total_emissions = emissions + added_emissions
+        new_intensity = new_total_emissions / new_total_energy
+        new_balance = new_total_energy * (target_intensity(year) - new_intensity)
 
-            if new_balance >= 0:
-                mitigation_rows.append({
-                    "Fuel": fuel["name"],
-                    "Required Amount (t)": round(current_tonnes, 2)
+        if new_balance >= 0:
+            mitigation_rows.append({
+                "Fuel": fuel["name"],
+                "Required Amount (t)": round(current_tonnes, 2)
                 })
-                found = True
-                break
-
-            current_tonnes += step
+            found = True
+            break
+            
+        current_tonnes += step
 
     if mitigation_rows:
         df_mitigation = pd.DataFrame(mitigation_rows).sort_values("Required Amount (t)").reset_index(drop=True)
