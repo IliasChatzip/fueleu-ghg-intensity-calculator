@@ -105,7 +105,7 @@ ops = st.sidebar.selectbox(
     "OPS Reward Factor (%)",
     [0, 1, 2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
     index=0,
-    help="Reduction for using Onshore Power Supply (max 20%)"
+    help="This is a reward factor of a ship which utilise the electricity from offshore power supply (OPS) connection point. This input is the percentage of electricity delivered to the ship per total amount of energy consumption onboard (max 20%)."
 )
 
 wind = st.sidebar.selectbox(
