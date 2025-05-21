@@ -207,49 +207,28 @@ if penalty > 0:
     mitigation_rows = []
 
     for fuel in FUELS:
-        if fuel["name"] in fuel_inputs and fuel_inputs[fuel["name"]] > 0:
+        # Skip fuels already used in input
+        if fuel_inputs.get(fuel["name"], 0) > 0:
             continue
-            
+
+        # Calculate GHG intensity of the fuel
         co2_mj = fuel["ttw_co2"] * (1 - ops / 100) * wind
         ch4_mj = fuel["ttw_ch4"] * gwp["CH4"]
         n2o_mj = fuel["ttw_n20"] * gwp["N2O"]
         ttw = co2_mj + ch4_mj + n2o_mj
-        fuel_ghg = fuel["wtt"] + ttw
-        delta = ghg_intensity - fuel_ghg
+        total_ghg_per_mj = fuel["wtt"] + ttw
 
+        delta = ghg_intensity - total_ghg_per_mj
         if delta <= 0:
-            continue
+            continue  # Not helpful for mitigation
 
-        # Step 1: Estimate required tonnes
-        required_energy = abs(compliance_balance) / delta
-        required_mass_g = required_energy / fuel["lcv"]
+        req_energy_mj = abs(compliance_balance) / delta
+        required_mass_g = req_energy_mj / fuel["lcv"]
         required_tonnes = required_mass_g / 1_000_000
-
-        # Step 2: Simulate updated totals
-        added_mass_g = required_tonnes * 1_000_000
-        added_energy = added_mass_g * fuel["lcv"]
-        added_energy_adj = added_energy * REWARD_FACTOR_NBO_MULTIPLIER if fuel["nbo"] and year <= 2033 else added_energy
-
-        added_emissions = (
-            added_energy * fuel["wtt"]
-            + added_mass_g * fuel["ttw_co2"] * (1 - ops / 100) * wind
-            + added_mass_g * fuel["ttw_ch4"] * gwp["CH4"]
-            + added_mass_g * fuel["ttw_n20"] * gwp["N2O"]
-        )
-
-        new_total_energy = total_energy + added_energy_adj
-        new_total_emissions = emissions + added_emissions
-        new_ghg_intensity = new_total_emissions / new_total_energy
-        new_balance = new_total_energy * (target_intensity(year) - new_ghg_intensity)
-        new_penalty = (abs(new_balance) / (new_ghg_intensity * VLSFO_ENERGY_CONTENT)) * PENALTY_RATE if new_balance < 0 else 0
-
-        if new_penalty < 1:  # tolerance
-            mitigation_rows.append({
-                "Fuel": fuel["name"],
-                "Required Amount (t)": required_tonnes,
-                "Post-Mitigation GHG Intensity": new_ghg_intensity,
-                "Post-Mitigation Penalty (€)": new_penalty,
-            })
+        mitigation_rows.append({
+            "Fuel": fuel["name"],
+            "Required Amount (t)": required_tonnes,
+        })
 
 
     if mitigation_rows:
