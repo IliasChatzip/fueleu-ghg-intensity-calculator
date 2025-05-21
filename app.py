@@ -170,7 +170,7 @@ if rows:
         "Energy (MJ)": "{:,.0f}",
         "Emissions (gCO2eq)": "{:,.0f}",
         "GHG Intensity (gCO2eq/MJ)": "{:,.2f}"
-    }))
+    })
 else:
     st.info("No fuel data provided yet. Please select fuel(s) and enter quantity.")
 
