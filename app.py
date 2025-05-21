@@ -218,8 +218,7 @@ if penalty > 0:
         ttw = co2_mj + ch4_mj + n2o_mj
         total_ghg_per_mj = fuel["wtt"] + ttw
 
-        target = target_intensity(year)
-        delta = target - total_ghg_per_mj
+        delta = target_intensity(year) - total_ghg_per_mj
         if delta <= 0:
             continue  # Not helpful for mitigation
 
