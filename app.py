@@ -92,15 +92,26 @@ def target_intensity(year: int) -> float:
 st.title("FuelEU - GHG Intensity & Penalty Calculator")
 st.sidebar.markdown("### Fuel Price Settings")
 st.sidebar.info("Enter fuel prices in USD or EUR. If USD, provide exchange rate.")
-price_currency = st.sidebar.radio("Fuel Price Currency", ["EUR", "USD"], index=0, horizontal=True)
-exchange_rate = 1.0
-if price_currency == "USD":
-    exchange_rate = st.sidebar.number_input("USD → EUR Exchange Rate", min_value=0.1, max_value=2.0, value=0.92, step=0.01)
-
 st.sidebar.subheader("Fuel Inputs")
 fuel_inputs = {}
 fuel_price_inputs = {}
 
+# Detect if any price was entered
+user_entered_prices = any(
+    st.session_state.get(f"price_{fuel['name']}", 0.0) > 0.0 for fuel in FUELS
+)
+
+exchange_rate = 1.0
+if user_entered_prices:
+    st.sidebar.markdown("---")
+    exchange_rate = st.sidebar.number_input(
+        "EUR/USD Exchange Rate",
+        min_value=0.5,
+        max_value=2.0,
+        value=0.93,
+        step=0.01,
+        help="Required if you've entered fuel prices in USD. This rate will convert USD to EUR."
+    )
 
 categories = {
     "Fossil ": [f for f in FUELS if not f['nbo'] and "Bio" not in f['name'] and "Biodiesel" not in f['name'] and "E-" not in f['name'] and "Green" not in f['name']],
