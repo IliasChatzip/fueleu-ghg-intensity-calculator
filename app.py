@@ -205,41 +205,51 @@ st.metric("Estimated Penalty (Eur)", f"{penalty:,.2f}")
 if penalty > 0:
     st.subheader("Mitigation Options (Penalty Offset)")
     mitigation_rows = []
-    original_energy = total_energy
-    original_emissions = emissions
-
     target = target_intensity(year)
-
 
     for fuel in FUELS:
         if fuel_inputs.get(fuel["name"], 0) > 0:
-            continue
-# Simulate adding mitigation fuel
+            continue  # skip fuels already selected
+
+        # Base GHG per MJ
         co2_mj = fuel["ttw_co2"] * (1 - ops / 100) * wind
         ch4_mj = fuel["ttw_ch4"] * gwp["CH4"]
         n2o_mj = fuel["ttw_n20"] * gwp["N2O"]
         total_ghg_mj = fuel["wtt"] + co2_mj + ch4_mj + n2o_mj
 
-        # Required energy to close the compliance gap
-        deficit = abs(compliance_balance)
-        added_energy_mj = deficit / (target - total_ghg_mj) if (target - total_ghg_mj) > 0 else None
-        if added_energy_mj is None or added_energy_mj < 0:
+        # Skip fuels that are worse or equal
+        if total_ghg_mj >= ghg_intensity:
             continue
 
-        added_mass_g = added_energy_mj / fuel["lcv"]
-        added_qty_t = added_mass_g / 1_000_000
+        # Binary search to find min tonnes needed
+        low = 0.0
+        high = 100_000.0  # upper bound in tonnes
+        best_qty = None
 
-        # Recalculate emissions
-        added_emissions = (co2_mj + ch4_mj + n2o_mj) * added_mass_g + added_energy_mj * fuel["wtt"]
-        new_total_energy = original_energy + added_energy_mj
-        new_total_emissions = original_emissions + added_emissions
-        new_ghg_intensity = new_total_emissions / new_total_energy
-        new_balance = new_total_energy * (target - new_ghg_intensity)
+        for _ in range(30):  # precision loop
+            mid = (low + high) / 2
+            mass_g = mid * 1_000_000
+            energy_mj = mass_g * fuel["lcv"]
 
-        if new_balance >= 0:
+            if fuel["nbo"] and year <= 2033:
+                energy_mj *= REWARD_FACTOR_NBO_MULTIPLIER
+
+            ttw = co2_mj * mass_g + ch4_mj * mass_g + n2o_mj * mass_g
+            wtt = energy_mj * fuel["wtt"]
+            total_emi = emissions + ttw + wtt
+            total_en = total_energy + energy_mj
+            new_ghg = total_emi / total_en if total_en else 9999
+
+            if new_ghg < target:
+                best_qty = mid
+                high = mid
+            else:
+                low = mid
+
+        if best_qty is not None:
             mitigation_rows.append({
                 "Fuel": fuel["name"],
-                "Required Amount (t)": added_qty_t
+                "Required Amount (t)": best_qty
             })
 
     if mitigation_rows:
@@ -247,6 +257,7 @@ if penalty > 0:
         st.dataframe(df_mitigation.style.format({"Required Amount (t)": "{:,.0f}"}))
     else:
         st.info("No effective fuels found to offset the penalty based on current configuration.")
+
 
 # === COMPLIANCE CHART ===
 years = list(range(2020, 2051, 5))
