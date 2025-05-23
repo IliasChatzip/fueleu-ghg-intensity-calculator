@@ -91,7 +91,7 @@ def target_intensity(year: int) -> float:
 # === USER INPUT ===
 st.title("FuelEU - GHG Intensity & Penalty Calculator")
 st.sidebar.markdown("### Fuel Price Settings")
-st.sidebar.info("Enter fuel prices in USD or EUR. If USD, provide exchange rate.")
+st.sidebar.info("Enter fuel prices in USD & provide exchange rate.")
 st.sidebar.subheader("Fuel Inputs")
 fuel_inputs = {}
 fuel_price_inputs = {}
