@@ -165,9 +165,6 @@ total_energy = 0.0
 emissions = 0.0
 rows = []
 
-# Get exchange rate
-exchange_rate = st.sidebar.number_input("EUR/USD Exchange Rate", min_value=0.1, value=1.0, step=0.01, help="Used to convert USD to EUR for fuel prices. All fuel prices below are assumed to be in USD/tonne.")
-
 fuel_price_inputs = {}
 for fuel in FUELS:
     if fuel["name"] in fuel_inputs:
@@ -248,7 +245,6 @@ st.metric("Compliance Balance (MJ)", f"{compliance_balance:,.0f}")
 st.metric("Estimated Penalty (Eur)", f"{penalty:,.2f}")
 
 # === MITIGATION OPTIONS ===
-from decimal import Decimal, getcontext
 
 # Set precision to 12 digits
 getcontext().prec = 12
@@ -275,7 +271,6 @@ if penalty > 0:
 
         low = Decimal("0.0")
         high = Decimal("100000.0")
-        import math
         best_qty = None
         tolerance = Decimal("0.00001")
 
@@ -315,8 +310,8 @@ if penalty > 0:
 
     if mitigation_rows:
         for row in mitigation_rows:
-            price = row.get("Price (Eur/t)", 0)
-            = st.number_input(f"💰 {row['Fuel']} - Price (Eur/t)", min_value=0.0, value=0.0, step=10.0, key=f"mit_price_{row['Fuel']}")
+            row["Price (Eur/t)"] = st.number_input(
+                f"{row['Fuel']} - Price (Eur/t)",min_value=0.0,value=0.0,step=10.0,key=f"mit_price_{row['Fuel']}")
             row["Estimated Cost (Eur)"] = row["Price (Eur/t)"] * row["Required Amount (t)"]
 
         df_mitigation = pd.DataFrame(mitigation_rows).sort_values("Required Amount (t)").reset_index(drop=True)
