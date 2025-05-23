@@ -369,9 +369,9 @@ if st.button("Export to PDF"):
             mitigation_rows_sorted = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
             for row in mitigation_rows_sorted:
                 mit_line = f"{row['Fuel']}: {row['Required Amount (t)']:,.0f} t"
-                if row.get("Price (Eur/t)", 0) > 0:                
-                pmit_line += f" @ {row['Price (Eur/t)']:,.2f} eur/t = {row['Estimated Cost (Eur)']:,.2f} Eur"
-                pdf.cell(200, 10, txt=mit_line, ln=True)
+                if row.get("Price (Eur/t)", 0) > 0:
+                    pmit_line += f" @ {row['Price (Eur/t)']:,.2f} eur/t = {row['Estimated Cost (Eur)']:,.2f} Eur"
+                    pdf.cell(200, 10, txt=mit_line, ln=True)
 
         # Export
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
