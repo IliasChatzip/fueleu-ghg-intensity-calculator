@@ -287,9 +287,9 @@ if penalty > 0:
             rounded_qty = math.ceil(float(best_qty))
             mitigation_rows.append({
                 "Fuel": fuel["name"],
-                "Required Amount (t)": rounded_qty
+                "Required Amount (t)": rounded_qty,
                 "Price (Eur/t)": 0.0,
-                "Estimated Cost (Eur)": 0.0
+                "Estimated Cost (Eur)": 0.0,
             })
 
     if mitigation_rows:
