@@ -202,43 +202,50 @@ st.metric("Compliance Balance (MJ)", f"{compliance_balance:,.0f}")
 st.metric("Estimated Penalty (Eur)", f"{penalty:,.2f}")
 
 # === MITIGATION OPTIONS ===
+from decimal import Decimal, getcontext
+
+# Set precision to 12 digits
+getcontext().prec = 12
+
 if penalty > 0:
     st.subheader("Mitigation Options (Penalty Offset)")
     mitigation_rows = []
-    target = target_intensity(year)
+    target = Decimal(str(target_intensity(year)))
+    dec_ghg = Decimal(str(ghg_intensity))
+    dec_emissions = Decimal(str(emissions))
+    dec_energy = Decimal(str(total_energy))
 
     for fuel in FUELS:
         if fuel_inputs.get(fuel["name"], 0) > 0:
-            continue  # skip fuels already selected
-
-        # Base GHG per MJ
-        co2_mj = fuel["ttw_co2"] * (1 - ops / 100) * wind
-        ch4_mj = fuel["ttw_ch4"] * gwp["CH4"]
-        n2o_mj = fuel["ttw_n20"] * gwp["N2O"]
-        total_ghg_mj = fuel["wtt"] + co2_mj + ch4_mj + n2o_mj
-
-        # Skip fuels that are worse or equal
-        if total_ghg_mj >= ghg_intensity:
             continue
 
-        # Binary search to find min tonnes needed
-        low = 0.0
-        high = 100_000.0  # upper bound in tonnes
-        best_qty = None
+        co2_mj = Decimal(str(fuel["ttw_co2"])) * Decimal(str(1 - ops / 100)) * Decimal(str(wind))
+        ch4_mj = Decimal(str(fuel["ttw_ch4"])) * Decimal(str(gwp["CH4"]))
+        n2o_mj = Decimal(str(fuel["ttw_n20"])) * Decimal(str(gwp["N2O"]))
+        total_ghg_mj = Decimal(str(fuel["wtt"])) + co2_mj + ch4_mj + n2o_mj
 
-        for _ in range(30):  # precision loop
+        if total_ghg_mj >= dec_ghg:
+            continue
+
+        low = Decimal("0.0")
+        high = Decimal("100000.0")
+        best_qty = None
+        tolerance = Decimal("0.00001")
+
+        for _ in range(50):
             mid = (low + high) / 2
-            mass_g = mid * 1_000_000
-            energy_mj = mass_g * fuel["lcv"]
+            mass_g = mid * Decimal("1000000")
+            energy_mj = mass_g * Decimal(str(fuel["lcv"]))
 
             if fuel["nbo"] and year <= 2033:
-                energy_mj *= REWARD_FACTOR_NBO_MULTIPLIER
+                energy_mj *= Decimal(str(REWARD_FACTOR_NBO_MULTIPLIER))
 
-            ttw = co2_mj * mass_g + ch4_mj * mass_g + n2o_mj * mass_g
-            wtt = energy_mj * fuel["wtt"]
-            total_emi = emissions + ttw + wtt
-            total_en = total_energy + energy_mj
-            new_ghg = total_emi / total_en if total_en else 9999
+            ttw = (co2_mj + ch4_mj + n2o_mj) * mass_g
+            wtt = energy_mj * Decimal(str(fuel["wtt"]))
+            new_emissions = dec_emissions + ttw + wtt
+            new_energy = dec_energy + energy_mj
+
+            new_ghg = new_emissions / new_energy if new_energy else Decimal("99999")
 
             if new_ghg < target:
                 best_qty = mid
@@ -246,18 +253,20 @@ if penalty > 0:
             else:
                 low = mid
 
+            if (high - low) < tolerance:
+                break
+
         if best_qty is not None:
             mitigation_rows.append({
                 "Fuel": fuel["name"],
-                "Required Amount (t)": best_qty
+                "Required Amount (t)": float(best_qty)
             })
 
     if mitigation_rows:
         df_mitigation = pd.DataFrame(mitigation_rows).sort_values("Required Amount (t)").reset_index(drop=True)
-        st.dataframe(df_mitigation.style.format({"Required Amount (t)": "{:,.0f}"}))
+        st.dataframe(df_mitigation.style.format({"Required Amount (t)": "{:,.2f}"}))
     else:
         st.info("No effective fuels found to offset the penalty based on current configuration.")
-
 
 # === COMPLIANCE CHART ===
 years = list(range(2020, 2051, 5))
