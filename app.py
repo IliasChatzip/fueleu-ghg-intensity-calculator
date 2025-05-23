@@ -102,16 +102,6 @@ user_entered_prices = any(
     st.session_state.get(f"price_{fuel['name']}", 0.0) > 0.0 for fuel in FUELS
 )
 
-exchange_rate = 1.0
-exchange_rate = st.sidebar.number_input(
-    "EUR/USD Exchange Rate (1 USD = ... EUR)",
-    min_value=0.1,
-    max_value=2.0,
-    value=0.93,
-    step=0.01,
-    help="Used to convert USD to EUR for fuel prices. All fuel prices are assumed to be in USD/tonne."
-)
-
 categories = {
     "Fossil ": [f for f in FUELS if not f['nbo'] and "Bio" not in f['name'] and "Biodiesel" not in f['name'] and "E-" not in f['name'] and "Green" not in f['name']],
     "Bio": [f for f in FUELS if "Bio" in f['name'] or "Biodiesel" in f['name']],
@@ -164,13 +154,6 @@ wind = st.sidebar.selectbox(
 total_energy = 0.0
 emissions = 0.0
 rows = []
-
-fuel_price_inputs = {}
-for fuel in FUELS:
-    if fuel["name"] in fuel_inputs:
-        fuel_price_inputs[fuel["name"]] = st.sidebar.number_input(
-            f"{fuel['name']} price (USD/t)", min_value=0.0, value=0.0, step=1.0, format="%.2f", key=f"price_{fuel['name']}"
-        )
 
 for fuel in FUELS:
     qty = fuel_inputs.get(fuel["name"], 0.0)
@@ -311,7 +294,8 @@ if penalty > 0:
     if mitigation_rows:
         for row in mitigation_rows:
             row["Price (Eur/t)"] = st.number_input(
-                f"{row['Fuel']} - Price (Eur/t)",min_value=0.0,value=0.0,step=10.0,key=f"mit_price_{row['Fuel']}")
+                f"{row['Fuel']} - Price (Eur/t)",min_value=0.0,value=0.0,step=10.0,unique_key = f"mit_price_{row['Fuel']}_mit"
+                row["Price (Eur/t)"] = st.number_input(f"{row['Fuel']} - Price (Eur/t)",min_value=0.0,value=0.0,step=10.0,key=unique_key)
             row["Estimated Cost (Eur)"] = row["Price (Eur/t)"] * row["Required Amount (t)"]
 
         df_mitigation = pd.DataFrame(mitigation_rows).sort_values("Required Amount (t)").reset_index(drop=True)
