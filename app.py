@@ -189,7 +189,7 @@ if rows:
         "Quantity (t)": "{:,.0f}",
         "Energy (MJ)": "{:,.0f}",
         "Emissions (gCO2eq)": "{:,.0f}",
-        "GHG Intensity (gCO2eq/MJ)": "{:,.2f}"
+        "GHG Intensity (gCO2eq/MJ)": "{:,.5f}"
     })
     st.dataframe(df_formatted)
 else:
@@ -297,9 +297,9 @@ if st.button("Export to PDF"):
         pdf.set_font("Arial", size=12)
         pdf.cell(200, 10, txt="Fuel EU Maritime GHG & Penalty Report", ln=True, align="C")
         pdf.cell(200, 10, txt=f"Year: {year} | GWP: {gwp_choice}", ln=True)
-        pdf.cell(200, 10, txt=f"GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ", ln=True)
+        pdf.cell(200, 10, txt=f"GHG Intensity: {ghg_intensity:.1f} gCO2eq/MJ", ln=True)
         pdf.cell(200, 10, txt=f"Compliance Balance: {compliance_balance:,.0f} MJ", ln=True)
-        pdf.cell(200, 10, txt=f"Penalty: {penalty:,.2f} EUR", ln=True)
+        pdf.cell(200, 10, txt=f"Penalty: {penalty:,.0f} EUR", ln=True)
         pdf.ln(10)
 
         # Fuel breakdown
