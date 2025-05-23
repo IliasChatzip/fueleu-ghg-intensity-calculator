@@ -352,11 +352,9 @@ if st.button("Export to PDF"):
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Arial", size=12)
-
-        # Header
-        pdf.cell(200, 10, txt=f"Fuel Price Input: {price_currency}", ln=True)
-        if price_currency == "USD":
-            pdf.cell(200, 10, txt=f"Conversion Rate Used: 1 USD = {exchange_rate:.2f} EUR", ln=True)
+        
+        pdf.cell(200, 10, txt="Fuel Price Input: USD (converted to EUR)", ln=True)
+        pdf.cell(200, 10, txt=f"Conversion Rate Used: 1 USD = {exchange_rate:.2f} EUR", ln=True)
         pdf.cell(200, 10, txt="Fuel EU Maritime GHG & Penalty Report", ln=True, align="C")
         pdf.cell(200, 10, txt=f"Year: {year} | GWP: {gwp_choice}", ln=True)
         pdf.cell(200, 10, txt=f"GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ", ln=True)
@@ -393,7 +391,7 @@ if st.button("Export to PDF"):
             for row in mitigation_rows_sorted:
                 mit_line = f"{row['Fuel']}: {row['Required Amount (t)']:,.0f} t"
                 if row.get("Price (Eur/t)", 0) > 0:
-                    pmit_line += f" @ {row['Price (Eur/t)']:,.2f} eur/t = {row['Estimated Cost (Eur)']:,.2f} Eur"
+                    mit_line += f" @ {row['Price (Eur/t)']:,.2f} eur/t = {row['Estimated Cost (Eur)']:,.2f} Eur"
                     pdf.cell(200, 10, txt=mit_line, ln=True)
 
         # Export
