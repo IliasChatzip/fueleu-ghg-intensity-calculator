@@ -90,6 +90,13 @@ def target_intensity(year: int) -> float:
     
 # === USER INPUT ===
 st.title("FuelEU - GHG Intensity & Penalty Calculator")
+st.sidebar.markdown("### Fuel Price Settings")
+st.sidebar.info("Enter fuel prices in USD or EUR. If USD, provide exchange rate.")
+price_currency = st.sidebar.radio("Fuel Price Currency", ["EUR", "USD"], index=0, horizontal=True)
+exchange_rate = 1.0
+if price_currency == "USD":
+    exchange_rate = st.sidebar.number_input("USD → EUR Exchange Rate", min_value=0.1, max_value=2.0, value=0.92, step=0.01)
+
 st.sidebar.subheader("Fuel Inputs")
 fuel_inputs = {}
 fuel_price_inputs = {}
@@ -169,8 +176,9 @@ for fuel in FUELS:
         
         ghg_intensity_mj = total_emissions / energy if energy else 0
 
-        price_per_ton = fuel_price_inputs.get(fuel["name"], 0.0)
-        cost = qty * price_per_ton
+        price_input = fuel_price_inputs.get(fuel["name"], 0.0)
+        price_eur = price_input * exchange_rate if price_currency == "USD" else price_input
+        fuel_cost = qty * price_eur
         
         rows.append({
             "Fuel": fuel["name"],
@@ -323,6 +331,9 @@ if st.button("Export to PDF"):
         pdf.set_font("Arial", size=12)
 
         # Header
+        pdf.cell(200, 10, txt=f"Fuel Price Input: {price_currency}", ln=True)
+        if price_currency == "USD":
+            pdf.cell(200, 10, txt=f"Conversion Rate Used: 1 USD = {exchange_rate:.2f} EUR", ln=True)
         pdf.cell(200, 10, txt="Fuel EU Maritime GHG & Penalty Report", ln=True, align="C")
         pdf.cell(200, 10, txt=f"Year: {year} | GWP: {gwp_choice}", ln=True)
         pdf.cell(200, 10, txt=f"GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ", ln=True)
