@@ -333,13 +333,13 @@ if st.button("Export to PDF"):
             price = fuel_price_inputs.get(fuel_name, 0)
             cost = qty * price
             total_cost += cost
-            line = f"{fuel_name}: {qty:,.0f} t | {energy:,.0f} MJ | {emissions:,.0f} gCO2eq | €{cost:,.2f}"
+            line = f"{fuel_name}: {qty:,.0f} t | {energy:,.0f} MJ | {emissions:,.0f} gCO2eq | Eur{cost:,.2f}"
             pdf.cell(200, 10, txt=line, ln=True)
 
         # Total Cost
         pdf.ln(5)
         pdf.set_font("Arial", "B", size=12)
-        pdf.cell(200, 10, txt=f"💰 Total Fuel Cost: € {total_cost:,.2f}", ln=True)
+        pdf.cell(200, 10, txt=f"Total Fuel Cost: Eur {total_cost:,.2f}", ln=True)
 
         # Mitigation Options
         if penalty > 0 and mitigation_rows:
@@ -351,7 +351,7 @@ if st.button("Export to PDF"):
                 mit_line = f"{row['Fuel']}: {row['Required Amount (t)']:,.2f} t"
                 price = fuel_price_inputs.get(row['Fuel'], 0)
                 cost = row['Required Amount (t)'] * price
-                mit_line += f" | €{cost:,.2f}"
+                mit_line += f" | Eur{cost:,.2f}"
                 pdf.cell(200, 10, txt=mit_line, ln=True)
 
         # Export
