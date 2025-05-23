@@ -110,7 +110,6 @@ if user_entered_prices:
         max_value=2.0,
         value=0.93,
         step=0.01,
-        help="Required if you've entered fuel prices in USD. This rate will convert USD to EUR."
     )
 
 categories = {
@@ -166,6 +165,16 @@ total_energy = 0.0
 emissions = 0.0
 rows = []
 
+# Get exchange rate
+exchange_rate = st.sidebar.number_input("EUR/USD Exchange Rate", min_value=0.1, value=1.0, step=0.01, help="Used to convert USD to EUR for fuel prices. All fuel prices below are assumed to be in USD/tonne.")
+
+fuel_price_inputs = {}
+for fuel in FUELS:
+    if fuel["name"] in fuel_inputs:
+        fuel_price_inputs[fuel["name"]] = st.sidebar.number_input(
+            f"{fuel['name']} price (USD/t)", min_value=0.0, value=0.0, step=1.0, format="%.2f", key=f"price_{fuel['name']}"
+        )
+
 for fuel in FUELS:
     qty = fuel_inputs.get(fuel["name"], 0.0)
     if qty > 0:
@@ -186,15 +195,15 @@ for fuel in FUELS:
         emissions += total_emissions
         
         ghg_intensity_mj = total_emissions / energy if energy else 0
-
-        price_input = fuel_price_inputs.get(fuel["name"], 0.0)
-        price_eur = price_input * exchange_rate if price_currency == "USD" else price_input
-        fuel_cost = qty * price_eur
+        
+        price_usd = fuel_price_inputs.get(fuel["name"], 0.0)
+        price_eur = price_usd * exchange_rate
+        cost = qty * price_eur
         
         rows.append({
             "Fuel": fuel["name"],
             "Quantity (t)": qty,
-            "Price per Tonne (Eur)": price_per_ton,
+            "Price per Tonne (Eur)": price_eur,
             "Cost (Eur)": cost,
             "Energy (MJ)": energy,
             "GHG Intensity (gCO2eq/MJ)": ghg_intensity_mj,
@@ -225,8 +234,9 @@ if rows:
         "GHG Intensity (gCO2eq/MJ)": "{:,.5f}"
     })
     st.dataframe(df_formatted)
-    total_cost = sum(row["Cost (Eur)"] for row in rows)
-    st.markdown(f"**Total Fuel Cost:** Eur {total_cost:,.2f}")
+    total_cost = sum(row["Fuel Cost (Eur)"] for row in rows)
+    st.metric("Total Fuel Cost (Eur)", f"{total_cost:,.2f}")
+
 
 else:
     st.info("No fuel data provided yet. Please select fuel(s) and enter quantity.")
