@@ -92,6 +92,8 @@ def target_intensity(year: int) -> float:
 st.title("FuelEU - GHG Intensity & Penalty Calculator")
 st.sidebar.subheader("Fuel Inputs")
 fuel_inputs = {}
+fuel_price_inputs = {}
+
 
 categories = {
     "Fossil ": [f for f in FUELS if not f['nbo'] and "Bio" not in f['name'] and "Biodiesel" not in f['name'] and "E-" not in f['name'] and "Green" not in f['name']],
@@ -105,6 +107,9 @@ for category, fuels_in_cat in categories.items():
         for selected_fuel in selected_fuels:
             qty = st.number_input(f"{selected_fuel} (t)", min_value=0, step=1, value=0, format="%d", key=f"qty_{selected_fuel}")
             fuel_inputs[selected_fuel] = qty
+            price = st.number_input(f"{selected_fuel} - Price (€/tonne)", min_value=0.0, step=10.0, key=f"price_{selected_fuel}")
+            fuel_price_inputs[selected_fuel] = price  # Save for summary/cost calc
+
 
 st.sidebar.markdown("---")
 st.sidebar.header("Input Parameters")
@@ -167,6 +172,8 @@ for fuel in FUELS:
         rows.append({
             "Fuel": fuel["name"],
             "Quantity (t)": qty,
+            "Price per Tonne (Eur)": price_per_ton,
+            "Cost (Eur)": cost,
             "Energy (MJ)": energy,
             "GHG Intensity (gCO2eq/MJ)": ghg_intensity_mj,
             "Emissions (gCO2eq)": total_emissions,
@@ -189,11 +196,16 @@ if rows:
     df_raw = pd.DataFrame(rows).sort_values("Emissions (gCO2eq)", ascending=False).reset_index(drop=True)
     df_formatted = df_raw.style.format({
         "Quantity (t)": "{:,.0f}",
+        "Price per Tonne (Eur)": "{:,.2f}",
+        "Cost (Eur)": "{:,.2f}",
         "Energy (MJ)": "{:,.0f}",
         "Emissions (gCO2eq)": "{:,.0f}",
         "GHG Intensity (gCO2eq/MJ)": "{:,.5f}"
     })
     st.dataframe(df_formatted)
+    total_cost = sum(row["Cost (Eur)"] for row in rows)
+    st.markdown(f"**Total Fuel Cost:** Eur {total_cost:,.2f}")
+
 else:
     st.info("No fuel data provided yet. Please select fuel(s) and enter quantity.")
 
@@ -297,42 +309,54 @@ if st.button("Export to PDF"):
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Arial", size=12)
+
+        # Header
         pdf.cell(200, 10, txt="Fuel EU Maritime GHG & Penalty Report", ln=True, align="C")
         pdf.cell(200, 10, txt=f"Year: {year} | GWP: {gwp_choice}", ln=True)
-        pdf.cell(200, 10, txt=f"GHG Intensity: {ghg_intensity:.1f} gCO2eq/MJ", ln=True)
+        pdf.cell(200, 10, txt=f"GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ", ln=True)
         pdf.cell(200, 10, txt=f"Compliance Balance: {compliance_balance:,.0f} MJ", ln=True)
-        pdf.cell(200, 10, txt=f"Penalty: {penalty:,.0f} EUR", ln=True)
+        pdf.cell(200, 10, txt=f"Penalty: {penalty:,.2f} Eur", ln=True)
         pdf.ln(10)
 
-        # Fuel breakdown
+        # Fuel Breakdown
+        total_cost = 0
         pdf.set_font("Arial", size=11)
         pdf.cell(200, 10, txt="--- Fuel Breakdown ---", ln=True)
         for row in rows:
-            line = f"{row['Fuel']}: {row['Quantity (t)']:,.0f} t | {row['Energy (MJ)']:,.0f} MJ | {row['Emissions (gCO2eq)']:,.0f} gCO2eq"
+            fuel_name = row['Fuel']
+            qty = row['Quantity (t)']
+            energy = row['Energy (MJ)']
+            emissions = row['Emissions (gCO2eq)']
+            price = fuel_price_inputs.get(fuel_name, 0)
+            cost = qty * price
+            total_cost += cost
+            line = f"{fuel_name}: {qty:,.0f} t | {energy:,.0f} MJ | {emissions:,.0f} gCO2eq | €{cost:,.2f}"
             pdf.cell(200, 10, txt=line, ln=True)
+
+        # Total Cost
+        pdf.ln(5)
+        pdf.set_font("Arial", "B", size=12)
+        pdf.cell(200, 10, txt=f"💰 Total Fuel Cost: € {total_cost:,.2f}", ln=True)
 
         # Mitigation Options
         if penalty > 0 and mitigation_rows:
             pdf.ln(5)
             pdf.set_font("Arial", size=11)
-            pdf.cell(200, 10, txt="--- Mitigation Options (Rounded to Full Tonne) ---", ln=True)
-            
-            # Ensure sorted by Required Amount
+            pdf.cell(200, 10, txt="--- Mitigation Options ---", ln=True)
             mitigation_rows_sorted = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
-
             for row in mitigation_rows_sorted:
-                mit_line = f"{row['Fuel']}: {int(row['Required Amount (t)']):,} t"
+                mit_line = f"{row['Fuel']}: {row['Required Amount (t)']:,.2f} t"
+                price = fuel_price_inputs.get(row['Fuel'], 0)
+                cost = row['Required Amount (t)'] * price
+                mit_line += f" | €{cost:,.2f}"
                 pdf.cell(200, 10, txt=mit_line, ln=True)
 
-        # Finalize
+        # Export
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
             pdf.output(tmp_pdf.name)
             tmp_pdf_path = tmp_pdf.name
 
         st.success(f"PDF exported: {os.path.basename(tmp_pdf_path)}")
-        st.download_button(
-            "Download PDF",
-            data=open(tmp_pdf_path, "rb"),
-            file_name="ghg_report.pdf",
-            mime="application/pdf"
-        )
+        st.download_button("Download PDF", data=open(tmp_pdf_path, "rb"),
+                           file_name="ghg_report.pdf",
+                           mime="application/pdf")
