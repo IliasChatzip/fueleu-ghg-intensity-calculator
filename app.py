@@ -314,9 +314,9 @@ st.dataframe(df_mitigation.style.format({
         "Required Amount (t)": "{:,.0f}",
         "Price (Eur/t)": "{:,.2f}",
         "Estimated Cost (Eur)": "{:,.2f}"
-    }))
+    
 else:
-    st.info("No effective fuels found to offset the penalty based on current configuration.")
+    st.info("No effective fuels found to offset the penalty based on current configuration.")}))
 
 # === COMPLIANCE CHART ===
 years = list(range(2020, 2051, 5))
