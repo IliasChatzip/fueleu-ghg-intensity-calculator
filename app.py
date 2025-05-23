@@ -309,9 +309,8 @@ row["Price (Eur/t)"] = st.number_input(
             key=unique_key
 )
 row["Estimated Cost (Eur)"] = row["Price (Eur/t)"] * row["Required Amount (t)"]
-
-    df_mitigation = pd.DataFrame(mitigation_rows).sort_values("Required Amount (t)").reset_index(drop=True)
-    st.dataframe(df_mitigation.style.format({
+df_mitigation = pd.DataFrame(mitigation_rows).sort_values("Required Amount (t)").reset_index(drop=True)
+st.dataframe(df_mitigation.style.format({
         "Required Amount (t)": "{:,.0f}",
         "Price (Eur/t)": "{:,.2f}",
         "Estimated Cost (Eur)": "{:,.2f}"
