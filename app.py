@@ -124,8 +124,8 @@ for category, fuels_in_cat in categories.items():
         for selected_fuel in selected_fuels:
             qty = st.number_input(f"{selected_fuel} (t)", min_value=0, step=1, value=0, format="%d", key=f"qty_{selected_fuel}")
             fuel_inputs[selected_fuel] = qty
-            price = st.number_input(f"{selected_fuel} - Price (eur/tonne)", min_value=0.0, step=10.0, key=f"price_{selected_fuel}")
-            fuel_price_inputs[selected_fuel] = price  # Save for summary/cost calc
+            row["Price (Eur/t)"] = st.number_input(
+                f"{row['Fuel']} - Price (Eur/t)",min_value=0.0,value=0.0,step=10.0,key=f"mit_price_{row['Fuel']}"
 
 
 st.sidebar.markdown("---")
