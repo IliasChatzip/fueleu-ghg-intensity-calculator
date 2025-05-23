@@ -229,6 +229,7 @@ if penalty > 0:
 
         low = Decimal("0.0")
         high = Decimal("100000.0")
+        import math
         best_qty = None
         tolerance = Decimal("0.00001")
 
@@ -257,9 +258,11 @@ if penalty > 0:
                 break
 
         if best_qty is not None:
+            # Round up to the next full tonne to ensure full penalty coverage
+            rounded_qty = math.ceil(float(best_qty))
             mitigation_rows.append({
                 "Fuel": fuel["name"],
-                "Required Amount (t)": float(best_qty)
+                "Required Amount (t)": rounded_qty
             })
 
     if mitigation_rows:
