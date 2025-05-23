@@ -293,9 +293,14 @@ if penalty > 0:
     import re
     if mitigation_rows:
         for row in mitigation_rows:
-            fuel_name_safe = re.sub(r'[^a-zA-Z0-9_]', '_', row['Fuel'])  # clean special characters
-        unique_key = f"mit_price_{fuel_name_safe}_mit"
-
+            safe_key = re.sub(r'[^a-zA-Z0-9_]', '_', row['Fuel'])
+row["Price (Eur/t)"] = st.number_input(
+    f"💰 {row['Fuel']} - Price (Eur/t)",
+    min_value=0.0,
+    value=0.0,
+    step=10.0,
+    key=f"mit_price_{safe_key}_mit"
+)
         row["Price (Eur/t)"] = st.number_input(
             f"{row['Fuel']} - Price (Eur/t)",
             min_value=0.0,
