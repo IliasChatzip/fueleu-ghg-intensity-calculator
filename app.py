@@ -293,7 +293,7 @@ if penalty > 0:
     if mitigation_rows:
         for row in mitigation_rows:
             row["Price (Eur/t)"] = st.number_input(
-                f"{row['Fuel']} - Price (Eur/t)",min_value=0.0,value=0.0,step=10.0,unique_key = f"mit_price_{row['Fuel']}_mit"
+                f"{row['Fuel']} - Price (Eur/t)",min_value=0.0,value=0.0,step=10.0,unique_key = f"mit_price_{row['Fuel']}_mit")
                 row["Price (Eur/t)"] = st.number_input(f"{row['Fuel']} - Price (Eur/t)",min_value=0.0,value=0.0,step=10.0,key=unique_key)
             row["Estimated Cost (Eur)"] = row["Price (Eur/t)"] * row["Required Amount (t)"]
 
