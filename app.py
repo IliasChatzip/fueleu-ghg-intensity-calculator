@@ -290,7 +290,7 @@ if penalty > 0:
                 "Estimated Cost (Eur)": 0.0,
             })
 
-    import re
+import re
 if mitigation_rows:
     for row in mitigation_rows:
         safe_key = re.sub(r'[^a-zA-Z0-9_]', '_', row['Fuel'])
