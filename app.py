@@ -290,27 +290,17 @@ if penalty > 0:
                 "Price (Eur/t)": 0.0,
                 "Estimated Cost (Eur)": 0.0,
             })
-
-import re
-
-if mitigation_rows:
-    for row in mitigation_rows:
-        safe_key = re.sub(r'[^a-zA-Z0-9_]', '_', row['Fuel'])
-        row["Price (Eur/t)"] = st.number_input(
-            f"💰 {row['Fuel']} - Price (Eur/t)",
-            min_value=0.0,
-            value=0.0,
-            step=10.0,
-            key=f"mit_price_{safe_key}_mit"
-        )
-        row["Estimated Cost (Eur)"] = row["Price (Eur/t)"] * row["Required Amount (t)"]
-
-    df_mitigation = pd.DataFrame(mitigation_rows).sort_values("Required Amount (t)").reset_index(drop=True)
-    st.dataframe(df_mitigation.style.format({
-        "Required Amount (t)": "{:,.0f}",
-        "Price (Eur/t)": "{:,.2f}",
-        "Estimated Cost (Eur)": "{:,.2f}"
-    }))
+            import re
+            if mitigation_rows:
+                for row in mitigation_rows:
+                    safe_key = re.sub(r'[^a-zA-Z0-9_]', '_', row['Fuel'])
+                    row["Price (Eur/t)"] = st.number_input(f"{row['Fuel']} - Price (Eur/t)",min_value=0.0,value=0.0,step=10.0,key=f"mit_price_{safe_key}_mit")
+                    row["Estimated Cost (Eur)"] = row["Price (Eur/t)"] * row["Required Amount (t)"]
+                    
+                    df_mitigation = pd.DataFrame(mitigation_rows).sort_values("Required Amount (t)").reset_index(drop=True)
+                    st.dataframe(df_mitigation.style.format({
+                        "Required Amount (t)": "{:,.0f}","Price (Eur/t)": "{:,.2f}","Estimated Cost (Eur)": "{:,.2f}"
+                    }))
 else:
     st.info("No effective fuels found to offset the penalty based on current configuration.")
 
