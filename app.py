@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-import requests
 from fpdf import FPDF
 from datetime import datetime
 import tempfile
@@ -104,15 +103,14 @@ user_entered_prices = any(
 )
 
 exchange_rate = 1.0
-if user_entered_prices:
-    st.sidebar.markdown("---")
-    exchange_rate = st.sidebar.number_input(
-        "EUR/USD Exchange Rate",
-        min_value=0.1,
-        max_value=2.0,
-        value=0.93,
-        step=0.01,
-    )
+exchange_rate = st.sidebar.number_input(
+    "EUR/USD Exchange Rate (1 USD = ... EUR)",
+    min_value=0.1,
+    max_value=2.0,
+    value=0.93,
+    step=0.01,
+    help="Used to convert USD to EUR for fuel prices. All fuel prices are assumed to be in USD/tonne."
+)
 
 categories = {
     "Fossil ": [f for f in FUELS if not f['nbo'] and "Bio" not in f['name'] and "Biodiesel" not in f['name'] and "E-" not in f['name'] and "Green" not in f['name']],
@@ -236,7 +234,7 @@ if rows:
         "GHG Intensity (gCO2eq/MJ)": "{:,.5f}"
     })
     st.dataframe(df_formatted)
-    total_cost = sum(row["Fuel Cost (Eur)"] for row in rows)
+    total_cost = sum(row["Cost (Eur)"] for row in rows)
     st.metric("Total Fuel Cost (Eur)", f"{total_cost:,.2f}")
 
 
@@ -317,7 +315,8 @@ if penalty > 0:
 
     if mitigation_rows:
         for row in mitigation_rows:
-            row["Price (Eur/t)"] = st.number_input(f"💰 {row['Fuel']} - Price (Eur/t)", min_value=0.0, value=0.0, step=10.0, key=f"mit_price_{row['Fuel']}")
+            price = row.get("Price (Eur/t)", 0)
+            = st.number_input(f"💰 {row['Fuel']} - Price (Eur/t)", min_value=0.0, value=0.0, step=10.0, key=f"mit_price_{row['Fuel']}")
             row["Estimated Cost (Eur)"] = row["Price (Eur/t)"] * row["Required Amount (t)"]
 
         df_mitigation = pd.DataFrame(mitigation_rows).sort_values("Required Amount (t)").reset_index(drop=True)
@@ -371,7 +370,7 @@ if st.button("Export to PDF"):
             qty = row['Quantity (t)']
             energy = row['Energy (MJ)']
             emissions = row['Emissions (gCO2eq)']
-            price = fuel_price_inputs.get(fuel_name, 0)
+            price = fuel_price_inputs.get(fuel_name, 0) * exchange_rate
             cost = qty * price
             total_cost += cost
             line = f"{fuel_name}: {qty:,.0f} t | {energy:,.0f} MJ | {emissions:,.0f} gCO2eq | Eur{cost:,.2f}"
