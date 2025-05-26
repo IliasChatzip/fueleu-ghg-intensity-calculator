@@ -113,7 +113,7 @@ for category, fuels_in_cat in categories.items():
     with st.sidebar.expander(f"{category} Fuels", expanded=False):
         selected_fuels = st.multiselect(f"Select {category} Fuels", [f["name"] for f in fuels_in_cat], key=f"multiselect_{category}")
         for selected_fuel in selected_fuels:
-            qty = st.number_input(f"{selected_fuel} (t)", min_value=0, step=1, value=0, format="%d", key=f"qty_{selected_fuel}")
+            qty = st.number_input(f"{selected_fuel} (t)", min_value=0.0, step=0.000001, value=0.0, format="%.6f", key=f"qty_{selected_fuel}")
             fuel_inputs[selected_fuel] = qty
             price = st.number_input(f"{selected_fuel} - Price (USD/t)",min_value=0.0,value=0.0,step=10.0,key=f"price_{selected_fuel}")
             fuel_price_inputs[selected_fuel] = price
@@ -347,9 +347,6 @@ if st.button("Export to PDF"):
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Arial", size=12)
-        
-        pdf.cell(200, 10, txt="Fuel Price Input: USD (converted to EUR)", ln=True)
-        pdf.cell(200, 10, txt=f"Conversion Rate Used: 1 USD = {exchange_rate:.2f} EUR", ln=True)
         pdf.cell(200, 10, txt="Fuel EU Maritime GHG & Penalty Report", ln=True, align="C")
         pdf.cell(200, 10, txt=f"Year: {year} | GWP: {gwp_choice}", ln=True)
         pdf.cell(200, 10, txt=f"GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ", ln=True)
@@ -361,21 +358,26 @@ if st.button("Export to PDF"):
         total_cost = 0
         pdf.set_font("Arial", size=11)
         pdf.cell(200, 10, txt="--- Fuel Breakdown ---", ln=True)
+        user_entered_prices = any(fuel_price_inputs.get(f["name"], 0.0) > 0.0 for f in FUELS)
         for row in rows:
             fuel_name = row['Fuel']
             qty = row['Quantity (t)']
+            price_usd = fuel_price_inputs.get(fuel_name, 0.0)
+            cost = qty * price_usd * exchange_rate
             energy = row['Energy (MJ)']
             emissions = row['Emissions (gCO2eq)']
-            price = fuel_price_inputs.get(fuel_name, 0) * exchange_rate
-            cost = qty * price
             total_cost += cost
-            line = f"{fuel_name}: {qty:,.0f} t | {energy:,.0f} MJ | {emissions:,.0f} gCO2eq | Eur{cost:,.2f}"
+            line = f"{fuel_name}: {qty:,.0f} t @ {price_usd:,.2f} USD/t | {cost:,.2f} Eur| {energy:,.0f} MJ | {emissions:,.0f} gCO2eq"
             pdf.cell(200, 10, txt=line, ln=True)
 
         # Total Cost
         pdf.ln(5)
         pdf.set_font("Arial", "B", size=12)
         pdf.cell(200, 10, txt=f"Total Fuel Cost: Eur {total_cost:,.2f}", ln=True)
+        if user_entered_prices:
+            pdf.set_font("Arial", size=11)
+            pdf.ln(3)
+            pdf.cell(200, 10, txt=f"Conversion Rate Used: 1 USD = {exchange_rate:.2f} EUR", ln=True)
 
         # Mitigation Options
         if penalty > 0 and mitigation_rows:
