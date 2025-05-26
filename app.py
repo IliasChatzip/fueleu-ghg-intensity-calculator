@@ -125,6 +125,7 @@ exchange_rate = st.sidebar.number_input(
     min_value=0.000001,
     value=1.000000,
     step=0.000001,
+    format="%.6f",
     help="Exchange rate for converting USD fuel prices to EUR."
 )
 
