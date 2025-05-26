@@ -255,9 +255,6 @@ if penalty > 0:
     
     mitigation_rows = []
     for fuel in FUELS:
-        if fuel_inputs.get(fuel["name"], 0) > 0:
-            continue
-
         co2_mj = Decimal(str(fuel["ttw_co2"])) * Decimal(str(1 - ops / 100)) * Decimal(str(wind))
         ch4_mj = Decimal(str(fuel["ttw_ch4"])) * Decimal(str(gwp["CH4"]))
         n2o_mj = Decimal(str(fuel["ttw_n20"])) * Decimal(str(gwp["N2O"]))
