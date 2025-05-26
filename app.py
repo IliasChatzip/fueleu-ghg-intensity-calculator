@@ -238,16 +238,6 @@ balance_label = "Surplus" if compliance_balance >= 0 else "Deficit"
 st.metric("Compliance Balance (MJ)", f"{compliance_balance:,.0f}")
 st.metric("Estimated Penalty (Eur)", f"{penalty:,.2f}")
 
-mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows) if 'mitigation_rows' in locals() else 0.0
-
-if total_cost > 0 or mitigation_total_cost > 0:
-    st.markdown("### Total Cost Scenarios")
-    scenario1 = total_cost + penalty
-    st.metric("Scenario 1: Conservative Fuels + Penalty", f"{scenario1:,.2f} Eur")
-
-    scenario2 = total_cost + mitigation_total_cost
-    st.metric("Scenario 2: Conservative Fuels + Mitigation Fuels (No Penalty)", f"{scenario2:,.2f} Eur")
-
 
 # === MITIGATION OPTIONS ===
 
