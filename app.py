@@ -237,6 +237,9 @@ st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.5f}")
 balance_label = "Surplus" if compliance_balance >= 0 else "Deficit"
 st.metric("Compliance Balance (MJ)", f"{compliance_balance:,.0f}")
 st.metric("Estimated Penalty (Eur)", f"{penalty:,.2f}")
+if rows:
+    conservative_total = total_cost + penalty
+    st.metric("Total Cost of Selected Fuels + Penalty", f"{conservative_total:,.2f} Eur")
 
 
 # === MITIGATION OPTIONS ===
