@@ -195,10 +195,10 @@ for fuel in FUELS:
             "Quantity (t)": qty,
             "Price per Tonne (USD)": price_usd,
             "Cost (Eur)": cost,
+            "Emissions (gCO2eq)": total_emissions,
             "Energy (MJ)": energy,
             "GHG Intensity (gCO2eq/MJ)": ghg_intensity_mj,
-            "Emissions (gCO2eq)": total_emissions,
-        })
+           })
         
 # after all fuels processed
 ghg_intensity = emissions / total_energy if total_energy else 0.0
@@ -221,8 +221,8 @@ if rows:
         "Quantity (t)": "{:,.0f}",
         "Price per Tonne (USD)": "{:,.2f}",
         "Cost (Eur)": "{:,.2f}",
-        "Energy (MJ)": "{:,.0f}",
         "Emissions (gCO2eq)": "{:,.0f}",
+        "Energy (MJ)": "{:,.0f}",
         "GHG Intensity (gCO2eq/MJ)": "{:,.5f}"
     })
     st.dataframe(df_formatted)
@@ -371,7 +371,7 @@ if st.button("Export to PDF"):
             energy = row['Energy (MJ)']
             emissions = row['Emissions (gCO2eq)']
             total_cost += cost
-            line = f"{fuel_name}: {qty:,.0f} t @ {price_usd:,.2f} USD/t | {cost:,.2f} Eur| {energy:,.0f} MJ | {emissions:,.0f} gCO2eq"
+            line = f"{fuel_name}: {qty:,.0f} t @ {price_usd:,.2f} USD/t | {cost:,.2f} Eur | {emissions:,.0f} gCO2eq | {energy:,.0f} MJ"
             pdf.cell(200, 10, txt=line, ln=True)
 
         # Total Cost
