@@ -368,8 +368,7 @@ if st.button("Export to PDF"):
             qty = row['Quantity (t)']
             price_usd = fuel_price_inputs.get(fuel_name, 0.0)
             cost = qty * price_usd * exchange_rate
-            energy = row['Energy (MJ)']
-            emissions = row['Emissions (gCO2eq)']
+            ghg_intensity = row['GHG Intensity (gCO2eq/MJ)']
             total_cost += cost
             line = f"{fuel_name}: {qty:,.0f} t @ {price_usd:,.2f} USD/t | {cost:,.2f} Eur | {emissions:,.0f} gCO2eq | {energy:,.0f} MJ"
             pdf.cell(200, 10, txt=line, ln=True)
