@@ -396,8 +396,9 @@ if st.button("Export to PDF"):
             total_with_penalty = total_cost + penalty
             pdf.cell(200, 10, txt=f"Scenario 1 (Conservative fuels + Penalty): Eur {total_with_penalty:,.2f}", ln=True)
 
-            total_with_mitigation = total_cost + mitigation_total_cost
-            pdf.cell(200, 10, txt=f"Scenario 2 (Conservative fuels + Mitigation fuels, no Penalty): Eur {total_with_mitigation:,.2f}", ln=True)
+            if mitigation_total_cost > 0:
+                total_with_mitigation = total_cost + mitigation_total_cost
+                pdf.cell(200, 10, txt=f"Scenario 2 (Conservative fuels + Mitigation fuels, no Penalty): Eur {total_with_mitigation:,.2f}", ln=True)
 
         # Export
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
