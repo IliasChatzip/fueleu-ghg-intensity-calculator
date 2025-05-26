@@ -330,6 +330,8 @@ targets = [target_intensity(y) for y in years]
 st.subheader("Sector-wide GHG Intensity Targets")
 fig, ax = plt.subplots(figsize=(8, 4))
 ax.plot(years, targets, linestyle='--', marker='o', label='EU Target')
+for x, y in zip(years, targets):
+    ax.annotate(f"{y:.2f}", (x, y), textcoords="offset points", xytext=(0,5), ha='center', fontsize=8)
 ax.axhline(st.session_state["computed_ghg"], color='red', linestyle='-', label='Your GHG Intensity')
 ax.set_xlabel("Year")
 ax.set_ylabel("gCO2eq/MJ")
@@ -349,6 +351,7 @@ if st.button("Export to PDF"):
         pdf.set_font("Arial", size=12)
         pdf.cell(200, 10, txt="Fuel EU Maritime GHG & Penalty Report", ln=True, align="C")
         pdf.cell(200, 10, txt=f"Year: {year} | GWP: {gwp_choice}", ln=True)
+        pdf.cell(200, 10, txt=f"EU Target for {year}: {target_intensity(year):.2f} gCO2eq/MJ", ln=True)
         pdf.cell(200, 10, txt=f"GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ", ln=True)
         pdf.cell(200, 10, txt=f"Compliance Balance: {compliance_balance:,.0f} MJ", ln=True)
         pdf.cell(200, 10, txt=f"Penalty: {penalty:,.2f} Eur", ln=True)
