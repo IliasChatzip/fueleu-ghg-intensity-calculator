@@ -403,8 +403,7 @@ if st.button("Export to PDF"):
                     pdf.cell(200, 10, txt=mit_line, ln=True)
             pdf.ln(5)
             pdf.set_font("Arial", "B", size=12)
-
-           pdf.cell(200, 10, txt="No fuel prices provided - quantities only report", ln=True)
+            pdf.cell(200, 10, txt="No fuel prices provided - quantities only report", ln=True)
         else:
             mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
             total_with_penalty = total_cost + penalty
