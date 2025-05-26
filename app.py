@@ -303,15 +303,15 @@ if penalty > 0:
             
             if mitigation_rows:
                 st.subheader("Mitigation Fuel Costs")
-                for idx, row in enumerate(mitigation_rows):
-                    safe_key = re.sub(r'[^a-zA-Z0-9_]', '_', row['Fuel'])
+                for idx, mrow in enumerate(mitigation_rows):
+                    safe_key = re.sub(r'[^a-zA-Z0-9_]', '_', mrow['Fuel'])
                     unique_key = f"mit_price_{safe_key}_{idx}"
-                    row["Price (Eur/t)"] = st.number_input(
-                        f"{row['Fuel']} - Price (Eur/t)",
+                    mrow["Price (Eur/t)"] = st.number_input(
+                        f"{mrow['Fuel']} - Price (Eur/t)",
                         min_value=0.0,
                         value=0.0,step=10.0,
                         key=unique_key)
-                    row["Estimated Cost (Eur)"] = row["Price (Eur/t)"] * row["Required Amount (t)"]
+                    mrow["Estimated Cost (Eur)"] = mrow["Price (Eur/t)"] * mrow["Required Amount (t)"]
                     df_mitigation = pd.DataFrame(mitigation_rows).sort_values("Required Amount (t)").reset_index(drop=True)
                     st.dataframe(df_mitigation.style.format({
                         "Required Amount (t)": "{:,.0f}",
