@@ -241,7 +241,6 @@ st.metric("Estimated Penalty (Eur)", f"{penalty:,.2f}")
 getcontext().prec = 12
 
 import re
-import uuid
 
 if penalty > 0:
     st.subheader("Mitigation Options (Penalty Offset)")
@@ -302,25 +301,26 @@ if penalty > 0:
                 "Estimated Cost (Eur)": 0.0,
             })
             
-            if mitigation_rows:
-                st.subheader("Mitigation Fuel Costs")
-                for mrow in mitigation_rows:
-                    safe_key = re.sub(r'[^a-zA-Z0-9_]', '_', mrow['Fuel'])
-                    unique_key = f"mit_price_{safe_key}_{str(uuid.uuid4())}"
-                    mrow["Price (Eur/t)"] = st.number_input(
-                        f"{mrow['Fuel']} - Price (Eur/t)",
-                        min_value=0.0,
-                        value=0.0,
-                        step=10.0,
-                        key=unique_key)
-                    mrow["Estimated Cost (Eur)"] = mrow["Price (Eur/t)"] * mrow["Required Amount (t)"]
-                df_mitigation = pd.DataFrame(mitigation_rows).sort_values("Required Amount (t)").reset_index(drop=True)
-                st.dataframe(df_mitigation.style.format({
-                    "Required Amount (t)": "{:,.0f}",
-                    "Price (Eur/t)": "{:,.2f}",
-                    "Estimated Cost (Eur)": "{:,.2f}"}))
-            
-            else: st.info("No effective fuels found to offset the penalty based on current configuration.")
+    if mitigation_rows:
+        st.subheader("Mitigation Fuel Costs")
+        for mrow in mitigation_rows:
+            safe_key = re.sub(r'[^a-zA-Z0-9_]', '_', mrow['Fuel'])
+            unique_key = f"mit_price_{safe_key}_{str(uuid.uuid4())}"
+            mrow["Price (Eur/t)"] = st.number_input(
+                f"{mrow['Fuel']} - Price (Eur/t)",
+                min_value=0.0,
+                value=0.0,
+                step=10.0,
+                key=unique_key)
+            mrow["Estimated Cost (Eur)"] = mrow["Price (Eur/t)"] * mrow["Required Amount (t)"]
+            df_mitigation = pd.DataFrame(mitigation_rows).sort_values("Required Amount (t)").reset_index(drop=True)
+            st.dataframe(df_mitigation.style.format({
+                "Required Amount (t)": "{:,.0f}",
+                "Price (Eur/t)": "{:,.2f}",
+                "Estimated Cost (Eur)": "{:,.2f}"
+            }))
+    else:
+        st.info("No effective fuels found to offset the penalty based on current configuration.")
 
 # === COMPLIANCE CHART ===
 years = list(range(2020, 2051, 5))
