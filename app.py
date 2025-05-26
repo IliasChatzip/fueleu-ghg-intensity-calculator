@@ -304,10 +304,10 @@ if penalty > 0:
             
             if mitigation_rows:
                 st.subheader("Mitigation Fuel Costs")
-                    for mrow in mitigation_rows:
-                        safe_key = re.sub(r'[^a-zA-Z0-9_]', '_', mrow['Fuel'])
-                        unique_key = f"mit_price_{safe_key}_{str(uuid.uuid4())}"
-                        mrow["Price (Eur/t)"] = st.number_input(
+                for mrow in mitigation_rows:
+                       safe_key = re.sub(r'[^a-zA-Z0-9_]', '_', mrow['Fuel'])
+                       unique_key = f"mit_price_{safe_key}_{str(uuid.uuid4())}"
+                       mrow["Price (Eur/t)"] = st.number_input(
                             f"{mrow['Fuel']} - Price (Eur/t)",
                             min_value=0.0,
                             value=0.0,
