@@ -242,6 +242,11 @@ st.metric("Estimated Penalty (Eur)", f"{penalty:,.2f}")
 getcontext().prec = 12
 if penalty > 0:
     st.subheader("Mitigation Options (Penalty Offset)")
+    dec_ghg = Decimal(str(ghg_intensity))
+    dec_emissions = Decimal(str(emissions))
+    dec_energy = Decimal(str(total_energy))
+    target = Decimal(str(target_intensity(year)))
+    
     mitigation_rows = []
     for fuel in FUELS:
         if fuel_inputs.get(fuel["name"], 0) > 0:
