@@ -297,12 +297,10 @@ if penalty > 0:
             mitigation_rows.append({
                 "Fuel": fuel["name"],
                 "Required Amount (t)": rounded_qty,
-                "Price (Eur/t)": 0.0,
-                "Estimated Cost (Eur)": 0.0,
             })
             
     if mitigation_rows:
-        st.subheader("Mitigation Fuel Costs")
+        st.markdown("Mitigation Fuel Prices (Eur/t)")
         for mrow in mitigation_rows:
             safe_key = re.sub(r'[^a-zA-Z0-9_]', '_', mrow['Fuel'])
             unique_key = f"mit_price_{safe_key}"
@@ -311,13 +309,16 @@ if penalty > 0:
                 min_value=0.0,
                 value=0.0,
                 step=10.0,
-                key=unique_key)
-            mrow["Estimated Cost (Eur)"] = mrow["Price (Eur/t)"] * mrow["Required Amount (t)"]
-            df_mitigation = pd.DataFrame(mitigation_rows).sort_values("Required Amount (t)").reset_index(drop=True)
-            st.dataframe(df_mitigation.style.format({
-                "Required Amount (t)": "{:,.0f}",
-                "Price (Eur/t)": "{:,.2f}",
-                "Estimated Cost (Eur)": "{:,.2f}"
+                key=f"mit_price_{safe_key}"
+            )
+            row["Estimated Cost (Eur)"] = mrow["Price (Eur/t)"] * mrow["Required Amount (t)"]
+            
+        df_mitigation = pd.DataFrame(mitigation_rows).sort_values("Required Amount (t)").reset_index(drop=True)
+        st.markdown("Mitigation Fuel Prices (Eur/t)")
+        st.dataframe(df_mitigation.style.format({
+            "Required Amount (t)": "{:,.0f}",
+            "Price (Eur/t)": "{:,.2f}",
+            "Estimated Cost (Eur)": "{:,.2f}"
             }))
     else:
         st.info("No effective fuels found to offset the penalty based on current configuration.")
