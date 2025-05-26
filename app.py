@@ -318,15 +318,19 @@ if penalty > 0:
         st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
         
         mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
-        any_price = any(fuel_price_inputs.get(f["name"], 0) > 0 for f in FUELS) or price_usd > 0
-        if any_price :
+        user_entered_mitigation_price = price_usd > 0
+        
+        if not user_entered_mitigation_price:
+            # Show Mitigation Table (Quantities Only)
+            df_mit = pd.DataFrame(mitigation_rows)
+            st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
+        else:
+            # Show Scenarios only if prices exist
             st.markdown("### Total Cost Scenarios")
             scenario1 = total_cost + penalty
             scenario2 = total_cost + mitigation_total_cost
             st.metric("Scenario 1: Initial Fuels + Penalty", f"{scenario1:,.2f} Eur")
             st.metric("Scenario 2: Initial Fuels + Mitigation Fuels (No Penalty)", f"{scenario2:,.2f} Eur")
-    else:
-        st.info("No effective fuels found to offset the penalty based on current configuration.")
 
 # === COMPLIANCE CHART ===
 years = list(range(2020, 2051, 5))
@@ -391,29 +395,24 @@ if st.button("Export to PDF"):
             pdf.ln(5)
             pdf.set_font("Arial", size=11)
             pdf.cell(200, 10, txt="--- Mitigation Options ---", ln=True)
-            mitigation_rows_sorted = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
-            for row in mitigation_rows_sorted:
-                mit_line = f"{row['Fuel']}: {row['Required Amount (t)']:,.0f} t"
-                if row.get("Price (USD/t)", 0) > 0:
-                    mit_line += f" @ {row['Price (USD/t)']:,.2f} USD/t = {row['Estimated Cost (Eur)']:,.2f} Eur"
+            has_mitigation_price = any(row.get("Price (USD/t)", 0) > 0 for row in mitigation_rows)
+            if not has_mitigation_price:
+                mitigation_rows_sorted = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
+                for row in mitigation_rows_sorted:
+                    mit_line = f"{row['Fuel']}: {row['Required Amount (t)']:,.0f} t"
                     pdf.cell(200, 10, txt=mit_line, ln=True)
-            
             pdf.ln(5)
             pdf.set_font("Arial", "B", size=12)
 
-            has_fuel_prices = any(price > 0 for price in fuel_price_inputs.values())
-            has_mitigation_prices = any(row.get("Price (USD/t)", 0) > 0 for row in mitigation_rows)
-            if has_fuel_prices or has_mitigation_prices:
-                mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
-                total_with_penalty = total_cost + penalty
-                pdf.cell(200, 10, txt=f"Scenario 1 (Initial fuels + Penalty): {total_with_penalty:,.2f} Eur", ln=True)
-                if mitigation_total_cost > 0:
-                    total_with_mitigation = total_cost + mitigation_total_cost
-                    pdf.cell(200, 10, txt=f"Scenario 2 (Initial fuels + Mitigation fuels, no Penalty): {total_with_mitigation:,.2f} Eur", ln=True)
-            else:
-                pdf.ln(5)
-                pdf.set_font("Arial", "B", size=12)
-                pdf.cell(200, 10, txt="No fuel prices provided - quantities only report", ln=True)
+           pdf.cell(200, 10, txt="No fuel prices provided - quantities only report", ln=True)
+        else:
+            mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
+            total_with_penalty = total_cost + penalty
+            pdf.cell(200, 10, txt=f"Scenario 1 (Initial fuels + Penalty): {total_with_penalty:,.2f} Eur", ln=True)
+            if mitigation_total_cost > 0:
+                total_with_mitigation = total_cost + mitigation_total_cost
+                pdf.cell(200, 10, txt=f"Scenario 2 (Initial fuels + Mitigation fuels, no Penalty): {total_with_mitigation:,.2f} Eur", ln=True)
+            
         # Export
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
             pdf.output(tmp_pdf.name)
