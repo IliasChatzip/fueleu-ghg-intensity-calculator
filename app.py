@@ -377,9 +377,9 @@ if st.button("Export to PDF"):
         # Total Cost
         pdf.ln(5)
         pdf.set_font("Arial", "B", size=12)
-        pdf.cell(200, 10, txt=f"Total Fuel Cost: Eur {total_cost:,.2f}", ln=True)
+        pdf.cell(200, 10, txt=f"Total Fuel Cost: {total_cost:,.2f} Eur", ln=True)
         if user_entered_prices:
-            pdf.set_font("Arial", size=11)
+            pdf.set_font("Arial", size=10)
             pdf.ln(3)
             pdf.cell(200, 10, txt=f"Conversion Rate Used: 1 USD = {exchange_rate:.2f} EUR", ln=True)
 
@@ -400,11 +400,11 @@ if st.button("Export to PDF"):
 
             mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
             total_with_penalty = total_cost + penalty
-            pdf.cell(200, 10, txt=f"Scenario 1 (Conservative fuels + Penalty): Eur {total_with_penalty:,.2f}", ln=True)
+            pdf.cell(200, 10, txt=f"Scenario 1 (Conservative fuels + Penalty): {total_with_penalty:,.2f} Eur", ln=True)
 
             if mitigation_total_cost > 0:
                 total_with_mitigation = total_cost + mitigation_total_cost
-                pdf.cell(200, 10, txt=f"Scenario 2 (Conservative fuels + Mitigation fuels, no Penalty): Eur {total_with_mitigation:,.2f}", ln=True)
+                pdf.cell(200, 10, txt=f"Scenario 2 (Conservative fuels + Mitigation fuels, no Penalty): {total_with_mitigation:,.2f} Eur", ln=True)
 
         # Export
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
