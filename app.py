@@ -319,7 +319,7 @@ if penalty > 0:
         
         mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
         any_price = any(fuel_price_inputs.get(f["name"], 0) > 0 for f in FUELS) or price_usd > 0
-        if any_price > 0:
+        if any_price :
             st.markdown("### Total Cost Scenarios")
             scenario1 = total_cost + penalty
             scenario2 = total_cost + mitigation_total_cost
