@@ -122,8 +122,8 @@ for category, fuels_in_cat in categories.items():
 st.sidebar.markdown("---")
 exchange_rate = st.sidebar.number_input(
     "EUR/USD Exchange Rate",
-    min_value=0.1,
-    value=1.0,
+    min_value=0.000001,
+    value=1.000000,
     step=0.000001,
     help="Exchange rate for converting USD fuel prices to EUR."
 )
