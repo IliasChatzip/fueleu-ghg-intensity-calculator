@@ -212,6 +212,8 @@ else:
      penalty = (abs(compliance_balance) / (ghg_intensity * VLSFO_ENERGY_CONTENT)) * PENALTY_RATE
 
 mitigation_total_cost = 0.0
+# Safeguard for mitigation_rows
+mitigation_rows = []
 
 # === OUTPUT ===
 st.subheader("Fuel Breakdown")
@@ -294,7 +296,6 @@ if penalty > 0:
                 break
 
         if best_qty is not None:
-            # Round up to the next full tonne to ensure full penalty coverage
             rounded_qty = math.ceil(float(best_qty))
             mitigation_rows.append({
                 "Fuel": fuel["name"],
@@ -303,19 +304,22 @@ if penalty > 0:
             
     if mitigation_rows:
         mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
-        # Set default fuel in dropdown to "Biodiesel (UCO,B20)" if available
         default_fuel = "Biodiesel (UCO,B20)"
         fuel_names = [row["Fuel"] for row in mitigation_rows]
         default_index = fuel_names.index(default_fuel) if default_fuel in fuel_names else 0
         selected_fuel = st.selectbox("Select Mitigation Fuel for Price Input",fuel_names,index=default_index)
         price_usd = st.number_input(f"{selected_fuel} - Price (USD/t)", min_value=0.0, value=0.0, step=10.0, key="mitigation_price_input")
+        
         for row in mitigation_rows:
             row["Price (USD/t)"] = price_usd if row["Fuel"] == selected_fuel else 0.0
             row["Estimated Cost (Eur)"] = row["Price (USD/t)"] * exchange_rate * row["Required Amount (t)"]
+        
         df_mit = pd.DataFrame(mitigation_rows)
         st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
+        
         mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
-        if price_usd > 0:
+        any_price = any(fuel_price_inputs.get(f["name"], 0) > 0 for f in FUELS) or price_usd > 0
+        if any_price > 0:
             st.markdown("### Total Cost Scenarios")
             scenario1 = total_cost + penalty
             scenario2 = total_cost + mitigation_total_cost
@@ -370,7 +374,7 @@ if st.button("Export to PDF"):
             cost = qty * price_usd * exchange_rate
             ghg_intensity = row['GHG Intensity (gCO2eq/MJ)']
             total_cost += cost
-            line = f"{fuel_name}: {qty:,.0f} t @ {price_usd:,.2f} USD/t | {cost:,.2f} Eur | {emissions:,.0f} gCO2eq | {energy:,.0f} MJ"
+            line = f"{fuel_name}: {qty:,.0f} t @ {price_usd:,.2f} USD/t | {cost:,.2f} Eur | GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ"
             pdf.cell(200, 10, txt=line, ln=True)
 
         # Total Cost
@@ -397,14 +401,19 @@ if st.button("Export to PDF"):
             pdf.ln(5)
             pdf.set_font("Arial", "B", size=12)
 
-            mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
-            total_with_penalty = total_cost + penalty
-            pdf.cell(200, 10, txt=f"Scenario 1 (Initial fuels + Penalty): {total_with_penalty:,.2f} Eur", ln=True)
-
-            if mitigation_total_cost > 0:
-                total_with_mitigation = total_cost + mitigation_total_cost
-                pdf.cell(200, 10, txt=f"Scenario 2 (Initial fuels + Mitigation fuels, no Penalty): {total_with_mitigation:,.2f} Eur", ln=True)
-
+            has_fuel_prices = any(price > 0 for price in fuel_price_inputs.values())
+            has_mitigation_prices = any(row.get("Price (USD/t)", 0) > 0 for row in mitigation_rows)
+            if has_fuel_prices or has_mitigation_prices:
+                mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
+                total_with_penalty = total_cost + penalty
+                pdf.cell(200, 10, txt=f"Scenario 1 (Initial fuels + Penalty): {total_with_penalty:,.2f} Eur", ln=True)
+                if mitigation_total_cost > 0:
+                    total_with_mitigation = total_cost + mitigation_total_cost
+                    pdf.cell(200, 10, txt=f"Scenario 2 (Initial fuels + Mitigation fuels, no Penalty): {total_with_mitigation:,.2f} Eur", ln=True)
+            else:
+                pdf.ln(5)
+                pdf.set_font("Arial", "B", size=12)
+                pdf.cell(200, 10, txt="No fuel prices provided - quantities only report", ln=True)
         # Export
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
             pdf.output(tmp_pdf.name)
