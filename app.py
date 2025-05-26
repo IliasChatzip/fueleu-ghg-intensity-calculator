@@ -113,9 +113,9 @@ for category, fuels_in_cat in categories.items():
     with st.sidebar.expander(f"{category} Fuels", expanded=False):
         selected_fuels = st.multiselect(f"Select {category} Fuels", [f["name"] for f in fuels_in_cat], key=f"multiselect_{category}")
         for selected_fuel in selected_fuels:
-            qty = st.number_input(f"{selected_fuel} (t)", min_value=0.0, step=0.1, value=0.0, format="%.1f", key=f"qty_{selected_fuel}")
+            qty = st.number_input(f"{selected_fuel} (t)", min_value=0, step=1, value=0, format="%d", key=f"qty_{selected_fuel}")
             fuel_inputs[selected_fuel] = qty
-            price = st.number_input(f"{selected_fuel} - Price (USD/t)",min_value=0.0,value=0.0,step=0.000001, format="%.6f", key=f"price_{selected_fuel}")
+            price = st.number_input(f"{selected_fuel} - Price (USD/t)",min_value=0.0,value=0.0,step=0.01, format="%.2f", key=f"price_{selected_fuel}")
             fuel_price_inputs[selected_fuel] = price
 
 
