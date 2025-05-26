@@ -114,7 +114,7 @@ for category, fuels_in_cat in categories.items():
         for selected_fuel in selected_fuels:
             qty = st.number_input(f"{selected_fuel} (t)", min_value=0, step=1, value=0, format="%d", key=f"qty_{selected_fuel}")
             fuel_inputs[selected_fuel] = qty
-            price = st.number_input(f"{selected_fuel} - Price (Eur/t)",min_value=0.0,value=0.0,step=10.0,key=f"price_{selected_fuel}")
+            price = st.number_input(f"{selected_fuel} - Price (USD/t)",min_value=0.0,value=0.0,step=10.0,key=f"price_{selected_fuel}")
             fuel_price_inputs[selected_fuel] = price
 
 
@@ -191,7 +191,7 @@ for fuel in FUELS:
         rows.append({
             "Fuel": fuel["name"],
             "Quantity (t)": qty,
-            "Price per Tonne (Eur)": price_eur,
+            "Price per Tonne (USD)": price_usd,
             "Cost (Eur)": cost,
             "Energy (MJ)": energy,
             "GHG Intensity (gCO2eq/MJ)": ghg_intensity_mj,
@@ -215,7 +215,7 @@ if rows:
     df_raw = pd.DataFrame(rows).sort_values("Emissions (gCO2eq)", ascending=False).reset_index(drop=True)
     df_formatted = df_raw.style.format({
         "Quantity (t)": "{:,.0f}",
-        "Price per Tonne (Eur)": "{:,.2f}",
+        "Price per Tonne (USD)": "{:,.2f}",
         "Cost (Eur)": "{:,.2f}",
         "Energy (MJ)": "{:,.0f}",
         "Emissions (gCO2eq)": "{:,.0f}",
@@ -300,24 +300,25 @@ if penalty > 0:
             })
             
     if mitigation_rows:
-        st.markdown("Mitigation Fuel Prices (Eur/t)")
+        st.markdown("Mitigation Fuel Prices (USD/t)")
+        st.markdown("**Enter mitigation fuel prices in USD per tonne. Costs are shown in EUR after applying the exchange rate.")
         for mrow in mitigation_rows:
             safe_key = re.sub(r'[^a-zA-Z0-9_]', '_', mrow['Fuel'])
             unique_key = f"mit_price_{safe_key}"
-            mrow["Price (Eur/t)"] = st.number_input(
-                f"{mrow['Fuel']} - Price (Eur/t)",
+            mrow["Price (USD/t)"] = st.number_input(
+                f"{mrow['Fuel']} - Price (USD/t)",
                 min_value=0.0,
                 value=0.0,
                 step=10.0,
                 key=f"mit_price_{safe_key}"
             )
-            mrow["Estimated Cost (Eur)"] = mrow["Price (Eur/t)"] * mrow["Required Amount (t)"]
+            mrow["Estimated Cost (Eur)"] = mrow["Price (USD/t)"] * exchange_rate * mrow["Required Amount (t)"]
             
         df_mitigation = pd.DataFrame(mitigation_rows).sort_values("Required Amount (t)").reset_index(drop=True)
-        st.markdown("Mitigation Fuel Prices (Eur/t)")
+        st.markdown("Mitigation Fuel Prices (USD/t)")
         st.dataframe(df_mitigation.style.format({
             "Required Amount (t)": "{:,.0f}",
-            "Price (Eur/t)": "{:,.2f}",
+            "Price (USD/t)": "{:,.2f}",
             "Estimated Cost (Eur)": "{:,.2f}"
             }))
     else:
@@ -385,8 +386,8 @@ if st.button("Export to PDF"):
             mitigation_rows_sorted = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
             for row in mitigation_rows_sorted:
                 mit_line = f"{row['Fuel']}: {row['Required Amount (t)']:,.0f} t"
-                if row.get("Price (Eur/t)", 0) > 0:
-                    mit_line += f" @ {row['Price (Eur/t)']:,.2f} eur/t = {row['Estimated Cost (Eur)']:,.2f} Eur"
+                if row.get("Price (USD/t)", 0) > 0:
+                    mit_line += f" @ {row['Price (USD/t)']:,.2f} USD/t = {row['Estimated Cost (Eur)']:,.2f} Eur"
                     pdf.cell(200, 10, txt=mit_line, ln=True)
 
         # Export
