@@ -210,6 +210,8 @@ if compliance_balance >= 0:
 else:
      penalty = (abs(compliance_balance) / (ghg_intensity * VLSFO_ENERGY_CONTENT)) * PENALTY_RATE
 
+mitigation_total_cost = 0.0
+
 # === OUTPUT ===
 st.subheader("Fuel Breakdown")
 if rows:
@@ -236,16 +238,14 @@ balance_label = "Surplus" if compliance_balance >= 0 else "Deficit"
 st.metric("Compliance Balance (MJ)", f"{compliance_balance:,.0f}")
 st.metric("Estimated Penalty (Eur)", f"{penalty:,.2f}")
 
-# Check if user has entered prices for both conservative and mitigation fuels
-
-mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows) if penalty > 0 and 'mitigation_rows' in locals() else 0.0
+mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows) if 'mitigation_rows' in locals() else 0.0
 
 if total_cost > 0 or mitigation_total_cost > 0:
     st.markdown("### Total Cost Scenarios")
     scenario1 = total_cost + penalty
     st.metric("Scenario 1: Conservative Fuels + Penalty", f"{scenario1:,.2f} Eur")
 
-    scenario2 = total_cost + mitigation_total_cost + penalty
+    scenario2 = total_cost + mitigation_total_cost
     st.metric("Scenario 2: Conservative Fuels + Mitigation Fuels (No Penalty)", f"{scenario2:,.2f} Eur")
 
 
@@ -323,6 +323,13 @@ if penalty > 0:
             row["Estimated Cost (Eur)"] = row["Price (USD/t)"] * exchange_rate * row["Required Amount (t)"]
         df_mit = pd.DataFrame(mitigation_rows)
         st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
+        mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
+        if price_usd > 0:
+            st.markdown("### Total Cost Scenarios")
+            scenario1 = total_cost + penalty
+            scenario2 = total_cost + mitigation_total_cost
+            st.metric("Scenario 1: Conservative Fuels + Penalty", f"{scenario1:,.2f} Eur")
+            st.metric("Scenario 2: Conservative Fuels + Mitigation Fuels (No Penalty)", f"{scenario2:,.2f} Eur")
     else:
         st.info("No effective fuels found to offset the penalty based on current configuration.")
 
