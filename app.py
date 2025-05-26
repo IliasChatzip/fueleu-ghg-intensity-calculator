@@ -311,7 +311,7 @@ if penalty > 0:
                 step=10.0,
                 key=f"mit_price_{safe_key}"
             )
-            row["Estimated Cost (Eur)"] = mrow["Price (Eur/t)"] * mrow["Required Amount (t)"]
+            mrow["Estimated Cost (Eur)"] = mrow["Price (Eur/t)"] * mrow["Required Amount (t)"]
             
         df_mitigation = pd.DataFrame(mitigation_rows).sort_values("Required Amount (t)").reset_index(drop=True)
         st.markdown("Mitigation Fuel Prices (Eur/t)")
