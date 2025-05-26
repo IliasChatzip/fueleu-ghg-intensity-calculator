@@ -319,8 +319,8 @@ if penalty > 0:
             st.markdown("### Total Cost Scenarios")
             scenario1 = total_cost + penalty
             scenario2 = total_cost + mitigation_total_cost
-            st.metric("Scenario 1: Conservative Fuels + Penalty", f"{scenario1:,.2f} Eur")
-            st.metric("Scenario 2: Conservative Fuels + Mitigation Fuels (No Penalty)", f"{scenario2:,.2f} Eur")
+            st.metric("Scenario 1: Initial Fuels + Penalty", f"{scenario1:,.2f} Eur")
+            st.metric("Scenario 2: Initial Fuels + Mitigation Fuels (No Penalty)", f"{scenario2:,.2f} Eur")
     else:
         st.info("No effective fuels found to offset the penalty based on current configuration.")
 
@@ -400,11 +400,11 @@ if st.button("Export to PDF"):
 
             mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
             total_with_penalty = total_cost + penalty
-            pdf.cell(200, 10, txt=f"Scenario 1 (Conservative fuels + Penalty): {total_with_penalty:,.2f} Eur", ln=True)
+            pdf.cell(200, 10, txt=f"Scenario 1 (Initial fuels + Penalty): {total_with_penalty:,.2f} Eur", ln=True)
 
             if mitigation_total_cost > 0:
                 total_with_mitigation = total_cost + mitigation_total_cost
-                pdf.cell(200, 10, txt=f"Scenario 2 (Conservative fuels + Mitigation fuels, no Penalty): {total_with_mitigation:,.2f} Eur", ln=True)
+                pdf.cell(200, 10, txt=f"Scenario 2 (Initial fuels + Mitigation fuels, no Penalty): {total_with_mitigation:,.2f} Eur", ln=True)
 
         # Export
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
