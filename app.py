@@ -7,6 +7,7 @@ import tempfile
 import os
 from decimal import Decimal, getcontext
 import math
+import re
 
     
 # === PAGE CONFIG ===
@@ -227,7 +228,7 @@ if rows:
 
 
 else:
-    st.info("No fuel data provided yet. Please select fuel(s) and enter quantity.")
+    st.info("No fuel data provided yet.")
 
 st.subheader("Summary")
 st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.5f}")
@@ -239,17 +240,9 @@ st.metric("Estimated Penalty (Eur)", f"{penalty:,.2f}")
 
 # Set precision to 12 digits
 getcontext().prec = 12
-
-import re
-
 if penalty > 0:
     st.subheader("Mitigation Options (Penalty Offset)")
     mitigation_rows = []
-    target = Decimal(str(target_intensity(year)))
-    dec_ghg = Decimal(str(ghg_intensity))
-    dec_emissions = Decimal(str(emissions))
-    dec_energy = Decimal(str(total_energy))
-
     for fuel in FUELS:
         if fuel_inputs.get(fuel["name"], 0) > 0:
             continue
@@ -300,27 +293,13 @@ if penalty > 0:
             })
             
     if mitigation_rows:
-        st.markdown("Mitigation Fuel Prices (USD/t)")
-        st.markdown("**Enter mitigation fuel prices in USD per tonne. Costs are shown in EUR after applying the exchange rate.")
-        for mrow in mitigation_rows:
-            safe_key = re.sub(r'[^a-zA-Z0-9_]', '_', mrow['Fuel'])
-            unique_key = f"mit_price_{safe_key}"
-            mrow["Price (USD/t)"] = st.number_input(
-                f"{mrow['Fuel']} - Price (USD/t)",
-                min_value=0.0,
-                value=0.0,
-                step=10.0,
-                key=f"mit_price_{safe_key}"
-            )
-            mrow["Estimated Cost (Eur)"] = mrow["Price (USD/t)"] * exchange_rate * mrow["Required Amount (t)"]
-            
-        df_mitigation = pd.DataFrame(mitigation_rows).sort_values("Required Amount (t)").reset_index(drop=True)
-        st.markdown("Mitigation Fuel Prices (USD/t)")
-        st.dataframe(df_mitigation.style.format({
-            "Required Amount (t)": "{:,.0f}",
-            "Price (USD/t)": "{:,.2f}",
-            "Estimated Cost (Eur)": "{:,.2f}"
-            }))
+        selected_fuel = st.selectbox("Select Mitigation Fuel for Price Input", [row["Fuel"] for row in mitigation_rows])
+        price_usd = st.number_input(f"{selected_fuel} - Price (USD/t)", min_value=0.0, value=0.0, step=10.0, key="mitigation_price_input")
+        for row in mitigation_rows:
+            row["Price (USD/t)"] = price_usd if row["Fuel"] == selected_fuel else 0.0
+            row["Estimated Cost (Eur)"] = row["Price (USD/t)"] * exchange_rate * row["Required Amount (t)"]
+        df_mit = pd.DataFrame(mitigation_rows)
+        st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
     else:
         st.info("No effective fuels found to offset the penalty based on current configuration.")
 
