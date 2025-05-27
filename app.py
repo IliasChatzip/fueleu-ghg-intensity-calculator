@@ -214,7 +214,7 @@ ghg_intensity = emissions / total_energy if total_energy else 0.0
 st.session_state["computed_ghg"] = ghg_intensity
 
 compliance_balance = total_energy * (target_intensity(year) - ghg_intensity)
-co2_balance_gco2eq = (ghg_intensity - target_intensity(year)) * total_energy
+co2_balance_gco2eq = (ghg_intensity - target_intensity(year)) * compliance_balance
 
         
 if compliance_balance >= 0:
@@ -382,7 +382,7 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt=f"EU Target for {year}: {target_intensity(year):.2f} gCO2eq/MJ", ln=True)
         pdf.cell(200, 10, txt=f"GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ", ln=True)
         pdf.cell(200, 10, txt=f"Compliance Balance: {compliance_balance:,.0f} MJ", ln=True)
-        required_ghg_adjustment = abs(compliance_balance) * target_intensity(year)
+        co2_balance_gco2eq = (ghg_intensity - target_intensity(year)) * compliance_balance
         balance_label = "Surplus" if co2_balance_gco2eq < 0 else "Deficit"
         pdf.cell(200, 10, txt=f"CO2 {balance_label}: {co2_balance_gco2eq:,.0f} gCO2eq", ln=True)
         pdf.cell(200, 10, txt=f"Penalty: {penalty:,.2f} Eur", ln=True)
