@@ -324,7 +324,7 @@ if penalty > 0:
                 scenario2 = total_cost + mitigation_total_cost
                 st.metric("Scenario 1: Initial Fuels + Penalty", f"{scenario1:,.2f} Eur")
                 st.metric("Scenario 2: Initial Fuels + Mitigation Fuels (No Penalty)", f"{scenario2:,.2f} Eur")
-           else:
+            else:
                # No price: show mitigation table (quantity report)
                df_mit = pd.DataFrame(mitigation_rows)
                st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
