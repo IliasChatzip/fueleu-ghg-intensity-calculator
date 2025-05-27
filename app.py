@@ -420,9 +420,9 @@ if st.button("Export to PDF"):
                         f"{row['Estimated Cost (Eur)']:,.2f} Eur")
                 pdf.cell(200, 10, txt=line, ln=True)
 
-             mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
-             total_with_mitigation = total_cost + mitigation_total_cost
-             total_with_penalty = total_cost + penalty
+            mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
+            total_with_mitigation = total_cost + mitigation_total_cost
+            total_with_penalty = total_cost + penalty
 
              pdf.ln(5)
              pdf.set_font("Arial", "B", size=12)
