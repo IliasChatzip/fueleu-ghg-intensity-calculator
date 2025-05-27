@@ -62,7 +62,7 @@ FUELS = [
     {"name": "Biodiesel (Animal Fats,B100)",                            "lcv": 0.0430,  "wtt": 20.8,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": False},
     {"name": "Biodiesel (Sunflower Oil,B100)",                          "lcv": 0.0430,  "wtt": 44.7,  "ttw_co2": 2.834,  "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": False},
     {"name": "Biodiesel (Soybean Oil,B100)",                            "lcv": 0.0430,  "wtt": 47.0,  "ttw_co2": 2.834,  "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": False},
-    {"name": "Biodiesel (Palm Oil,B100)",                               "lcv": 0.0430,  "wtt": 75.7,  "ttw_co2": 2.834,  "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": False}
+    {"name": "Biodiesel (Palm Oil,B100)",                               "lcv": 0.0430,  "wtt": 75.7,  "ttw_co2": 2.834,  "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": False},
     {"name": "Bioethanol (Sugar Beet,E100)",                            "lcv": 0.0268,  "wtt": 38.2,  "ttw_co2": 1.913,  "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": False},
     {"name": "Bioethanol (Maize,E100)",                                 "lcv": 0.0268,  "wtt": 56.8,  "ttw_co2": 1.913,  "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": False},
     {"name": "Bioethanol (Other cereals excluding maize,E100)",         "lcv": 0.0268,  "wtt": 58.5,  "ttw_co2": 1.913,  "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": False},
