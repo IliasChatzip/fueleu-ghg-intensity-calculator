@@ -409,7 +409,7 @@ if st.button("Export to PDF"):
                     pdf.cell(200, 10, txt=mit_line, ln=True)
                 pdf.ln(5)
                 pdf.set_font("Arial", "B", size=12)
-                pdf.cell(200, 10, txt="No fuel prices provided - quantities only report", ln=True)
+                pdf.cell(200, 10, txt="No mitigation fuel prices provided - quantities only report", ln=True)
 
             
         # Export
