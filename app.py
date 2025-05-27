@@ -406,13 +406,13 @@ if st.button("Export to PDF"):
             pdf.cell(200, 10, txt=f"Conversion Rate Used: 1 USD = {exchange_rate:.4f} EUR", ln=True)
 
         # Mitigation Options
-       pdf.ln(5)
-       pdf.set_font("Arial", size=11)
-       pdf.cell(200, 10, txt="--- Mitigation Options ---", ln=True)
+        pdf.ln(5)
+        pdf.set_font("Arial", size=11)
+        pdf.cell(200, 10, txt="--- Mitigation Options ---", ln=True)
 
-       mitigation_with_price = [row for row in mitigation_rows if row.get("Price (USD/t)", 0) > 0]
+        mitigation_with_price = [row for row in mitigation_rows if row.get("Price (USD/t)", 0) > 0]
 
-       if mitigation_with_price:
+        if mitigation_with_price:
             pdf.set_font("Arial", size=10)
             for row in mitigation_with_price:
                 line = (f"{row['Fuel']}: {row['Required Amount (t)']:,.0f} t @ "
