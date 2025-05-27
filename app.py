@@ -13,15 +13,34 @@ import re
 # === PAGE CONFIG ===
 st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
 
-# === STABLE RESET HANDLER ===
 def reset_app():
     exclude_keys = {"exchange_rate"}
-    for key in list(st.session_state.keys()):
-        if key not in exclude_keys:
+    widget_keys = [
+        # Fuel multiselects
+        *[f"multiselect_{category}" for category in ["Fossil ", "Bio", "RFNBO"]],
+        # Fuel quantities & prices
+        *[f"qty_{fuel['name']}" for fuel in FUELS],
+        *[f"price_{fuel['name']}" for fuel in FUELS],
+        # Mitigation fuel selection price
+        "mitigation_price_input",
+        # Input parameters
+        "Compliance Year",
+        "GWP Standard",
+        "OPS Reward Factor (%)",
+        "Wind Reward Factor"
+    ]
+
+    for key in widget_keys:
+        if key in st.session_state:
             del st.session_state[key]
-if st.session_state.get("trigger_reset", False):
-    reset_app()
+    
+    # Clear everything else except exchange_rate
+    for key in list(st.session_state.keys()):
+        if key not in exclude_keys and key not in widget_keys:
+            del st.session_state[key]
+
     st.session_state["trigger_reset"] = False
+
 
 # === Sidebar Reset Button
 st.sidebar.button("🔁 Reset Calculator", on_click=lambda: st.session_state.update({"trigger_reset": True}))
