@@ -313,24 +313,21 @@ if penalty > 0:
         for row in mitigation_rows:
             row["Price (USD/t)"] = price_usd if row["Fuel"] == selected_fuel else 0.0
             row["Estimated Cost (Eur)"] = row["Price (USD/t)"] * exchange_rate * row["Required Amount (t)"]
-        
-        df_mit = pd.DataFrame(mitigation_rows)
-        st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
-        
-        mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
-        user_entered_mitigation_price = price_usd > 0
-        
-        if not user_entered_mitigation_price:
-            # Show Mitigation Table (Quantities Only)
-            df_mit = pd.DataFrame(mitigation_rows)
-            st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
-        else:
-            # Show Scenarios only if prices exist
-            st.markdown("### Total Cost Scenarios")
-            scenario1 = total_cost + penalty
-            scenario2 = total_cost + mitigation_total_cost
-            st.metric("Scenario 1: Initial Fuels + Penalty", f"{scenario1:,.2f} Eur")
-            st.metric("Scenario 2: Initial Fuels + Mitigation Fuels (No Penalty)", f"{scenario2:,.2f} Eur")
+            
+            mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
+            user_entered_mitigation_price = price_usd > 0
+            
+            if user_entered_mitigation_price:
+                # User entered price: Only show scenarios
+                st.markdown("### Total Cost Scenarios")
+                scenario1 = total_cost + penalty
+                scenario2 = total_cost + mitigation_total_cost
+                st.metric("Scenario 1: Initial Fuels + Penalty", f"{scenario1:,.2f} Eur")
+                st.metric("Scenario 2: Initial Fuels + Mitigation Fuels (No Penalty)", f"{scenario2:,.2f} Eur")
+           else:
+               # No price: show mitigation table (quantity report)
+               df_mit = pd.DataFrame(mitigation_rows)
+               st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
 
 # === COMPLIANCE CHART ===
 years = list(range(2020, 2051, 5))
@@ -396,21 +393,23 @@ if st.button("Export to PDF"):
             pdf.set_font("Arial", size=11)
             pdf.cell(200, 10, txt="--- Mitigation Options ---", ln=True)
             has_mitigation_price = any(row.get("Price (USD/t)", 0) > 0 for row in mitigation_rows)
-            if not has_mitigation_price:
-                mitigation_rows_sorted = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
-                for row in mitigation_rows_sorted:
-                    mit_line = f"{row['Fuel']}: {row['Required Amount (t)']:,.0f} t"
-                    pdf.cell(200, 10, txt=mit_line, ln=True)
-            pdf.ln(5)
-            pdf.set_font("Arial", "B", size=12)
-            pdf.cell(200, 10, txt="No fuel prices provided - quantities only report", ln=True)
+            if has_mitigation_price:
+                mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
+                total_with_penalty = total_cost + penalty
+                pdf.set_font("Arial", size=11)
+                pdf.cell(200, 10, txt=f"Scenario 1 (Initial fuels + Penalty): {total_with_penalty:,.2f} Eur", ln=True)
+                if mitigation_total_cost > 0:
+                    total_with_mitigation = total_cost + mitigation_total_cost
+                    pdf.cell(200, 10, txt=f"Scenario 2 (Initial fuels + Mitigation fuels, no Penalty): {total_with_mitigation:,.2f} Eur", ln=True)
         else:
-            mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
-            total_with_penalty = total_cost + penalty
-            pdf.cell(200, 10, txt=f"Scenario 1 (Initial fuels + Penalty): {total_with_penalty:,.2f} Eur", ln=True)
-            if mitigation_total_cost > 0:
-                total_with_mitigation = total_cost + mitigation_total_cost
-                pdf.cell(200, 10, txt=f"Scenario 2 (Initial fuels + Mitigation fuels, no Penalty): {total_with_mitigation:,.2f} Eur", ln=True)
+            mitigation_rows_sorted = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
+            for row in mitigation_rows_sorted:
+                mit_line = f"{row['Fuel']}: {row['Required Amount (t)']:,.0f} t"
+                pdf.cell(200, 10, txt=mit_line, ln=True)
+                pdf.ln(5)
+                pdf.set_font("Arial", "B", size=12)
+                pdf.cell(200, 10, txt="No fuel prices provided - quantities only report", ln=True)
+
             
         # Export
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
