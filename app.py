@@ -424,11 +424,11 @@ if st.button("Export to PDF"):
             total_with_mitigation = total_cost + mitigation_total_cost
             total_with_penalty = total_cost + penalty
 
-             pdf.ln(5)
-             pdf.set_font("Arial", "B", size=12)
-             pdf.cell(200, 10, txt=f"Scenario 1 (Initial fuels + Penalty): {total_with_penalty:,.2f} Eur", ln=True)
-             pdf.cell(200, 10, txt=f"Total Mitigation Cost: {mitigation_total_cost:,.2f} Eur", ln=True)
-             pdf.cell(200, 10, txt=f"Scenario 2 (Initial fuels + Mitigation fuels, no Penalty): {total_with_mitigation:,.2f} Eur", ln=True)
+            pdf.ln(5)
+            pdf.set_font("Arial", "B", size=12)
+            pdf.cell(200, 10, txt=f"Scenario 1 (Initial fuels + Penalty): {total_with_penalty:,.2f} Eur", ln=True)
+            pdf.cell(200, 10, txt=f"Total Mitigation Cost: {mitigation_total_cost:,.2f} Eur", ln=True)
+            pdf.cell(200, 10, txt=f"Scenario 2 (Initial fuels + Mitigation fuels, no Penalty): {total_with_mitigation:,.2f} Eur", ln=True)
                 
         else:
             mitigation_rows_sorted = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
