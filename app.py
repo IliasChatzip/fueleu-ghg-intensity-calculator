@@ -1,16 +1,4 @@
 import streamlit as st
-
-try:
-    if st.session_state.get("trigger_reset", False):
-        exclude_keys = {"exchange_rate"}
-        for key in list(st.session_state.keys()):
-            if key not in exclude_keys and key != "trigger_reset":
-                del st.session_state[key]
-        st.session_state["trigger_reset"] = False
-        st.experimental_rerun()
-except RuntimeError:
-    pass
-    
 import pandas as pd
 import matplotlib.pyplot as plt
 from fpdf import FPDF
@@ -223,6 +211,15 @@ else:
 mitigation_total_cost = 0.0
 # Safeguard for mitigation_rows
 mitigation_rows = []
+
+# === Reset Handler ===
+if st.session_state.get("trigger_reset", False):
+    exclude_keys = {"exchange_rate"}
+    for key in list(st.session_state.keys()):
+        if key not in exclude_keys and key != "trigger_reset":
+            del st.session_state[key]
+    st.session_state["trigger_reset"] = False
+    st.experimental_rerun()
 
 # === OUTPUT ===
 st.subheader("Fuel Breakdown")
