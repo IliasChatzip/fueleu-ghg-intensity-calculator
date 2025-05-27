@@ -12,6 +12,18 @@ import re
 # === PAGE CONFIG ===
 st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
 
+st.sidebar.button(
+    "🔁 Reset Calculator",
+    on_click=lambda: st.session_state.update({"trigger_reset": True}))
+
+# === Reset Handler ===
+def reset_session_state():
+    exclude_keys = {"exchange_rate"}
+    keys_to_delete = [key for key in st.session_state if key not in exclude_keys and key != "trigger_reset"]
+    for key in keys_to_delete:
+        del st.session_state[key]
+    st.session_state["trigger_reset"] = False
+
 # === CONFIGURATION ===
 BASE_TARGET = 91.16
 REDUCTIONS = {2025: 0.02, 2030: 0.06, 2035: 0.14, 2050: 0.80}
@@ -154,8 +166,6 @@ wind = st.sidebar.selectbox(
     index=0,
     help="This is a reward factor wind-assisted propulsion if it is installed onboard. Reference can be made to the Regulation (EU) 2023/1805 of The European Parliament and of The Counsil. In case of no wind-assisted propulsion onboard, Wind Reward Factor of 1 can be selected (lower = more assistance)."
 )
-
-st.sidebar.button("🔁 Reset Calculator", on_click=lambda: st.session_state.update({"trigger_reset": True}))
     
 # === CALCULATIONS ===
 total_energy = 0.0
@@ -427,3 +437,7 @@ if st.button("Export to PDF"):
         st.download_button("Download PDF", data=open(tmp_pdf_path, "rb"),
                            file_name="ghg_report.pdf",
                            mime="application/pdf")
+
+if st.session_state.get("trigger_reset", False):
+    reset_session_state()
+    st.experimental_rerun()
