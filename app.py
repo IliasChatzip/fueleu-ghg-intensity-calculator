@@ -39,8 +39,10 @@ def reset_app():
         if key not in exclude_keys and key not in widget_keys:
             del st.session_state[key]
 
-st.session_state["trigger_reset"] = False
+    st.session_state["trigger_reset"] = False
 
+if st.session_state.get("trigger_reset", False):
+    reset_app()
 
 # === Sidebar Reset Button
 st.sidebar.button("🔁 Reset Calculator", on_click=lambda: st.session_state.update({"trigger_reset": True}))
