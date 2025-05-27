@@ -19,6 +19,8 @@ def reset_app():
     for key in list(st.session_state.keys()):
         if key not in exclude_keys:
             del st.session_state[key]
+if st.session_state.get("trigger_reset", False):
+    reset_app()
     st.session_state["trigger_reset"] = False
 
 # === Sidebar Reset Button
