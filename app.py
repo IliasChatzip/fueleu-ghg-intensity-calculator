@@ -104,8 +104,8 @@ user_entered_prices = any(
 )
 
 categories = {
-    "Fossil ": [f for f in FUELS if not f['nbo'] and "Bio" not in f['name'] and "Biodiesel" not in f['name'] and "E-" not in f['name'] and "Green" not in f['name']],
-    "Bio": [f for f in FUELS if "Bio" in f['name'] or "Biodiesel" in f['name']],
+    "Fossil ": [f for f in FUELS if not f['nbo'] and "Bio" not in f['name'] and "Biodiesel" not in f['name'] and "E-" not in f['name'] and "Green" not in f['name'] and "Vegetable" not in f['name']],
+    "Bio": [f for f in FUELS if "Bio" in f['name'] or "Biodiesel" in f['name'] or "Vegetable" in f['name']],
     "NBO": [f for f in FUELS if f['nbo'] or "E-" in f['name'] or "Green" in f['name']]
 }
 
