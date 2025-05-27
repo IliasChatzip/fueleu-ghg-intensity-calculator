@@ -214,6 +214,8 @@ ghg_intensity = emissions / total_energy if total_energy else 0.0
 st.session_state["computed_ghg"] = ghg_intensity
 
 compliance_balance = total_energy * (target_intensity(year) - ghg_intensity)
+required_ghg_adjustment = abs(compliance_balance) * target_intensity(year)
+
         
 if compliance_balance >= 0:
      penalty = 0
@@ -257,6 +259,7 @@ st.subheader("Summary")
 st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.5f}")
 balance_label = "Surplus" if compliance_balance >= 0 else "Deficit"
 st.metric("Compliance Balance (MJ)", f"{compliance_balance:,.0f}")
+st.metric("CO2 Balance (gCO2eq)", f"{required_ghg_adjustment:,.0f}")
 st.metric("Estimated Penalty (Eur)", f"{penalty:,.2f}")
 if rows:
     conservative_total = total_cost + penalty
@@ -378,6 +381,8 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt=f"EU Target for {year}: {target_intensity(year):.2f} gCO2eq/MJ", ln=True)
         pdf.cell(200, 10, txt=f"GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ", ln=True)
         pdf.cell(200, 10, txt=f"Compliance Balance: {compliance_balance:,.0f} MJ", ln=True)
+        required_ghg_adjustment = abs(compliance_balance) * target_intensity(year)
+        pdf.cell(200, 10, txt=f"CO2 Balance: {required_ghg_adjustment:,.0f} gCO2eq", ln=True)
         pdf.cell(200, 10, txt=f"Penalty: {penalty:,.2f} Eur", ln=True)
         pdf.ln(10)
 
