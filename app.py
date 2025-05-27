@@ -13,37 +13,6 @@ import re
 # === PAGE CONFIG ===
 st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
 
-def reset_app():
-    exclude_keys = {"exchange_rate"}
-    widget_keys = [
-        # Fuel multiselects
-        *[f"multiselect_{category}" for category in ["Fossil ", "Bio", "RFNBO"]],
-        # Fuel quantities & prices
-        *[f"qty_{fuel['name']}" for fuel in FUELS],
-        *[f"price_{fuel['name']}" for fuel in FUELS],
-        # Mitigation fuel selection price
-        "mitigation_price_input",
-        # Input parameters
-        "Compliance Year",
-        "GWP Standard",
-        "OPS Reward Factor (%)",
-        "Wind Reward Factor"
-    ]
-
-    for key in widget_keys:
-        if key in st.session_state:
-            del st.session_state[key]
-    
-    # Clear everything else except exchange_rate
-    for key in list(st.session_state.keys()):
-        if key not in exclude_keys and key not in widget_keys:
-            del st.session_state[key]
-
-    st.session_state["trigger_reset"] = False
-
-if st.session_state.get("trigger_reset", False):
-    reset_app()
-
 # === Sidebar Reset Button
 st.sidebar.button("🔁 Reset Calculator", on_click=lambda: st.session_state.update({"trigger_reset": True}))
 
@@ -106,6 +75,34 @@ FUELS = [
     {"name": "E-Ammonia",                                               "lcv": 0.0186,  "wtt": 0.0,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": True},  
 ]
 
+# === Reset Handler ===
+def reset_app():
+    exclude_keys = {"exchange_rate"}
+    widget_keys = [
+        *[f"multiselect_{category}" for category in ["Fossil ", "Bio", "RFNBO"]],
+        *[f"qty_{fuel['name']}" for fuel in FUELS],
+        *[f"price_{fuel['name']}" for fuel in FUELS],
+        "mitigation_price_input",
+        "Compliance Year",
+        "GWP Standard",
+        "OPS Reward Factor (%)",
+        "Wind Reward Factor"
+    ]
+
+    for key in widget_keys:
+        if key in st.session_state:
+            del st.session_state[key]
+    
+    for key in list(st.session_state.keys()):
+        if key not in exclude_keys and key not in widget_keys:
+            del st.session_state[key]
+
+    st.session_state["trigger_reset"] = False
+
+# === Detect Reset Trigger ===
+if st.session_state.get("trigger_reset", False):
+    reset_app()
+    
 # === TARGET FUNCTION ===
 def target_intensity(year: int) -> float:
     if year <= 2020:
