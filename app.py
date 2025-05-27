@@ -9,21 +9,8 @@ from decimal import Decimal, getcontext
 import math
 import re
 
-    
 # === PAGE CONFIG ===
 st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
-
-# === Reset Handler ===
-if "trigger_reset" in st.session_state and st.session_state["trigger_reset"]:
-    exclude_keys = {"exchange_rate"}
-    for key in list(st.session_state.keys()):
-        if key not in exclude_keys and key != "trigger_reset":
-            del st.session_state[key]
-    st.session_state["trigger_reset"] = False
-    st.experimental_rerun()
-
-# === Reset Button ===
-st.sidebar.button("🔁 Reset Calculator", on_click=lambda: st.session_state.update({"trigger_reset": True}))
 
 # === CONFIGURATION ===
 BASE_TARGET = 91.16
@@ -97,8 +84,7 @@ def target_intensity(year: int) -> float:
     frac = (year - 2035) / (2050 - 2035)
     red = REDUCTIONS[2035] + frac * (REDUCTIONS[2050] - REDUCTIONS[2035])
     return BASE_TARGET * (1 - red)
-
-    
+  
 # === USER INPUT ===
 st.title("FuelEU - GHG Intensity & Penalty Calculator")
 st.sidebar.markdown("### Fuel Price Settings")
@@ -168,6 +154,17 @@ wind = st.sidebar.selectbox(
     index=0,
     help="This is a reward factor wind-assisted propulsion if it is installed onboard. Reference can be made to the Regulation (EU) 2023/1805 of The European Parliament and of The Counsil. In case of no wind-assisted propulsion onboard, Wind Reward Factor of 1 can be selected (lower = more assistance)."
 )
+
+st.sidebar.button("🔁 Reset Calculator", on_click=lambda: st.session_state.update({"trigger_reset": True}))
+
+# === Reset Handler ===
+if st.session_state.get("trigger_reset", False):
+    exclude_keys = {"exchange_rate"}
+    for key in list(st.session_state.keys()):
+        if key not in exclude_keys and key != "trigger_reset":
+            del st.session_state[key]
+    st.session_state["trigger_reset"] = False
+    st.experimental_rerun()
     
 # === CALCULATIONS ===
 total_energy = 0.0
