@@ -12,17 +12,19 @@ import re
 # === PAGE CONFIG ===
 st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
 
+# === STABLE RESET HANDLER ===
+def reset_app():
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]  # Clear all session state
+    st.session_state["trigger_reset"] = False
+    
+# === Check if Reset Was Triggered
+if st.session_state.get("trigger_reset", False):
+    reset_app()
+    
 st.sidebar.button(
     "🔁 Reset Calculator",
     on_click=lambda: st.session_state.update({"trigger_reset": True}))
-
-# === Reset Handler ===
-def reset_session_state():
-    exclude_keys = {"exchange_rate"}
-    keys_to_delete = [key for key in st.session_state if key not in exclude_keys and key != "trigger_reset"]
-    for key in keys_to_delete:
-        del st.session_state[key]
-    st.session_state["trigger_reset"] = False
 
 # === CONFIGURATION ===
 BASE_TARGET = 91.16
@@ -437,7 +439,3 @@ if st.button("Export to PDF"):
         st.download_button("Download PDF", data=open(tmp_pdf_path, "rb"),
                            file_name="ghg_report.pdf",
                            mime="application/pdf")
-
-if st.session_state.get("trigger_reset", False):
-    reset_session_state()
-    st.experimental_rerun()
