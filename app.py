@@ -40,9 +40,9 @@ GWP_VALUES = {
 # === FUEL DATABASE ===
 FUELS = [
     {"name": "Heavy Fuel Oil (HFO)",                                    "lcv": 0.0405,  "wtt": 13.5,  "ttw_co2": 3.114,  "ttw_ch4": 0.00005,  "ttw_n20": 0.00018,  "rfnbo": False},
-    {"name": "Heavy Fuel Oil (LSFO)",                                   "lcv": 0.0405,  "wtt": 13.7,  "ttw_co2": 3.114,  "ttw_ch4": 0.00005,  "ttw_n20": 0.00018,  "rfnbo": False},
-    {"name": "Heavy Fuel Oil (ULSFO)",                                  "lcv": 0.0405,  "wtt": 13.2,  "ttw_co2": 3.114,  "ttw_ch4": 0.00005,  "ttw_n20": 0.00018,  "rfnbo": False},
-    {"name": "Heavy Fuel Oil (VLSFO)",                                  "lcv": 0.041,   "wtt": 13.2,  "ttw_co2": 3.206,  "ttw_ch4": 0.00005,  "ttw_n20": 0.00018,  "rfnbo": False},
+    {"name": "Low Sulphur Fuel Oil (LSFO)",                             "lcv": 0.0405,  "wtt": 13.7,  "ttw_co2": 3.114,  "ttw_ch4": 0.00005,  "ttw_n20": 0.00018,  "rfnbo": False},
+    {"name": "Ultra Low Sulphur Fuel Oil (ULSFO)",                      "lcv": 0.0405,  "wtt": 13.2,  "ttw_co2": 3.114,  "ttw_ch4": 0.00005,  "ttw_n20": 0.00018,  "rfnbo": False},
+    {"name": "Very Low Sulphur Fuel Oil (VLSFO)",                       "lcv": 0.041,   "wtt": 13.2,  "ttw_co2": 3.206,  "ttw_ch4": 0.00005,  "ttw_n20": 0.00018,  "rfnbo": False},
     {"name": "Low Fuel Oil (LFO)",                                      "lcv": 0.041,   "wtt": 13.2,  "ttw_co2": 3.151,  "ttw_ch4": 0.00005,  "ttw_n20": 0.00018,  "rfnbo": False},
     {"name": "Marine Diesel/Gas Oil (MDO/MGO)",                         "lcv": 0.0427,  "wtt": 14.4,  "ttw_co2": 3.206,  "ttw_ch4": 0.00005,  "ttw_n20": 0.00018,  "rfnbo": False},
     {"name": "Liquefied Natural Gas (LNG)",                             "lcv": 0.0491,  "wtt": 18.5,  "ttw_co2": 2.750,  "ttw_ch4": 0.001276, "ttw_n20": 0.00011,  "rfnbo": False},
