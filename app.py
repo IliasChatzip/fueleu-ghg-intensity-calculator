@@ -39,7 +39,7 @@ def reset_app():
         if key not in exclude_keys and key not in widget_keys:
             del st.session_state[key]
 
-    st.session_state["trigger_reset"] = False
+st.session_state["trigger_reset"] = False
 
 
 # === Sidebar Reset Button
