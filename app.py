@@ -13,6 +13,15 @@ import re
 # === PAGE CONFIG ===
 st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
 
+# === Reset Handler ===
+def reset_app():
+    exclude_keys = {"exchange_rate"}
+    for key in list(st.session_state.keys()):
+        if key not in exclude_keys:
+            del st.session_state[key]
+    st.session_state["trigger_reset"] = False
+    st.experimental_rerun()
+
 # === Sidebar Reset Button
 st.sidebar.button("🔁 Reset Calculator", on_click=lambda: st.session_state.update({"trigger_reset": True}))
 
@@ -74,15 +83,6 @@ FUELS = [
     {"name": "E-Hydrogen",                                              "lcv": 0.1200,  "wtt": 3.6,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": True},
     {"name": "E-Ammonia",                                               "lcv": 0.0186,  "wtt": 0.0,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": True},  
 ]
-
-# === Reset Handler ===
-def reset_app():
-    exclude_keys = {"exchange_rate"}
-    for key in list(st.session_state.keys()):
-        if key not in exclude_keys:
-            del st.session_state[key]
-    st.session_state["trigger_reset"] = False
-    st.experimental_rerun()
     
 # === TARGET FUNCTION ===
 def target_intensity(year: int) -> float:
