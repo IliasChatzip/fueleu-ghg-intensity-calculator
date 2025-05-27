@@ -403,7 +403,7 @@ if st.button("Export to PDF"):
         if user_entered_prices:
             pdf.set_font("Arial", size=10)
             pdf.ln(3)
-            pdf.cell(200, 10, txt=f"Conversion Rate Used: 1 USD = {exchange_rate:.2f} EUR", ln=True)
+            pdf.cell(200, 10, txt=f"Conversion Rate Used: 1 USD = {exchange_rate:.4f} EUR", ln=True)
 
         # Mitigation Options
        pdf.ln(5)
