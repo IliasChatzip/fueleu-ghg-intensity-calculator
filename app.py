@@ -156,15 +156,6 @@ wind = st.sidebar.selectbox(
 )
 
 st.sidebar.button("🔁 Reset Calculator", on_click=lambda: st.session_state.update({"trigger_reset": True}))
-
-# === Reset Handler ===
-if st.session_state.get("trigger_reset", False):
-    exclude_keys = {"exchange_rate"}
-    for key in list(st.session_state.keys()):
-        if key not in exclude_keys and key != "trigger_reset":
-            del st.session_state[key]
-    st.session_state["trigger_reset"] = False
-    st.experimental_rerun()
     
 # === CALCULATIONS ===
 total_energy = 0.0
@@ -427,3 +418,12 @@ if st.button("Export to PDF"):
         st.download_button("Download PDF", data=open(tmp_pdf_path, "rb"),
                            file_name="ghg_report.pdf",
                            mime="application/pdf")
+
+# === Reset Handler ===
+if st.session_state.get("trigger_reset", False):
+    exclude_keys = {"exchange_rate"}
+    for key in list(st.session_state.keys()):
+        if key not in exclude_keys and key != "trigger_reset":
+            del st.session_state[key]
+    st.session_state["trigger_reset"] = False
+    st.experimental_rerun()
