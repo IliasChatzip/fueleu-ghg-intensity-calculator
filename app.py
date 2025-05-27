@@ -78,30 +78,11 @@ FUELS = [
 # === Reset Handler ===
 def reset_app():
     exclude_keys = {"exchange_rate"}
-    widget_keys = [
-        *[f"multiselect_{category}" for category in ["Fossil ", "Bio", "RFNBO"]],
-        *[f"qty_{fuel['name']}" for fuel in FUELS],
-        *[f"price_{fuel['name']}" for fuel in FUELS],
-        "mitigation_price_input",
-        "Compliance Year",
-        "GWP Standard",
-        "OPS Reward Factor (%)",
-        "Wind Reward Factor"
-    ]
-
-    for key in widget_keys:
-        if key in st.session_state:
-            del st.session_state[key]
-    
     for key in list(st.session_state.keys()):
-        if key not in exclude_keys and key not in widget_keys:
+        if key not in exclude_keys:
             del st.session_state[key]
-
     st.session_state["trigger_reset"] = False
-
-# === Detect Reset Trigger ===
-if st.session_state.get("trigger_reset", False):
-    reset_app()
+    st.experimental_rerun()
     
 # === TARGET FUNCTION ===
 def target_intensity(year: int) -> float:
