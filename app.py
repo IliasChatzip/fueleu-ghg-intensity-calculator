@@ -403,7 +403,7 @@ if st.button("Export to PDF"):
         if user_entered_prices:
             pdf.set_font("Arial", size=10)
             pdf.ln(3)
-            pdf.cell(200, 10, txt=f"Conversion Rate Used: 1 USD = {exchange_rate:.4f} EUR", ln=True)
+            pdf.cell(200, 10, txt=f"Conversion Rate Used: 1 USD = {exchange_rate:.6f} EUR", ln=True)
 
         # Mitigation Options
         pdf.ln(5)
@@ -427,7 +427,6 @@ if st.button("Export to PDF"):
             pdf.ln(5)
             pdf.set_font("Arial", "B", size=12)
             pdf.cell(200, 10, txt=f"Scenario 1 (Initial fuels + Penalty): {total_with_penalty:,.2f} Eur", ln=True)
-            pdf.cell(200, 10, txt=f"Total Mitigation Cost: {mitigation_total_cost:,.2f} Eur", ln=True)
             pdf.cell(200, 10, txt=f"Scenario 2 (Initial fuels + Mitigation fuels, no Penalty): {total_with_mitigation:,.2f} Eur", ln=True)
                 
         else:
