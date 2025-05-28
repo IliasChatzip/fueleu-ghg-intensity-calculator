@@ -276,20 +276,22 @@ total_with_pooling = 0.0
 
 if co2_balance_gco2eq > 0:
     show_pooling_option = True
-    st.subheader("Pooling Option (Penalty Offset)")
+    st.subheader("Pooling Option (Compliance Offset)")
     st.info(f"CO₂ Deficit: {co2_balance_gco2eq:,.0f} gCO₂eq. You may offset this via pooling if you have access to external credits.")
 
-    pooling_price = st.number_input(
-        "Enter Pooling Price (Eur/gCO₂eq)",
+    pooling_price_usd_per_tonne = st.number_input(
+        "Enter Pooling Price (USD/tCO₂eq)",
         min_value=0.0, value=0.0, step=0.01,
-        help="The cost per gCO₂eq to buy compliance credits from the pool. If 0, pooling will not be applied.")
+        help="The cost per tCO₂eq to buy compliance credits from the pool. If 0, pooling will not be applied.")
 
-    if pooling_price > 0:
-        pooling_cost = co2_balance_gco2eq * pooling_price
-        total_with_pooling = total_cost + pooling_cost
+    if pooling_price_usd_per_tonne > 0:
+       deficit_tonnes = co2_balance_gco2eq / 1_000_000
+       pooling_cost_usd = pooling_price_usd_per_tonne * deficit_tonnes
+       pooling_cost_eur = pooling_cost_usd * exchange_rate
+       total_with_pooling = total_cost + pooling_cost_eur
 
         st.markdown("### Scenario 2: Initial Fuels + Pooling Option")
-        st.metric("Pooling Cost (Eur)", f"{pooling_cost:,.2f}")
+        st.metric("Pooling Cost (Eur)", f"{pooling_cost_eur:,.2f}")
         st.metric("Total Cost (Fuels + Pooling)", f"{total_with_pooling:,.2f} Eur")
     else:
         st.info("Enter a non-zero pooling price to activate Scenario 2.")
@@ -474,11 +476,12 @@ if st.button("Export to PDF"):
         pdf.set_font("Arial", size=10)
         pdf.cell(200, 10, txt="--- Pooling Option ---", ln=True)
         
-        if show_pooling_option and pooling_price > 0:
+        if show_pooling_option and pooling_price_usd_per_tonne > 0:
             pdf.set_font("Arial", size=10)
-            pdf.cell(200, 10, txt=f"CO₂ Deficit: {co2_balance_gco2eq:,.0f} gCO₂eq", ln=True)
-            pdf.cell(200, 10, txt=f"Pooling Price: {pooling_price:,.2f} €/gCO₂eq", ln=True)
-            pdf.cell(200, 10, txt=f"Pooling Cost: {pooling_cost:,.2f} Eur", ln=True)
+            pdf.cell(200, 10, txt=f"CO₂ Deficit: {deficit_tonnes:,.2f} gCO₂eq", ln=True)
+            pdf.cell(200, 10, txt=f"Pooling Price: {pooling_price_usd_per_tonne:,.2f} USD/tCO₂eq", ln=True)
+            pdf.cell(200, 10, txt=f"Pooling Cost: {pooling_cost_eur:,.2f} Eur", ln=True)
+            pdf.cell(200, 10, txt=f"Total Cost (Fuels + Pooling): {total_with_pooling:,.2f} Eur", ln=True)
             
             pdf.ln(5)
             pdf.set_font("Arial", "B", size=12)
