@@ -290,9 +290,6 @@ if deficit_tonnes > 0:
        pooling_cost_eur = pooling_cost_usd * exchange_rate
        total_with_pooling = total_cost + pooling_cost_eur
 
-       st.markdown("### Scenario 2: Initial Fuels + Pooling Option")
-       st.metric("Pooling Cost (Eur)", f"{pooling_cost_eur:,.2f}")
-       st.metric("Total Cost (Fuels + Pooling)", f"{total_with_pooling:,.2f} Eur")
     else:
        st.info("Enter a non-zero pooling price to activate Scenario 2.")
 
@@ -373,8 +370,10 @@ if penalty > 0:
             # User entered price: Only show scenarios
             st.markdown("### Total Cost Scenarios")
             scenario1 = total_cost + penalty
+            scenario2 = total_with_pooling
             scenario3 = total_cost + mitigation_total_cost
             st.metric("Scenario 1: Initial Fuels + Penalty", f"{scenario1:,.2f} Eur")
+            st.metric("Scenario 2: Initial Fuels + Pooling (No Penalty)", f"{scenario2:,.2f} Eur")
             st.metric("Scenario 3: Initial Fuels + Mitigation Fuels (No Penalty)", f"{scenario3:,.2f} Eur")
         else:
              # No price: show mitigation table (quantity report)
