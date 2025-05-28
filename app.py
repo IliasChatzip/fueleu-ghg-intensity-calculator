@@ -251,8 +251,6 @@ if co2_balance_gco2eq > 0:
         st.metric("Total Cost (Fuels + Pooling)", f"{total_with_pooling:,.2f} Eur")
     else:
         st.info("Enter a non-zero pooling price to activate Scenario 3.")
-else:
-    st.info("You have a CO₂ surplus. No pooling option available.")
 
 
 # === Reset Handler ===
