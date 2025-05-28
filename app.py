@@ -448,9 +448,10 @@ if st.button("Export to PDF"):
         
         if show_pooling_option and pooling_price_usd_per_tonne > 0:
             pdf.set_font("Arial", size=10)
-            pdf.cell(200, 10, txt=f"CO2 Deficit: {deficit_tonnes:,.2f} tCO2eq", ln=True)
-            pdf.cell(200, 10, txt=f"Pooling Price: {pooling_price_usd_per_tonne:,.2f} USD/tCO2eq", ln=True)
-            pdf.cell(200, 10, txt=f"Pooling Cost: {pooling_cost_eur:,.2f} Eur", ln=True)
+            pooling_line = (f"Deficit Offset: {deficit_tonnes:,.2f} tCO2eq @ "
+                    f"{pooling_price_usd_per_tonne:,.2f} USD/t | "
+                    f"{pooling_cost_eur:,.2f} Eur")
+            pdf.cell(200, 10, txt=pooling_line, ln=True)
 
         # Mitigation Options
         pdf.ln(5)
