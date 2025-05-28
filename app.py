@@ -273,11 +273,12 @@ show_pooling_option = False
 pooling_price = 0.0
 pooling_cost = 0.0
 total_with_pooling = 0.0
+deficit_tonnes = co2_balance_gco2eq / 1_000_000
 
-if co2_balance_gco2eq > 0:
+if deficit_tonnes > 0:
     show_pooling_option = True
     st.subheader("Pooling Option (Compliance Offset)")
-    st.info(f"CO₂ Deficit: {co2_balance_gco2eq:,.0f} gCO₂eq. You may offset this via pooling if you have access to external credits.")
+    st.info(f"CO₂ Deficit: {deficit_tonnes:,.2f} tCO₂eq. You may offset this via pooling if you have access to external credits.")
 
     pooling_price_usd_per_tonne = st.number_input(
         "Enter Pooling Price (USD/tCO₂eq)",
@@ -285,7 +286,6 @@ if co2_balance_gco2eq > 0:
         help="The cost per tCO₂eq to buy compliance credits from the pool. If 0, pooling will not be applied.")
 
     if pooling_price_usd_per_tonne > 0:
-       deficit_tonnes = co2_balance_gco2eq / 1_000_000
        pooling_cost_usd = pooling_price_usd_per_tonne * deficit_tonnes
        pooling_cost_eur = pooling_cost_usd * exchange_rate
        total_with_pooling = total_cost + pooling_cost_eur
