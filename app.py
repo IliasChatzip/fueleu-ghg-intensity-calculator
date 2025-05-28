@@ -226,32 +226,6 @@ mitigation_total_cost = 0.0
 # Safeguard for mitigation_rows
 mitigation_rows = []
 
-# === Pooling Option ===
-show_pooling_option = False
-pooling_price = 0.0
-pooling_cost = 0.0
-total_with_pooling = 0.0
-
-if co2_balance_gco2eq > 0:
-    show_pooling_option = True
-    st.markdown("### Pooling Option Available")
-    st.info(f"CO₂ Deficit: {co2_balance_gco2eq:,.0f} gCO₂eq. You may offset this via pooling if you have access to external credits.")
-
-    pooling_price = st.number_input(
-        "Enter Pooling Price (Eur/gCO₂eq)",
-        min_value=0.0, value=0.0, step=0.01,
-        help="The cost per gCO₂eq to buy compliance credits from the pool. If 0, pooling will not be applied.")
-
-    if pooling_price > 0:
-        pooling_cost = co2_balance_gco2eq * pooling_price
-        total_with_pooling = total_cost + pooling_cost
-
-        st.markdown("### Scenario 3: Initial Fuels + Pooling Option")
-        st.metric("Pooling Cost (Eur)", f"{pooling_cost:,.2f}")
-        st.metric("Total Cost (Fuels + Pooling)", f"{total_with_pooling:,.2f} Eur")
-    else:
-        st.info("Enter a non-zero pooling price to activate Scenario 3.")
-
 
 # === Reset Handler ===
 if st.session_state.get("trigger_reset", False):
@@ -292,6 +266,33 @@ st.metric("Estimated Penalty (Eur)", f"{penalty:,.2f}")
 if rows:
     conservative_total = total_cost + penalty
     st.metric("Total Cost of Selected Fuels + Penalty", f"{conservative_total:,.2f} Eur")
+
+# === POOLING OPTION ===
+
+show_pooling_option = False
+pooling_price = 0.0
+pooling_cost = 0.0
+total_with_pooling = 0.0
+
+if co2_balance_gco2eq > 0:
+    show_pooling_option = True
+    st.markdown("Pooling Option (Penalty Offset)")
+    st.info(f"CO₂ Deficit: {co2_balance_gco2eq:,.0f} gCO₂eq. You may offset this via pooling if you have access to external credits.")
+
+    pooling_price = st.number_input(
+        "Enter Pooling Price (Eur/gCO₂eq)",
+        min_value=0.0, value=0.0, step=0.01,
+        help="The cost per gCO₂eq to buy compliance credits from the pool. If 0, pooling will not be applied.")
+
+    if pooling_price > 0:
+        pooling_cost = co2_balance_gco2eq * pooling_price
+        total_with_pooling = total_cost + pooling_cost
+
+        st.markdown("### Scenario 2: Initial Fuels + Pooling Option")
+        st.metric("Pooling Cost (Eur)", f"{pooling_cost:,.2f}")
+        st.metric("Total Cost (Fuels + Pooling)", f"{total_with_pooling:,.2f} Eur")
+    else:
+        st.info("Enter a non-zero pooling price to activate Scenario 2.")
 
 
 # === MITIGATION OPTIONS ===
@@ -370,9 +371,9 @@ if penalty > 0:
             # User entered price: Only show scenarios
             st.markdown("### Total Cost Scenarios")
             scenario1 = total_cost + penalty
-            scenario2 = total_cost + mitigation_total_cost
+            scenario3 = total_cost + mitigation_total_cost
             st.metric("Scenario 1: Initial Fuels + Penalty", f"{scenario1:,.2f} Eur")
-            st.metric("Scenario 2: Initial Fuels + Mitigation Fuels (No Penalty)", f"{scenario2:,.2f} Eur")
+            st.metric("Scenario 3: Initial Fuels + Mitigation Fuels (No Penalty)", f"{scenario3:,.2f} Eur")
         else:
              # No price: show mitigation table (quantity report)
              df_mit = pd.DataFrame(mitigation_rows)
@@ -482,11 +483,10 @@ if st.button("Export to PDF"):
             pdf.ln(5)
             pdf.set_font("Arial", "B", size=12)
             pdf.cell(200, 10, txt=f"Scenario 1 (Initial fuels + Penalty): {total_with_penalty:,.2f} Eur", ln=True)
-            pdf.cell(200, 10, txt=f"Scenario 2 (Initial fuels + Mitigation fuels, no Penalty): {total_with_mitigation:,.2f} Eur", ln=True)
-            pdf.cell(200, 10, txt=f"Scenario 3 (Initial fuels + Pooling, no Penalty): {total_with_pooling:,.2f} Eur", ln=True)
-                
-
+            pdf.cell(200, 10, txt=f"Scenario 2 (Initial fuels + Pooling, no Penalty): {total_with_pooling:,.2f} Eur", ln=True)
+            pdf.cell(200, 10, txt=f"Scenario 3 (Initial fuels + Mitigation fuels, no Penalty): {total_with_mitigation:,.2f} Eur", ln=True)
             
+                            
         # Export
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
             pdf.output(tmp_pdf.name)
