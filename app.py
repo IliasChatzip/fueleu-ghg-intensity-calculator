@@ -226,6 +226,35 @@ mitigation_total_cost = 0.0
 # Safeguard for mitigation_rows
 mitigation_rows = []
 
+# === Pooling Option ===
+show_pooling_option = False
+pooling_price = 0.0
+pooling_cost = 0.0
+scenario3_total = 0.0
+
+if co2_balance_gco2eq > 0:
+    show_pooling_option = True
+    st.markdown("### Pooling Option Available")
+    st.info(f"CO₂ Deficit: {co2_balance_gco2eq:,.0f} gCO₂eq. You may offset this via pooling if you have access to external credits.")
+
+    pooling_price = st.number_input(
+        "Enter Pooling Price (Eur/gCO₂eq)",
+        min_value=0.0, value=0.0, step=0.01,
+        help="The cost per gCO₂eq to buy compliance credits from the pool. If 0, pooling will not be applied.")
+
+    if pooling_price > 0:
+        pooling_cost = co2_balance_gco2eq * pooling_price
+        total_with_pooling = total_cost + pooling_cost
+
+        st.markdown("### Scenario 3: Initial Fuels + Pooling Option")
+        st.metric("Pooling Cost (Eur)", f"{pooling_cost:,.2f}")
+        st.metric("Total Cost (Fuels + Pooling)", f"{scenario3_total:,.2f} Eur")
+    else:
+        st.info("Enter a non-zero pooling price to activate Scenario 3.")
+else:
+    st.info("You have a CO₂ surplus. No pooling option available.")
+
+
 # === Reset Handler ===
 if st.session_state.get("trigger_reset", False):
     exclude_keys = {"exchange_rate"}
@@ -430,12 +459,9 @@ if st.button("Export to PDF"):
             mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
             total_with_mitigation = total_cost + mitigation_total_cost
             total_with_penalty = total_cost + penalty
-
-            pdf.ln(5)
-            pdf.set_font("Arial", "B", size=12)
-            pdf.cell(200, 10, txt=f"Scenario 1 (Initial fuels + Penalty): {total_with_penalty:,.2f} Eur", ln=True)
-            pdf.cell(200, 10, txt=f"Scenario 2 (Initial fuels + Mitigation fuels, no Penalty): {total_with_mitigation:,.2f} Eur", ln=True)
-                
+            pooling_cost = co2_balance_gco2eq * pooling_price
+            total_with_pooling = total_cost + pooling_cost
+        
         else:
             mitigation_rows_sorted = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
             for row in mitigation_rows_sorted:
@@ -444,6 +470,24 @@ if st.button("Export to PDF"):
             pdf.ln(5)
             pdf.set_font("Arial", "B", size=12)
             pdf.cell(200, 10, txt="No mitigation fuel prices provided - quantities only report", ln=True)
+
+        # Pooling Option
+        pdf.ln(5)
+        pdf.set_font("Arial", size=10)
+        pdf.cell(200, 10, txt="--- Pooling Option ---", ln=True)
+        
+        if show_pooling_option and pooling_price > 0:
+            pdf.set_font("Arial", size=10)
+            pdf.cell(200, 10, txt=f"CO₂ Deficit: {co2_balance_gco2eq:,.0f} gCO₂eq", ln=True)
+            pdf.cell(200, 10, txt=f"Pooling Price: {pooling_price:,.2f} €/gCO₂eq", ln=True)
+            pdf.cell(200, 10, txt=f"Pooling Cost: {pooling_cost:,.2f} Eur", ln=True)
+            
+            pdf.ln(5)
+            pdf.set_font("Arial", "B", size=12)
+            pdf.cell(200, 10, txt=f"Scenario 1 (Initial fuels + Penalty): {total_with_penalty:,.2f} Eur", ln=True)
+            pdf.cell(200, 10, txt=f"Scenario 2 (Initial fuels + Mitigation fuels, no Penalty): {total_with_mitigation:,.2f} Eur", ln=True)
+            pdf.cell(200, 10, txt=f"Scenario 3 (Initial fuels + Pooling, no Penalty): {
+                
 
             
         # Export
