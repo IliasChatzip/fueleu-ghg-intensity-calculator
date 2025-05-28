@@ -276,7 +276,7 @@ total_with_pooling = 0.0
 
 if co2_balance_gco2eq > 0:
     show_pooling_option = True
-    st.markdown("Pooling Option (Penalty Offset)")
+    st.subheader("Pooling Option (Penalty Offset)")
     st.info(f"CO₂ Deficit: {co2_balance_gco2eq:,.0f} gCO₂eq. You may offset this via pooling if you have access to external credits.")
 
     pooling_price = st.number_input(
