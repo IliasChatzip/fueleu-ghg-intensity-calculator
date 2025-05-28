@@ -281,9 +281,9 @@ if deficit_tonnes > 0:
     st.info(f"CO₂ Deficit: {deficit_tonnes:,.2f} tCO2eq. You may offset this via pooling if you have access to external credits.")
 
     pooling_price_usd_per_tonne = st.number_input(
-        "Enter Pooling Price (USD/tCO₂eq)",
+        "Enter Pooling Price (USD/tCO2eq)",
         min_value=0.0, value=0.0, step=0.01,
-        help="The cost per tCO₂eq to buy compliance credits from the pool. If 0, pooling will not be applied.")
+        help="The cost per tCO2eq to buy compliance credits from the pool. If 0, pooling will not be applied.")
 
     if pooling_price_usd_per_tonne > 0:
        pooling_cost_usd = pooling_price_usd_per_tonne * deficit_tonnes
@@ -448,8 +448,8 @@ if st.button("Export to PDF"):
         
         if show_pooling_option and pooling_price_usd_per_tonne > 0:
             pdf.set_font("Arial", size=10)
-            pdf.cell(200, 10, txt=f"CO₂ Deficit: {deficit_tonnes:,.2f} tCO₂eq", ln=True)
-            pdf.cell(200, 10, txt=f"Pooling Price: {pooling_price_usd_per_tonne:,.2f} USD/tCO₂eq", ln=True)
+            pdf.cell(200, 10, txt=f"CO₂ Deficit: {deficit_tonnes:,.2f} tCO2eq", ln=True)
+            pdf.cell(200, 10, txt=f"Pooling Price: {pooling_price_usd_per_tonne:,.2f} USD/tCO2eq", ln=True)
             pdf.cell(200, 10, txt=f"Pooling Cost: {pooling_cost_eur:,.2f} Eur", ln=True)
 
         # Mitigation Options
