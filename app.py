@@ -441,6 +441,17 @@ if st.button("Export to PDF"):
             pdf.ln(3)
             pdf.cell(200, 10, txt=f"Conversion Rate Used: 1 USD = {exchange_rate:.6f} EUR", ln=True)
 
+        # Pooling Option
+        pdf.ln(5)
+        pdf.set_font("Arial", size=11)
+        pdf.cell(200, 10, txt="--- Pooling Option ---", ln=True)
+        
+        if show_pooling_option and pooling_price_usd_per_tonne > 0:
+            pdf.set_font("Arial", size=10)
+            pdf.cell(200, 10, txt=f"CO₂ Deficit: {deficit_tonnes:,.2f} gCO₂eq", ln=True)
+            pdf.cell(200, 10, txt=f"Pooling Price: {pooling_price_usd_per_tonne:,.2f} USD/tCO₂eq", ln=True)
+            pdf.cell(200, 10, txt=f"Pooling Cost: {pooling_cost_eur:,.2f} Eur", ln=True)
+
         # Mitigation Options
         pdf.ln(5)
         pdf.set_font("Arial", size=11)
@@ -458,9 +469,9 @@ if st.button("Export to PDF"):
 
             mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
             total_with_mitigation = total_cost + mitigation_total_cost
+            total_with_pooling = total_cost + pooling_cost_eur
             total_with_penalty = total_cost + penalty
-            total_with_pooling = total_cost + pooling_cost
-        
+                    
         else:
             mitigation_rows_sorted = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
             for row in mitigation_rows_sorted:
@@ -470,17 +481,6 @@ if st.button("Export to PDF"):
             pdf.set_font("Arial", "B", size=12)
             pdf.cell(200, 10, txt="No mitigation fuel prices provided - quantities only report", ln=True)
 
-        # Pooling Option
-        pdf.ln(5)
-        pdf.set_font("Arial", size=10)
-        pdf.cell(200, 10, txt="--- Pooling Option ---", ln=True)
-        
-        if show_pooling_option and pooling_price_usd_per_tonne > 0:
-            pdf.set_font("Arial", size=10)
-            pdf.cell(200, 10, txt=f"CO₂ Deficit: {deficit_tonnes:,.2f} gCO₂eq", ln=True)
-            pdf.cell(200, 10, txt=f"Pooling Price: {pooling_price_usd_per_tonne:,.2f} USD/tCO₂eq", ln=True)
-            pdf.cell(200, 10, txt=f"Pooling Cost: {pooling_cost_eur:,.2f} Eur", ln=True)
-            pdf.cell(200, 10, txt=f"Total Cost (Fuels + Pooling): {total_with_pooling:,.2f} Eur", ln=True)
             
             pdf.ln(5)
             pdf.set_font("Arial", "B", size=12)
