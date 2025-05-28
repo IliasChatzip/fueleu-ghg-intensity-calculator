@@ -469,7 +469,6 @@ if st.button("Export to PDF"):
 
             mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
             total_with_mitigation = total_cost + mitigation_total_cost
-            total_with_pooling = total_cost + pooling_cost_eur
             total_with_penalty = total_cost + penalty
                     
         else:
