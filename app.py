@@ -489,7 +489,6 @@ if st.button("Export to PDF"):
         pdf.ln(10)
 
         # Fuel Breakdown
-        total_cost = 0
         pdf.set_font("Arial", size=11)
         pdf.cell(200, 10, txt="--- Fuel Breakdown ---", ln=True)
         user_entered_prices = any(fuel_price_inputs.get(f["name"], 0.0) > 0.0 for f in FUELS)
