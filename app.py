@@ -109,13 +109,6 @@ fuel_price_inputs = {}
 initial_fuels = [f["name"] for f in FUELS if not f["rfnbo"] and "Bio" not in f["name"] and "Biodiesel" not in f["name"] and "E-" not in f["name"] and "Vegetable" not in f["name"]]
 mitigation_fuels = [f["name"] for f in FUELS if "Bio" in f["name"] or "Biodiesel" in f["name"] or "Vegetable" in f["name"] or f["rfnbo"] or "E-" in f["name"]]
 
-
-# Detect if any price was entered
-user_entered_prices = any(
-    fuel_inputs.get(f["name"], 0.0) > 0 and fuel_price_inputs.get(f["name"], 0.0) > 0.0
-    for f in FUELS
-)
-
 categories = {
     "Fossil ": [f for f in FUELS if not f['rfnbo'] and "Bio" not in f['name'] and "Biodiesel" not in f['name'] and "E-" not in f['name'] and "Green" not in f['name'] and "Vegetable" not in f['name']],
     "Bio": [f for f in FUELS if "Bio" in f['name'] or "Biodiesel" in f['name'] or "Vegetable" in f['name']],
@@ -260,6 +253,8 @@ if rows:
     st.dataframe(df_formatted)
     total_cost = sum(row["Cost (Eur)"] for row in rows)
     st.metric("Total Fuel Cost (Eur)", f"{total_cost:,.2f}")
+    user_entered_prices = any(
+        fuel_price_inputs.get(row["Fuel"], 0.0) > 0.0 for row in rows
 else:
     st.info("No fuel data provided yet.")
 
