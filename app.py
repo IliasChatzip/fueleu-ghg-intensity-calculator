@@ -376,7 +376,7 @@ if penalty > 0:
             scenario1 = total_cost + penalty
             scenario2 = total_with_pooling
             scenario3 = total_cost + mitigation_total_cost
-            scenario4 = total_substitution_cost if total_substitution_cost is not None else None
+            scenario4 = substitution_cost if substitution_cost is not None else None
             st.metric("Scenario 1: Initial Fuels + Penalty", f"{scenario1:,.2f} Eur")
             st.metric("Scenario 2: Initial Fuels + Pooling (No Penalty)", f"{scenario2:,.2f} Eur")
             st.metric("Scenario 3: Initial Fuels + Mitigation Fuels (No Penalty)", f"{scenario3:,.2f} Eur")
