@@ -254,7 +254,7 @@ if rows:
     total_cost = sum(row["Cost (Eur)"] for row in rows)
     st.metric("Total Fuel Cost (Eur)", f"{total_cost:,.2f}")
     user_entered_prices = any(
-        fuel_price_inputs.get(row["Fuel"], 0.0) > 0.0 for row in rows
+        fuel_price_inputs.get(row["Fuel"], 0.0) > 0.0 for row in rows)
 else:
     st.info("No fuel data provided yet.")
 
