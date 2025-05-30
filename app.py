@@ -243,6 +243,8 @@ if st.session_state.get("trigger_reset", False):
 
 # === OUTPUT ===
 
+total_cost = 0.0
+
 st.subheader("Fuel Breakdown")
 if rows:
     df_raw = pd.DataFrame(rows).sort_values("Emissions (gCO2eq)", ascending=False).reset_index(drop=True)
