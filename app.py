@@ -304,7 +304,7 @@ if deficit_tonnes > 0.001:
 
 getcontext().prec = 12
 user_entered_mitigation_price = False
-if penalty == 0:
+if rows and penalty ==0
     st.info("✅ Compliance already achieved! No mitigation required.")
 else:
     st.subheader("Mitigation Options (Penalty Offset)")
