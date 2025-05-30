@@ -392,6 +392,7 @@ if penalty > 0:
 # === SUBSTITUTION SCENARIO ===
 
 if penalty > 0:
+    st.subheader("Sub-Mitigation Option (Bare Compliance Replacement)")
     default_substitute_fuel = "Biodiesel (UCO,B20)"
     default_substitute_index = mitigation_fuels.index(default_substitute_fuel) if default_substitute_fuel in mitigation_fuels else 0
 
@@ -410,7 +411,6 @@ if penalty > 0:
     replaced_mass = None
 
  if qty_initial > 0 and price_initial > 0.0 and substitution_price_usd > 0.0:
-     st.subheader("Sub-Mitigation Option (Bare Compliance Replacement)")
      st.markdown("Estimate compliance by replacing the smallest possible fraction of a high-emission fuel with a mitigation fuel, ensuring GHG intensity is just below the FuelEU target.")
 
      initial_props = next(f for f in FUELS if f["name"] == initial_fuel)
