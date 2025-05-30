@@ -445,7 +445,6 @@ if penalty > 0:
             st.markdown(f"**Replaced {initial_fuel} mass**: {replaced_mass:,.1f} tonnes")
             st.markdown(f"**Added {substitute_fuel} mass**: {replaced_mass:,.1f} tonnes")
             st.markdown(f"**Additional substitution cost **: {additional_substitution_cost:,.2f} EUR")
-            st.metric("Sub-Mitigation (No Penalty)", f"{total_substitution_cost:,.2f} Eur")
 
     else:
            st.info("Enter valid fuel quantities and prices to estimate substitution cost.")
@@ -460,6 +459,7 @@ if user_entered_mitigation_price:
     st.metric("Initial Fuels + Penalty", f"{scenario1:,.2f} Eur")
     st.metric("Initial Fuels + Pooling (No Penalty)", f"{scenario2:,.2f} Eur")
     st.metric("Initial Fuels + Mitigation Fuels (No Penalty)", f"{scenario3:,.2f} Eur")
+    st.metric("Sub-Mitigation (No Penalty)", f"{total_substitution_cost:,.2f} Eur")
 else:
     df_mit = pd.DataFrame(mitigation_rows)
     st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
