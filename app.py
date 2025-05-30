@@ -390,6 +390,13 @@ if penalty > 0:
 
 
 # === SUBSTITUTION SCENARIO ===
+initial_fuel = st.selectbox("Select Fuel to Replace", initial_fuels, key="sub_initial")
+substitute_fuel = st.selectbox("Select Mitigation Fuel to Use", mitigation_fuels, key="sub_mitigation")
+
+qty_initial = fuel_inputs.get(initial_fuel, 0.0)
+price_initial = fuel_price_inputs.get(initial_fuel, 0.0) * exchange_rate
+price_sub = fuel_price_inputs.get(substitute_fuel, 0.0) * exchange_rate
+
 if initial_fuel and substitute_fuel and qty_initial > 0 and price_initial > 0.0 and price_sub > 0.0:
     qty_initial = fuel_inputs.get(initial_fuel, 0.0) if "initial_fuel" in locals() else 0.0
     price_initial = fuel_price_inputs.get(initial_fuel, 0.0) * exchange_rate if "initial_fuel" in locals() else 0.0
@@ -435,8 +442,8 @@ if initial_fuel and substitute_fuel and qty_initial > 0 and price_initial > 0.0 
 
             st.metric("Estimated Substitution Scenario Cost (Eur)", f"{total_substitution_cost:,.2f}")
 
-        else:
-            st.info("Enter valid fuel prices to estimate substitution cost.")
+else:
+    st.info("Enter valid fuel prices to estimate substitution cost.")
 
 # === COMPLIANCE CHART ===
 years = list(range(2020, 2051, 5))
@@ -464,6 +471,8 @@ ax.legend()
 ax.grid(True)
 st.pyplot(fig)
 
+total_with_penalty = total_cost + penalty
+total_with_mitigation = total_cost + mitigation_total_cost
 
 # === PDF EXPORT ===
 if st.button("Export to PDF"):
