@@ -458,13 +458,15 @@ ax.plot(years, targets, linestyle='--', marker='o', label='EU Target')
 for x, y in zip(years, targets):
     ax.annotate(f"{y:.2f}", (x, y), textcoords="offset points", xytext=(0,5), ha='center', fontsize=8)
 computed_ghg = st.session_state.get("computed_ghg", ghg_intensity)
-ax.axhline(st.session_state["computed_ghg"], color='red', linestyle='-', label='Your GHG Intensity')
-ax.annotate(f"{computed_ghg:.2f} gCO2eq/MJ",
+target_value = target_intensity(year)
+line_color = 'red' if computed_ghg > target_value else 'green'
+ax.axhline(computed_ghg, color=line_color, linestyle='-', label='Your GHG Intensity')
+ax.annotate(f"{computed_ghg:.2f}",
             xy=(2035, computed_ghg),
             xytext=(10, 0),
             textcoords="offset points",
             ha="left", va="center",
-            color="red", fontsize=9, fontweight="bold")
+            color="black", fontsize=9)
 ax.set_xlabel("Year")
 ax.set_ylabel("gCO2eq/MJ")
 ax.set_title("Your Performance vs Sector Target")
