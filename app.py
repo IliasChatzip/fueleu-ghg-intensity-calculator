@@ -389,6 +389,9 @@ if penalty > 0:
 
 # === SUBSTITUTION SCENARIO ===
 
+default_substitute_fuel = "Biodiesel (UCO,B20)"
+default_substitute_index = mitigation_fuels.index(default_substitute_fuel) if default_substitute_fuel in mitigation_fuels else 0
+
 initial_fuel = st.selectbox("Select Fuel to Replace", initial_fuels, key="sub_initial")
 substitute_fuel = st.selectbox("Select Mitigation Fuel to Use", mitigation_fuels, key="sub_mitigation")
 
