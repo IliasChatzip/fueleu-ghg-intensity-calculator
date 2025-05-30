@@ -373,7 +373,7 @@ if penalty > 0:
 
 # === SUBSTITUTION SCENARIO ===
 
-if total_energy > 0 and ghg_intensity > target_intensity(year):
+if penalty > 0:
     st.subheader("Sub-Mitigation Option (Bare Compliance Replacement)")
     default_substitute_fuel = "Biodiesel (UCO,B20)"
     default_substitute_index = mitigation_fuels.index(default_substitute_fuel) if default_substitute_fuel in mitigation_fuels else 0
