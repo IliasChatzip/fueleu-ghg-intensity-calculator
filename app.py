@@ -400,7 +400,7 @@ substitute_fuel = st.selectbox("Select Mitigation Fuel to Use", mitigation_fuels
 qty_initial = fuel_inputs.get(initial_fuel, 0.0)
 price_initial = fuel_price_inputs.get(initial_fuel, 0.0) * exchange_rate
 substitution_price_usd = st.number_input(
-    f"{substitute_fuel} - Price for Substitution Mode (USD/t)",
+    f"{substitute_fuel} - Price for Mitigation fuel (USD/t)",
     min_value=0.0, value=0.0, step=10.0, key="substitution_price_input"
 )
 substitution_price_eur = substitution_price_usd * exchange_rate
