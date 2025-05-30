@@ -397,50 +397,38 @@ qty_initial = fuel_inputs.get(initial_fuel, 0.0)
 price_initial = fuel_price_inputs.get(initial_fuel, 0.0) * exchange_rate
 price_sub = fuel_price_inputs.get(substitute_fuel, 0.0) * exchange_rate
 
-if initial_fuel and substitute_fuel and qty_initial > 0 and price_initial > 0.0 and price_sub > 0.0:
-    qty_initial = fuel_inputs.get(initial_fuel, 0.0) if "initial_fuel" in locals() else 0.0
-    price_initial = fuel_price_inputs.get(initial_fuel, 0.0) * exchange_rate if "initial_fuel" in locals() else 0.0
-    price_sub = fuel_price_inputs.get(substitute_fuel, 0.0) * exchange_rate if "substitute_fuel" in locals() else 0.0
-        st.subheader("Substitution Scenario (Fixed Total Energy)")
-        st.markdown("Estimate compliance by replacing a portion of a high-emission fuel with a mitigation fuel, keeping the same total energy.")
+if qty_initial > 0 and price_initial > 0.0 and price_sub > 0.0:
+    st.subheader("Substitution Scenario (Fixed Total Energy)")
+    st.markdown("Estimate compliance by replacing a portion of a high-emission fuel with a mitigation fuel, keeping the same total energy.")
+    initial_fuel = st.selectbox("Select Fuel to Replace", initial_fuels, key="sub_initial")
+    substitute_fuel = st.selectbox("Select Mitigation Fuel to Use", mitigation_fuels, key="sub_mitigation")
+    initial_props = next(f for f in FUELS if f["name"] == initial_fuel)
+    sub_props = next(f for f in FUELS if f["name"] == substitute_fuel)
+    co2_initial = initial_props["ttw_co2"] * (1 - ops / 100) * wind
+    ch4_initial = initial_props["ttw_ch4"] * gwp["CH4"]
+    n2o_initial = initial_props["ttw_n20"] * gwp["N2O"]
+    ghg_initial = co2_initial + ch4_initial + n2o_initial + initial_props["wtt"]
+    co2_sub = sub_props["ttw_co2"] * (1 - ops / 100) * wind
+    ch4_sub = sub_props["ttw_ch4"] * gwp["CH4"]
+    n2o_sub = sub_props["ttw_n20"] * gwp["N2O"]
+    ghg_sub = co2_sub + ch4_sub + sub_props["wtt"]
+    target = target_intensity(year)
+    if ghg_sub >= ghg_initial:
+        st.warning("Selected mitigation fuel has a higher GHG intensity than the initial fuel. Substitution won't improve compliance.")
+    else:
+        x = (ghg_initial - target) / (ghg_initial - ghg_sub)
+        x = max(0, min(1, x))  # Clamp
+        st.success(f"To comply with the FuelEU target of {target:.2f} gCO2eq/MJ, you need to replace at least **{x*100:.2f}%** of {initial_fuel} with {substitute_fuel}.")
+        qty_sub = x * qty_initial
+        qty_remain = (1 - x) * qty_initial
+        substitution_cost = (qty_sub * price_sub) + (qty_remain * price_initial)
+        other_fuel_costs = sum(
+            fuel_inputs.get(f["name"], 0.0) * fuel_price_inputs.get(f["name"], 0.0) * exchange_rate
+            for f in FUELS if f["name"] not in [initial_fuel]
+        )
+        total_substitution_cost = substitution_cost + other_fuel_costs
 
-        initial_fuel = st.selectbox("Select Fuel to Replace", initial_fuels, key="sub_initial")
-        substitute_fuel = st.selectbox("Select Mitigation Fuel to Use", mitigation_fuels, key="sub_mitigation")
-
-        initial_props = next(f for f in FUELS if f["name"] == initial_fuel)
-        sub_props = next(f for f in FUELS if f["name"] == substitute_fuel)
-
-        co2_initial = initial_props["ttw_co2"] * (1 - ops / 100) * wind
-        ch4_initial = initial_props["ttw_ch4"] * gwp["CH4"]
-        n2o_initial = initial_props["ttw_n20"] * gwp["N2O"]
-        ghg_initial = co2_initial + ch4_initial + n2o_initial + initial_props["wtt"]
-
-        co2_sub = sub_props["ttw_co2"] * (1 - ops / 100) * wind
-        ch4_sub = sub_props["ttw_ch4"] * gwp["CH4"]
-        n2o_sub = sub_props["ttw_n20"] * gwp["N2O"]
-        ghg_sub = co2_sub + ch4_sub + sub_props["wtt"]
-
-        target = target_intensity(year)
-
-        if ghg_sub >= ghg_initial:
-            st.warning("Selected mitigation fuel has a higher GHG intensity than the initial fuel. Substitution won't improve compliance.")
-        else:
-            x = (ghg_initial - target) / (ghg_initial - ghg_sub)
-            x = max(0, min(1, x))  # Clamp
-
-            st.success(f"To comply with the FuelEU target of {target:.2f} gCO2eq/MJ, you need to replace at least **{x*100:.2f}%** of {initial_fuel} with {substitute_fuel}.")
-
-            qty_sub = x * qty_initial
-            qty_remain = (1 - x) * qty_initial
-            substitution_cost = (qty_sub * price_sub) + (qty_remain * price_initial)
-
-            other_fuel_costs = sum(
-                fuel_inputs.get(f["name"], 0.0) * fuel_price_inputs.get(f["name"], 0.0) * exchange_rate
-                for f in FUELS if f["name"] not in [initial_fuel]
-            )
-            total_substitution_cost = substitution_cost + other_fuel_costs
-
-            st.metric("Estimated Substitution Scenario Cost (Eur)", f"{total_substitution_cost:,.2f}")
+        st.metric("Estimated Substitution Scenario Cost (Eur)", f"{total_substitution_cost:,.2f}")
 
 else:
     st.info("Enter valid fuel prices to estimate substitution cost.")
