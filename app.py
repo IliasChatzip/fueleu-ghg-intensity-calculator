@@ -478,11 +478,11 @@ target_value = target_intensity(year)
 line_color = 'red' if computed_ghg > target_value else 'green'
 ax.axhline(computed_ghg, color=line_color, linestyle='-', label='Your GHG Intensity')
 ax.annotate(f"{computed_ghg:.2f}",
-            xy=(2035, computed_ghg),
+            xy=(2050, computed_ghg),
             xytext=(0, -10),
             textcoords="offset points",
             ha="center", va="top",
-            color="black", fontsize=8)
+            color="black", fontsize=10)
 ax.set_xlabel("Year")
 ax.set_ylabel("gCO2eq/MJ")
 ax.set_title("Your Performance vs Sector Target")
