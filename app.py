@@ -423,8 +423,8 @@ if penalty > 0:
                 if high - low < precision:
                     break
 
-        if best_x is None:
-            st.warning("Selected mitigation fuel cannot achieve compliance even with 100% replacement.")
+        if best_x is None or best_x > 1.0:
+            st.warning("⚠️ Consider alternative fuels.")
             total_substitution_cost = None
         else:
             replaced_mass = best_x * qty_initial
