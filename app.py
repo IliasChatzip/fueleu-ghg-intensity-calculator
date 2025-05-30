@@ -254,7 +254,7 @@ if rows:
         "Cost (Eur)": "{:,.2f}",
         "Emissions (gCO2eq)": "{:,.0f}",
         "Energy (MJ)": "{:,.0f}",
-        "GHG Intensity (gCO2eq/MJ)": "{:,.5f}"
+        "GHG Intensity (gCO2eq/MJ)": "{:,.2f}"
     })
     st.dataframe(df_formatted)
     total_cost = sum(row["Cost (Eur)"] for row in rows)
