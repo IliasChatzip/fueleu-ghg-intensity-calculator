@@ -112,7 +112,8 @@ mitigation_fuels = [f["name"] for f in FUELS if "Bio" in f["name"] or "Biodiesel
 
 # Detect if any price was entered
 user_entered_prices = any(
-    st.session_state.get(f"price_{fuel['name']}", 0.0) > 0.0 for fuel in FUELS
+    fuel_inputs.get(f["name"], 0.0) > 0 and fuel_price_inputs.get(f["name"], 0.0) > 0.0
+    for f in FUELS
 )
 
 categories = {
