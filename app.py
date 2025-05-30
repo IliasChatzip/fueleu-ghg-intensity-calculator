@@ -105,6 +105,9 @@ st.sidebar.info("Enter fuel prices in USD & provide exchange rate.")
 st.sidebar.subheader("Fuel Inputs")
 fuel_inputs = {}
 fuel_price_inputs = {}
+initial_fuels = [f["name"] for f in FUELS if not f["rfnbo"] and "Bio" not in f["name"] and "Biodiesel" not in f["name"] and "E-" not in f["name"] and "Vegetable" not in f["name"]]
+mitigation_fuels = [f["name"] for f in FUELS if "Bio" in f["name"] or "Biodiesel" in f["name"] or "Vegetable" in f["name"] or f["rfnbo"] or "E-" in f["name"]]
+
 
 # Detect if any price was entered
 user_entered_prices = any(
@@ -293,6 +296,7 @@ if deficit_tonnes > 0:
     else:
        st.info("Enter a non-zero pooling price to activate Scenario 2.")
 
+substitution_cost = None  # Initialize substitution scenario cost
 
 # === MITIGATION OPTIONS ===
 
@@ -372,12 +376,13 @@ if penalty > 0:
             scenario1 = total_cost + penalty
             scenario2 = total_with_pooling
             scenario3 = total_cost + mitigation_total_cost
+            scenario4 = substitution_cost if substitution_cost is not None else None
             st.metric("Scenario 1: Initial Fuels + Penalty", f"{scenario1:,.2f} Eur")
             st.metric("Scenario 2: Initial Fuels + Pooling (No Penalty)", f"{scenario2:,.2f} Eur")
             st.metric("Scenario 3: Initial Fuels + Mitigation Fuels (No Penalty)", f"{scenario3:,.2f} Eur")
-            
-            if substitution_cost:
-                st.metric("Scenario 4: Substitution Mode (No Penalty)", f"{scenario4:,.2f} Eur")
+                        
+            if substitution_cost is not None:
+                st.metric("Scenario 4: Substitution Mode (No Penalty)", f"{substitution_cost:,.2f} Eur")
 
         else:
              # No price: show mitigation table (quantity report)
@@ -388,8 +393,6 @@ st.markdown("This tool estimates how much of a high-emission fuel (e.g., HFO) yo
 
 # === SUBSTITUTION SCENARIO ===
 st.subheader("Substitution Scenario (Fixed Total Energy)")
-
-substitution_cost = None  # Initialize substitution scenario cost
 
 if initial_fuels and mitigation_fuels:
     st.markdown("Estimate compliance by replacing a portion of a high-emission fuel with a mitigation fuel, keeping the same total energy.")
@@ -553,8 +556,13 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt=f"Scenario 1 (Initial fuels + Penalty): {total_with_penalty:,.2f} Eur", ln=True)
         pdf.cell(200, 10, txt=f"Scenario 2 (Initial fuels + Pooling, no Penalty): {total_with_pooling:,.2f} Eur", ln=True)
         pdf.cell(200, 10, txt=f"Scenario 3 (Initial fuels + Mitigation fuels, no Penalty): {total_with_mitigation:,.2f} Eur", ln=True)
-            
-                            
+        if substitution_cost is not None:
+            total_substitution_cost = substitution_cost + sum(
+                fuel_inputs.get(f["name"], 0.0) * fuel_price_inputs.get(f["name"], 0.0) * exchange_rate
+                for f in FUELS if f["name"] not in [initial_fuel]
+            )
+            pdf.cell(200, 10, txt=f"Scenario 4 (Substitution Mode, no Penalty): {substitution_cost:,.2f} Eur", ln=True)
+                                        
         # Export
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
             pdf.output(tmp_pdf.name)
