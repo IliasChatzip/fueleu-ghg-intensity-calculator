@@ -300,8 +300,8 @@ if deficit_tonnes > 0:
 
 # === MITIGATION OPTIONS ===
 
-# Set precision to 12 digits
 getcontext().prec = 12
+user_entered_mitigation_price = False
 if penalty > 0:
     st.subheader("Mitigation Options (Penalty Offset)")
     st.info(" Mitigation fuel is an **addition** to the existing fuel selection, not a replacement. It supplements the initial fuels to help achieve compliance.")
@@ -369,7 +369,6 @@ if penalty > 0:
             row["Estimated Cost (Eur)"] = row["Price (USD/t)"] * exchange_rate * row["Required Amount (t)"]
             
         mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
-        user_entered_mitigation_price = price_usd > 0
 
 # === SUBSTITUTION SCENARIO ===
 
