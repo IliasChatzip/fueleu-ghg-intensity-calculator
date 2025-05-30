@@ -222,6 +222,7 @@ else:
      penalty = (abs(compliance_balance) / (ghg_intensity * VLSFO_ENERGY_CONTENT)) * PENALTY_RATE
 
 mitigation_total_cost = 0.0
+substitution_cost = None
 # Safeguard for mitigation_rows
 mitigation_rows = []
 
