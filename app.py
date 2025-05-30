@@ -226,6 +226,7 @@ else:
 
 mitigation_total_cost = 0.0
 substitution_cost = None
+total_substitution_cost = None
 # Safeguard for mitigation_rows
 mitigation_rows = []
 
@@ -368,9 +369,6 @@ if penalty > 0:
             
         mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
         user_entered_mitigation_price = price_usd > 0
-
-        if substitution_cost is not None:
-                st.metric("Scenario 4: Substitution Mode (No Penalty)", f"{total_substitution_cost:,.2f} Eur")
             
         if user_entered_mitigation_price:
             # User entered price: Only show scenarios
@@ -390,6 +388,7 @@ if penalty > 0:
 
 
 # === SUBSTITUTION SCENARIO ===
+
 initial_fuel = st.selectbox("Select Fuel to Replace", initial_fuels, key="sub_initial")
 substitute_fuel = st.selectbox("Select Mitigation Fuel to Use", mitigation_fuels, key="sub_mitigation")
 
@@ -400,8 +399,6 @@ price_sub = fuel_price_inputs.get(substitute_fuel, 0.0) * exchange_rate
 if qty_initial > 0 and price_initial > 0.0 and price_sub > 0.0:
     st.subheader("Substitution Scenario (Fixed Total Energy)")
     st.markdown("Estimate compliance by replacing a portion of a high-emission fuel with a mitigation fuel, keeping the same total energy.")
-    initial_fuel = st.selectbox("Select Fuel to Replace", initial_fuels, key="sub_initial")
-    substitute_fuel = st.selectbox("Select Mitigation Fuel to Use", mitigation_fuels, key="sub_mitigation")
     initial_props = next(f for f in FUELS if f["name"] == initial_fuel)
     sub_props = next(f for f in FUELS if f["name"] == substitute_fuel)
     co2_initial = initial_props["ttw_co2"] * (1 - ops / 100) * wind
@@ -429,6 +426,7 @@ if qty_initial > 0 and price_initial > 0.0 and price_sub > 0.0:
         total_substitution_cost = substitution_cost + other_fuel_costs
 
         st.metric("Estimated Substitution Scenario Cost (Eur)", f"{total_substitution_cost:,.2f}")
+        st.metric("Scenario 4: Substitution Mode (No Penalty)", f"{total_substitution_cost:,.2f} Eur")
 
 else:
     st.info("Enter valid fuel prices to estimate substitution cost.")
@@ -504,6 +502,7 @@ if st.button("Export to PDF"):
             pdf.ln(3)
             pdf.cell(200, 10, txt=f"Conversion Rate Used: 1 USD = {exchange_rate:.6f} EUR", ln=True)
 
+        pooling_cost_eur = 0.0
         # Pooling Option
         pdf.ln(5)
         pdf.set_font("Arial", size=11)
@@ -545,7 +544,7 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt=f"Scenario 1 (Initial fuels + Penalty): {total_with_penalty:,.2f} Eur", ln=True)
         pdf.cell(200, 10, txt=f"Scenario 2 (Initial fuels + Pooling, no Penalty): {total_with_pooling:,.2f} Eur", ln=True)
         pdf.cell(200, 10, txt=f"Scenario 3 (Initial fuels + Mitigation fuels, no Penalty): {total_with_mitigation:,.2f} Eur", ln=True)
-        if substitution_cost is not None:
+        if total_substitution_cost is not None:
             pdf.cell(200, 10, txt=f"Scenario 4 (Substitution Mode, no Penalty): {total_substitution_cost:,.2f} Eur", ln=True)
                                         
         # Export
