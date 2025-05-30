@@ -281,7 +281,7 @@ pooling_cost = 0.0
 total_with_pooling = 0.0
 deficit_tonnes = co2_balance_gco2eq / 1_000_000
 
-if deficit_tonnes > 0:
+if deficit_tonnes > 0.001:
     show_pooling_option = True
     st.subheader("Pooling Option (Compliance Offset)")
     st.info(f"CO2 Deficit: {deficit_tonnes:,.2f} tCO2eq. You may offset this via pooling if you have access to external credits.")
