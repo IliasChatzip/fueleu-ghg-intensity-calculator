@@ -602,7 +602,7 @@ if st.button("Export to PDF"):
         pdf.set_font("Arial", "B", size=12)
         pdf.cell(200, 10, txt="--- Cost Analysis ---", ln=True)
         pdf.set_font("Arial", size=10)
-        pdf.multi_cell(0, 10, "These scenarios estimate different compliance pathways. Mitigation fuels are added **on top** of initial fuel selections. Substitution replaces a **fraction** of an existing fuel for compliance.")
+        pdf.multi_cell(0, 10, "These scenarios estimate different compliance pathways. Mitigation fuels are added **on top** of initial fuel selections.")
         pdf.set_font("Arial", style="B", size=10)
         pdf.cell(200, 10, txt=f"- Initial fuels + Penalty: {conservative_total:,.2f} Eur", ln=True)
         pdf.set_font("Arial", style="B", size=10)
