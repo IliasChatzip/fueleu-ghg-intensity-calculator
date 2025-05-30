@@ -440,30 +440,30 @@ if penalty > 0:
                 if high - low < precision:
                     break
 
-     if best_x is None:
-         st.warning("Selected mitigation fuel cannot achieve compliance even with 100% replacement.")
-         total_substitution_cost = None
-     else:
-         replaced_mass = best_x * qty_initial
+    if best_x is None:
+        st.warning("Selected mitigation fuel cannot achieve compliance even with 100% replacement.")
+        total_substitution_cost = None
+    else:
+        replaced_mass = best_x * qty_initial
 
-         initial_fuel_cost = qty_initial * price_initial
-         mitigation_fuel_cost = replaced_mass * substitution_price_eur
-         remaining_fuel_cost = (qty_initial - replaced_mass) * price_initial
+        initial_fuel_cost = qty_initial * price_initial
+        mitigation_fuel_cost = replaced_mass * substitution_price_eur
+        remaining_fuel_cost = (qty_initial - replaced_mass) * price_initial
 
-         additional_substitution_cost = (replaced_mass * (substitution_price_eur-price_initial))
-         substitution_total_cost = mitigation_fuel_cost + remaining_fuel_cost
-         other_fuel_costs = sum(
-             fuel_inputs.get(f["name"], 0.0) * fuel_price_inputs.get(f["name"], 0.0) * exchange_rate
-             for f in FUELS if f["name"] not in [initial_fuel]
-             )
+        additional_substitution_cost = (replaced_mass * (substitution_price_eur-price_initial))
+        substitution_total_cost = mitigation_fuel_cost + remaining_fuel_cost
+        other_fuel_costs = sum(
+            fuel_inputs.get(f["name"], 0.0) * fuel_price_inputs.get(f["name"], 0.0) * exchange_rate
+            for f in FUELS if f["name"] not in [initial_fuel]
+            )
         
-         total_substitution_cost = substitution_total_cost + other_fuel_costs
+        total_substitution_cost = substitution_total_cost + other_fuel_costs
 
-         st.success(f"To comply with the FuelEU target of {target:.12f} gCO2eq/MJ, you need to replace at least **{best_x*100:.12f}%** of {initial_fuel} with {substitute_fuel}.")
-         st.markdown(f"**Replaced {initial_fuel} mass**: {replaced_mass:,.1f} tonnes")
-         st.markdown(f"**Added {substitute_fuel} mass**: {replaced_mass:,.1f} tonnes")
-         st.markdown(f"**Additional substitution cost **: {additional_substitution_cost:,.2f} EUR")
-         st.metric("Scenario 4: Sub-Mitigation (No Penalty)", f"{total_substitution_cost:,.2f} Eur")
+        st.success(f"To comply with the FuelEU target of {target:.12f} gCO2eq/MJ, you need to replace at least **{best_x*100:.12f}%** of {initial_fuel} with {substitute_fuel}.")
+        st.markdown(f"**Replaced {initial_fuel} mass**: {replaced_mass:,.1f} tonnes")
+        st.markdown(f"**Added {substitute_fuel} mass**: {replaced_mass:,.1f} tonnes")
+        st.markdown(f"**Additional substitution cost **: {additional_substitution_cost:,.2f} EUR")
+        st.metric("Scenario 4: Sub-Mitigation (No Penalty)", f"{total_substitution_cost:,.2f} Eur")
 
     else:
         st.info("Enter valid fuel quantities and prices to estimate substitution cost.")
