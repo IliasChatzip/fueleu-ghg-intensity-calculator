@@ -435,12 +435,10 @@ if penalty > 0:
             if blended_ghg < target - precision:
                 best_x = mid
                 high = mid
-                else:
-                    low = mid
-                    if high - low < precision:
-                        break
-
-
+            else:
+                low = mid
+                if high - low < precision:
+                    break
 
     if best_x is None:
         st.warning("Selected mitigation fuel cannot achieve compliance even with 100% replacement.")
