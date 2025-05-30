@@ -386,52 +386,7 @@ if penalty > 0:
 
 st.markdown("This tool estimates how much of a high-emission fuel (e.g., HFO) you need to replace with a cleaner fuel (e.g., Biodiesel) to comply with FuelEU targets without increasing total energy consumption.")
 
-# === SUBSTITUTION MODE ===
-st.subheader("Substitution Mode (Fixed Total Energy)")
-
-initial_fuels = [f["name"] for f in FUELS if fuel_inputs.get(f["name"], 0.0) > 0.0]
-mitigation_fuels = [f["name"] for f in FUELS if "Biodiesel" in f["name"] or "HVO" in f["name"] or "Bio" in f["name"] or "Vegetable" in f["name"]]
-
-if initial_fuels and mitigation_fuels:
-    initial_fuel = st.selectbox("Select Fuel to Replace", initial_fuels, key="sub_initial")
-    substitute_fuel = st.selectbox("Select Mitigation Fuel to Use", mitigation_fuels, key="sub_mitigation")
-
-    initial_props = next(f for f in FUELS if f["name"] == initial_fuel)
-    sub_props = next(f for f in FUELS if f["name"] == substitute_fuel)
-
-    co2_initial = initial_props["ttw_co2"] * (1 - ops / 100) * wind
-    ch4_initial = initial_props["ttw_ch4"] * gwp["CH4"]
-    n2o_initial = initial_props["ttw_n20"] * gwp["N2O"]
-    ghg_initial = co2_initial + ch4_initial + n2o_initial + initial_props["wtt"]
-
-    co2_sub = sub_props["ttw_co2"] * (1 - ops / 100) * wind
-    ch4_sub = sub_props["ttw_ch4"] * gwp["CH4"]
-    n2o_sub = sub_props["ttw_n20"] * gwp["N2O"]
-    ghg_sub = co2_sub + ch4_sub + sub_props["wtt"]
-
-    target = target_intensity(year)
-
-    if ghg_sub >= ghg_initial:
-        st.warning("Selected mitigation fuel has a higher GHG intensity than the initial fuel. Substitution won't improve compliance.")
-    else:
-        # Solve for substitution ratio x
-        x = (ghg_initial - target) / (ghg_initial - ghg_sub)
-        x = max(0, min(1, x))  # Clamp between 0 and 1
-
-        st.success(f"To comply with the FuelEU target of {target:.2f} gCO2eq/MJ, you need to replace at least **{x*100:.2f}%** of {initial_fuel} with {substitute_fuel}.")
-
-        # Optional cost analysis
-        price_initial = fuel_price_inputs.get(initial_fuel, 0.0) * exchange_rate
-        price_sub = fuel_price_inputs.get(substitute_fuel, 0.0) * exchange_rate
-
-        if price_initial > 0.0 and price_sub > 0.0:
-            cost_change = (x * price_sub + (1 - x) * price_initial) - price_initial
-            delta_text = "increase" if cost_change > 0 else "decrease"
-            st.info(f"Estimated average cost change per tonne: **{cost_change:.2f} EUR/t** ({delta_text} compared to using only {initial_fuel}).")
-else:
-    st.info("Please enter at least one fuel quantity and select prices to use Substitution Mode.")
-
-# === SUBSTITUTION SCENARIO (SCENARIO 4) ===
+# === SUBSTITUTION SCENARIO ===
 st.subheader("Substitution Scenario (Fixed Total Energy)")
 
 substitution_cost = None  # Initialize substitution scenario cost
@@ -442,7 +397,6 @@ if initial_fuels and mitigation_fuels:
     initial_fuel = st.selectbox("Select Fuel to Replace", initial_fuels, key="sub_initial")
     substitute_fuel = st.selectbox("Select Mitigation Fuel to Use", mitigation_fuels, key="sub_mitigation")
 
-    # Get properties
     initial_props = next(f for f in FUELS if f["name"] == initial_fuel)
     sub_props = next(f for f in FUELS if f["name"] == substitute_fuel)
 
