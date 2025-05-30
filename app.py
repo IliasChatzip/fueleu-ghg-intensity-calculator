@@ -370,9 +370,6 @@ if penalty > 0:
             
         mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
         user_entered_mitigation_price = price_usd > 0
-            
-       
-
 
 # === SUBSTITUTION SCENARIO ===
 
@@ -453,23 +450,19 @@ if penalty > 0:
     else:
            st.info("Enter valid fuel quantities and prices to estimate substitution cost.")
         
-         if user_entered_mitigation_price:
-            # User entered price: Only show scenarios
-            st.markdown("### Total Cost Scenarios")
-            st.info("💡 These scenarios estimate different compliance cost pathways. Mitigation fuels are added **on top** of initial fuel selections. Substitution replaces a **fraction** of an existing fuel for compliance.")
-            scenario1 = total_cost + penalty
-            scenario2 = total_with_pooling
-            scenario3 = total_cost + mitigation_total_cost
-            scenario4 = substitution_cost if substitution_cost is not None else None
-            st.metric("Initial Fuels + Penalty", f"{scenario1:,.2f} Eur")
-            st.metric("Initial Fuels + Pooling (No Penalty)", f"{scenario2:,.2f} Eur")
-            st.metric("Initial Fuels + Mitigation Fuels (No Penalty)", f"{scenario3:,.2f} Eur")
-
-         else:
-             # No price: show mitigation table (quantity report)
-             df_mit = pd.DataFrame(mitigation_rows)
-             st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
-
+if user_entered_mitigation_price:
+    st.markdown("### Total Cost Scenarios")
+    st.info("💡 These scenarios estimate different compliance cost pathways. Mitigation fuels are added **on top** of initial fuel selections. Substitution replaces a **fraction** of an existing fuel for compliance.")
+    scenario1 = total_cost + penalty
+    scenario2 = total_with_pooling
+    scenario3 = total_cost + mitigation_total_cost
+    scenario4 = substitution_cost if substitution_cost is not None else None
+    st.metric("Initial Fuels + Penalty", f"{scenario1:,.2f} Eur")
+    st.metric("Initial Fuels + Pooling (No Penalty)", f"{scenario2:,.2f} Eur")
+    st.metric("Initial Fuels + Mitigation Fuels (No Penalty)", f"{scenario3:,.2f} Eur")
+else:
+    df_mit = pd.DataFrame(mitigation_rows)
+    st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
 
 # === COMPLIANCE CHART ===
 years = list(range(2020, 2051, 5))
