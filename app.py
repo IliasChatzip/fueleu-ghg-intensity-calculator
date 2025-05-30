@@ -296,7 +296,6 @@ if deficit_tonnes > 0:
     else:
        st.info("Enter a non-zero pooling price to activate Scenario 2.")
 
-substitution_cost = None  # Initialize substitution scenario cost
 
 # === MITIGATION OPTIONS ===
 
@@ -391,9 +390,6 @@ if penalty > 0:
 
 
 # === SUBSTITUTION SCENARIO ===
-substitution_cost = None
-total_substitution_cost = None
-
 if initial_fuels and mitigation_fuels:
     qty_initial = fuel_inputs.get(initial_fuel, 0.0) if "initial_fuel" in locals() else 0.0
     price_initial = fuel_price_inputs.get(initial_fuel, 0.0) * exchange_rate if "initial_fuel" in locals() else 0.0
@@ -443,10 +439,6 @@ if initial_fuels and mitigation_fuels:
 
         else:
             st.info("Enter valid fuel prices to estimate substitution cost.")
-
-else:
-    st.info("Select initial fuels and mitigation fuels for Substitution Mode.")
-
 
 # === COMPLIANCE CHART ===
 years = list(range(2020, 2051, 5))
