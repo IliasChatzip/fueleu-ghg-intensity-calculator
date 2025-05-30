@@ -575,12 +575,16 @@ if st.button("Export to PDF"):
             
         pdf.ln(5)
         pdf.set_font("Arial", "B", size=12)
-        pdf.cell(200, 10, txt=f"(Initial fuels + Penalty): {total_with_penalty:,.2f} Eur", ln=True)
-        pdf.cell(200, 10, txt=f"(Initial fuels + Pooling, no Penalty): {total_with_pooling:,.2f} Eur", ln=True)
-        pdf.cell(200, 10, txt=f"(Initial fuels + Mitigation fuels, no Penalty): {total_with_mitigation:,.2f} Eur", ln=True)
+        pdf.cell(200, 10, txt="--- Cost Analysis ---", ln=True)
+        pdf.set_font("Arial", size=10)
+        pdf.multi_cell(0, 10, "💡 These scenarios estimate different compliance pathways. Mitigation fuels are added **on top** of initial fuel selections. Substitution replaces a **fraction** of an existing fuel for compliance.")
+        
+        pdf.cell(200, 10, txt=f"•Initial fuels + Penalty: {total_with_penalty:,.2f} Eur", ln=True)
+        pdf.cell(200, 10, txt=f"•Initial fuels + Pooling, no Penalty: {total_with_pooling:,.2f} Eur", ln=True)
+        pdf.cell(200, 10, txt=f"•Initial fuels + Mitigation fuels, no Penalty: {total_with_mitigation:,.2f} Eur", ln=True)
         if total_substitution_cost and best_x is not None:
-            pdf.cell(200, 10, txt=f"(Sub-Mitigation, no Penalty): {total_substitution_cost:,.2f} Eur", ln=True)
-            pdf.cell(200, 10, txt=f"Substitution Ratio: {best_x*100:.12f}% of {initial_fuel} replaced by {substitute_fuel} for compliance.", ln=True)
+            pdf.cell(200, 10, txt=f"•Sub-Mitigation, no Penalty: {total_substitution_cost:,.2f} Eur", ln=True)
+            pdf.cell(200, 10, txt=f"Substitution Ratio: {best_x*100:.0f}% of {initial_fuel} replaced by {substitute_fuel} for compliance.", ln=True)
                                         
         # Export
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
