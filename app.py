@@ -241,6 +241,7 @@ if st.session_state.get("trigger_reset", False):
     st.experimental_rerun()
 
 # === OUTPUT ===
+
 st.subheader("Fuel Breakdown")
 if rows:
     df_raw = pd.DataFrame(rows).sort_values("Emissions (gCO2eq)", ascending=False).reset_index(drop=True)
@@ -404,9 +405,8 @@ substitution_price_usd = st.number_input(
 substitution_price_eur = substitution_price_usd * exchange_rate
 
 if qty_initial > 0 and price_initial > 0.0 and substitution_price_usd > 0.0:
-    st.subheader("Substitution Scenario (Fixed Total Energy)")
-    st.markdown("Estimate compliance by replacing a portion of a high-emission fuel with a mitigation fuel, keeping the same total energy.")
-    
+    st.subheader("Substitution Scenario (Minimum Replacement for Bare Compliance)")
+    st.markdown("Estimate compliance by replacing the smallest possible fraction of a high-emission fuel with a mitigation fuel, ensuring GHG intensity is just below the FuelEU target.")
     initial_props = next(f for f in FUELS if f["name"] == initial_fuel)
     sub_props = next(f for f in FUELS if f["name"] == substitute_fuel)
 
@@ -421,16 +421,29 @@ if qty_initial > 0 and price_initial > 0.0 and substitution_price_usd > 0.0:
     ghg_sub = co2_sub + ch4_sub + sub_props["wtt"]
 
     target = target_intensity(year)
-    
-    if ghg_sub >= ghg_initial:
-        st.warning("Selected mitigation fuel has a higher GHG intensity than the initial fuel. Substitution won't improve compliance.")
+    precision = 1e-12
+    low, high = 0.0, 1.0
+    best_x = None
+
+    for _ in range(100):
+        mid = (low + high) / 2
+        blended_ghg = mid * ghg_sub + (1 - mid) * ghg_initial
+        if blended_ghg < target - precision:
+            best_x = mid
+            high = mid
+        else:
+            low = mid
+        if high - low < precision:
+            break
+
+    if best_x is None:
+        st.warning("Selected mitigation fuel cannot achieve compliance even with 100% replacement.")
         total_substitution_cost = None
     else:
-        x = (ghg_initial - target) / (ghg_initial - ghg_sub)
-        x = max(0, min(1, x))  # Clamp
-        st.success(f"To comply with the FuelEU target of {target:.2f} gCO2eq/MJ, you need to replace at least **{x*100:.2f}%** of {initial_fuel} with {substitute_fuel}.")
-        qty_sub = x * qty_initial
-        qty_remain = (1 - x) * qty_initial
+        st.success(f"To comply with the FuelEU target of {target:.12f} gCO2eq/MJ, you need to replace at least **{best_x*100:.12f}%** of {initial_fuel} with {substitute_fuel}.")
+        qty_sub = best_x * qty_initial
+        qty_remain = (1 - best_x) * qty_initial
+
         substitution_cost = (qty_sub * substitution_price_eur) + (qty_remain * price_initial)
         other_fuel_costs = sum(
             fuel_inputs.get(f["name"], 0.0) * fuel_price_inputs.get(f["name"], 0.0) * exchange_rate
@@ -554,8 +567,9 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt=f"Scenario 1 (Initial fuels + Penalty): {total_with_penalty:,.2f} Eur", ln=True)
         pdf.cell(200, 10, txt=f"Scenario 2 (Initial fuels + Pooling, no Penalty): {total_with_pooling:,.2f} Eur", ln=True)
         pdf.cell(200, 10, txt=f"Scenario 3 (Initial fuels + Mitigation fuels, no Penalty): {total_with_mitigation:,.2f} Eur", ln=True)
-        if total_substitution_cost is not None:
-            pdf.cell(200, 10, txt=f"Scenario 4 (Substitution Mode, no Penalty): {total_substitution_cost:,.2f} Eur", ln=True)
+        if total_substitution_cost and best_x is not None:
+            pdf.cell(200, 10, txt=f"Scenario 4 (Substitution Case, no Penalty): {total_substitution_cost:,.2f} Eur", ln=True)
+            pdf.cell(200, 10, txt=f"Substitution Ratio: {best_x*100:.12f}% of {initial_fuel} replaced by {substitute_fuel} for compliance.", ln=True)
                                         
         # Export
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
