@@ -463,7 +463,7 @@ if penalty > 0:
             st.markdown(f"**Replaced {initial_fuel} mass**: {replaced_mass:,.1f} tonnes")
             st.markdown(f"**Added {substitute_fuel} mass**: {replaced_mass:,.1f} tonnes")
             st.markdown(f"**Additional substitution cost **: {additional_substitution_cost:,.2f} EUR")
-            st.metric("Scenario 4: Sub-Mitigation (No Penalty)", f"{total_substitution_cost:,.2f} Eur")
+            st.metric("Sub-Mitigation (No Penalty)", f"{total_substitution_cost:,.2f} Eur")
 
     else:
            st.info("Enter valid fuel quantities and prices to estimate substitution cost.")
