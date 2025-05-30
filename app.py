@@ -304,7 +304,7 @@ if deficit_tonnes > 0.001:
 
 getcontext().prec = 12
 user_entered_mitigation_price = False
-if rows and penalty ==0
+if rows and penalty == 0:
     st.info("✅ Compliance already achieved! No mitigation required.")
 else:
     st.subheader("Mitigation Options (Penalty Offset)")
@@ -452,20 +452,25 @@ if penalty > 0:
     else:
            st.info("Enter valid fuel quantities and prices to estimate substitution cost.")
         
-if user_entered_mitigation_price:
-    st.markdown("### Total Cost Scenarios")
-    st.info("💡 These scenarios estimate different compliance cost pathways. Mitigation fuels are added **on top** of initial fuel selections. Substitution replaces a **fraction** of an existing fuel for compliance.")
-    scenario1 = total_cost + penalty
-    scenario2 = total_with_pooling
-    scenario3 = total_cost + mitigation_total_cost
-    scenario4 = substitution_cost if substitution_cost is not None else None
-    st.metric("Initial Fuels + Penalty", f"{scenario1:,.2f} Eur")
-    st.metric("Initial Fuels + Pooling (No Penalty)", f"{scenario2:,.2f} Eur")
-    st.metric("Initial Fuels + Mitigation Fuels (No Penalty)", f"{scenario3:,.2f} Eur")
-    st.metric("Sub-Mitigation (No Penalty)", f"{total_substitution_cost:,.2f} Eur")
+if mitigation_rows:
+    if user_entered_mitigation_price:
+        st.markdown("### Total Cost Scenarios")
+        st.info("💡 These scenarios estimate different compliance cost pathways. Mitigation fuels are added **on top** of initial fuel selections. Substitution replaces a **fraction** of an existing fuel for compliance.")
+        scenario1 = total_cost + penalty
+        scenario2 = total_with_pooling
+        scenario3 = total_cost + mitigation_total_cost
+        scenario4 = substitution_cost if substitution_cost is not None else None
+        st.metric("Initial Fuels + Penalty", f"{scenario1:,.2f} Eur")
+        st.metric("Initial Fuels + Pooling (No Penalty)", f"{scenario2:,.2f} Eur")
+        st.metric("Initial Fuels + Mitigation Fuels (No Penalty)", f"{scenario3:,.2f} Eur")
+        st.metric("Sub-Mitigation (No Penalty)", f"{total_substitution_cost:,.2f} Eur")
+    else:
+        df_mit = pd.DataFrame(mitigation_rows)
+        st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
+
 else:
-    df_mit = pd.DataFrame(mitigation_rows)
-    st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
+    if rows:
+        st.info("✅ Compliance already achieved! No mitigation required.")
 
 # === COMPLIANCE CHART ===
 years = list(range(2020, 2051, 5))
