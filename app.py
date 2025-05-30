@@ -85,6 +85,7 @@ FUELS = [
 ]
     
 # === TARGET FUNCTION ===
+
 def target_intensity(year: int) -> float:
     if year <= 2020:
         return BASE_TARGET
@@ -217,8 +218,7 @@ st.session_state["computed_ghg"] = ghg_intensity
 
 compliance_balance = total_energy * (target_intensity(year) - ghg_intensity)
 co2_balance_gco2eq = (target_intensity(year) - ghg_intensity) * compliance_balance
-
-        
+       
 if compliance_balance >= 0:
      penalty = 0
 else:
@@ -232,6 +232,7 @@ mitigation_rows = []
 
 
 # === Reset Handler ===
+
 if st.session_state.get("trigger_reset", False):
     exclude_keys = {"exchange_rate"}
     for key in list(st.session_state.keys()):
@@ -256,8 +257,6 @@ if rows:
     st.dataframe(df_formatted)
     total_cost = sum(row["Cost (Eur)"] for row in rows)
     st.metric("Total Fuel Cost (Eur)", f"{total_cost:,.2f}")
-
-
 else:
     st.info("No fuel data provided yet.")
 
@@ -394,18 +393,18 @@ default_substitute_fuel = "Biodiesel (UCO,B20)"
 default_substitute_index = mitigation_fuels.index(default_substitute_fuel) if default_substitute_fuel in mitigation_fuels else 0
 
 initial_fuel = st.selectbox("Select Fuel to Replace", initial_fuels, key="sub_initial")
-substitute_fuel = st.selectbox("Select Mitigation Fuel to Use", mitigation_fuels, key="sub_mitigation")
+substitute_fuel = st.selectbox("Select Mitigation Fuel to Use", mitigation_fuels,index=default_substitute_index, key="sub_mitigation")
 
 qty_initial = fuel_inputs.get(initial_fuel, 0.0)
 price_initial = fuel_price_inputs.get(initial_fuel, 0.0) * exchange_rate
 substitution_price_usd = st.number_input(
-    f"{substitute_fuel} - Price for Substitution Mode (USD/t)",
+    f"{substitute_fuel} - Price for Sub-Mitigation Option (USD/t)",
     min_value=0.0, value=0.0, step=10.0, key="substitution_price_input"
 )
 substitution_price_eur = substitution_price_usd * exchange_rate
 
 if qty_initial > 0 and price_initial > 0.0 and substitution_price_usd > 0.0:
-    st.subheader("Substitution Scenario (Minimum Replacement for Bare Compliance)")
+    st.subheader("Sub-Mitigation Option (Minimum Replacement for Bare Compliance)")
     st.markdown("Estimate compliance by replacing the smallest possible fraction of a high-emission fuel with a mitigation fuel, ensuring GHG intensity is just below the FuelEU target.")
     initial_props = next(f for f in FUELS if f["name"] == initial_fuel)
     sub_props = next(f for f in FUELS if f["name"] == substitute_fuel)
@@ -451,8 +450,8 @@ if qty_initial > 0 and price_initial > 0.0 and substitution_price_usd > 0.0:
         )
         total_substitution_cost = substitution_cost + other_fuel_costs
 
-        st.metric("Estimated Substitution Scenario Cost (Eur)", f"{total_substitution_cost:,.2f}")
-        st.metric("Scenario 4: Substitution Mode (No Penalty)", f"{total_substitution_cost:,.2f} Eur")
+        st.metric("Estimated Sub-Mitigation Scenario Cost (Eur)", f"{total_substitution_cost:,.2f}")
+        st.metric("Scenario 4: Sub-Mitigation Option (No Penalty)", f"{total_substitution_cost:,.2f} Eur")
 
 else:
     st.info("Enter valid fuel quantities and prices to estimate substitution cost.")
@@ -512,7 +511,6 @@ if st.button("Export to PDF"):
             price_usd = fuel_price_inputs.get(fuel_name, 0.0)
             cost = qty * price_usd * exchange_rate
             ghg_intensity = row['GHG Intensity (gCO2eq/MJ)']
-            total_cost += cost
             line = f"{fuel_name}: {qty:,.0f} t @ {price_usd:,.2f} USD/t | {cost:,.2f} Eur | GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ"
             pdf.cell(200, 10, txt=line, ln=True)
 
@@ -568,7 +566,7 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt=f"Scenario 2 (Initial fuels + Pooling, no Penalty): {total_with_pooling:,.2f} Eur", ln=True)
         pdf.cell(200, 10, txt=f"Scenario 3 (Initial fuels + Mitigation fuels, no Penalty): {total_with_mitigation:,.2f} Eur", ln=True)
         if total_substitution_cost and best_x is not None:
-            pdf.cell(200, 10, txt=f"Scenario 4 (Substitution Case, no Penalty): {total_substitution_cost:,.2f} Eur", ln=True)
+            pdf.cell(200, 10, txt=f"Scenario 4 (Sub-Mitigation, no Penalty): {total_substitution_cost:,.2f} Eur", ln=True)
             pdf.cell(200, 10, txt=f"Substitution Ratio: {best_x*100:.12f}% of {initial_fuel} replaced by {substitute_fuel} for compliance.", ln=True)
                                         
         # Export
