@@ -390,12 +390,10 @@ if penalty > 0:
 
 
 # === SUBSTITUTION SCENARIO ===
-if initial_fuels and mitigation_fuels:
+if initial_fuel and substitute_fuel and qty_initial > 0 and price_initial > 0.0 and price_sub > 0.0:
     qty_initial = fuel_inputs.get(initial_fuel, 0.0) if "initial_fuel" in locals() else 0.0
     price_initial = fuel_price_inputs.get(initial_fuel, 0.0) * exchange_rate if "initial_fuel" in locals() else 0.0
     price_sub = fuel_price_inputs.get(substitute_fuel, 0.0) * exchange_rate if "substitute_fuel" in locals() else 0.0
-
-    if qty_initial > 0 and price_initial > 0.0 and price_sub > 0.0:
         st.subheader("Substitution Scenario (Fixed Total Energy)")
         st.markdown("Estimate compliance by replacing a portion of a high-emission fuel with a mitigation fuel, keeping the same total energy.")
 
@@ -458,7 +456,7 @@ ax.annotate(f"{computed_ghg:.2f}",
             xytext=(10, 0),
             textcoords="offset points",
             ha="left", va="center",
-            color="black", fontsize=9)
+            color="black", fontsize=8)
 ax.set_xlabel("Year")
 ax.set_ylabel("gCO2eq/MJ")
 ax.set_title("Your Performance vs Sector Target")
@@ -534,12 +532,7 @@ if st.button("Export to PDF"):
                 line = (f"{row['Fuel']}: {row['Required Amount (t)']:,.0f} t @ "
                         f"{row['Price (USD/t)']:,.2f} USD/t | "
                         f"{row['Estimated Cost (Eur)']:,.2f} Eur")
-                pdf.cell(200, 10, txt=line, ln=True)
-
-            mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
-            total_with_mitigation = total_cost + mitigation_total_cost
-            total_with_penalty = total_cost + penalty
-                    
+                pdf.cell(200, 10, txt=line, ln=True)        
         else:
             mitigation_rows_sorted = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
             for row in mitigation_rows_sorted:
@@ -556,10 +549,6 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt=f"Scenario 2 (Initial fuels + Pooling, no Penalty): {total_with_pooling:,.2f} Eur", ln=True)
         pdf.cell(200, 10, txt=f"Scenario 3 (Initial fuels + Mitigation fuels, no Penalty): {total_with_mitigation:,.2f} Eur", ln=True)
         if substitution_cost is not None:
-            total_substitution_cost = substitution_cost + sum(
-                fuel_inputs.get(f["name"], 0.0) * fuel_price_inputs.get(f["name"], 0.0) * exchange_rate
-                for f in FUELS if f["name"] not in [initial_fuel]
-            )
             pdf.cell(200, 10, txt=f"Scenario 4 (Substitution Mode, no Penalty): {total_substitution_cost:,.2f} Eur", ln=True)
                                         
         # Export
