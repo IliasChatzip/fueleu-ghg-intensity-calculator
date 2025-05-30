@@ -467,8 +467,6 @@ ax.legend()
 ax.grid(True)
 st.pyplot(fig)
 
-total_with_penalty = total_cost + penalty
-total_with_mitigation = total_cost + mitigation_total_cost
 
 # === PDF EXPORT ===
 if st.button("Export to PDF"):
