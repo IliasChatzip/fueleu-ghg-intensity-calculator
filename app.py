@@ -418,31 +418,31 @@ if penalty > 0:
             sub_mass_g = initial_mass_g * mid
             remain_mass_g = initial_mass_g * (1 - mid)
 
-           energy_initial = remain_mass_g * initial_props["lcv"]
-           energy_sub = sub_mass_g * sub_props["lcv"]
-           if sub_props["rfnbo"] and year <= 2033:
-               energy_sub *= REWARD_FACTOR_RFNBO_MULTIPLIER
+            energy_initial = remain_mass_g * initial_props["lcv"]
+            energy_sub = sub_mass_g * sub_props["lcv"]
+            if sub_props["rfnbo"] and year <= 2033:
+                energy_sub *= REWARD_FACTOR_RFNBO_MULTIPLIER
 
-           total_energy_blend = energy_initial + energy_sub + (total_energy - (initial_mass_g * initial_props["lcv"]))
+            total_energy_blend = energy_initial + energy_sub + (total_energy - (initial_mass_g * initial_props["lcv"]))
 
-           # Emissions
-           ttw_initial = remain_mass_g * (co2_initial + ch4_initial + n2o_initial)
-           ttw_sub = sub_mass_g * (co2_sub + ch4_sub + n2o_sub)
-           wtt_initial = energy_initial * initial_props["wtt"]
-           wtt_sub = energy_sub * sub_props["wtt"]
+            # Emissions
+            ttw_initial = remain_mass_g * (co2_initial + ch4_initial + n2o_initial)
+            ttw_sub = sub_mass_g * (co2_sub + ch4_sub + n2o_sub)
+            wtt_initial = energy_initial * initial_props["wtt"]
+            wtt_sub = energy_sub * sub_props["wtt"]
 
-           total_emissions_blend = emissions - (initial_mass_g * (co2_initial + ch4_initial + n2o_initial) + initial_mass_g * initial_props["lcv"] * initial_props["wtt"]) + ttw_initial + ttw_sub + wtt_initial + wtt_sub
+            total_emissions_blend = emissions - (initial_mass_g * (co2_initial + ch4_initial + n2o_initial) + initial_mass_g * initial_props["lcv"] * initial_props["wtt"]) + ttw_initial + ttw_sub + wtt_initial + wtt_sub
 
-           blended_ghg = total_emissions_blend / total_energy_blend if total_energy_blend > 0 else 99999
+            blended_ghg = total_emissions_blend / total_energy_blend if total_energy_blend > 0 else 99999
 
-           if blended_ghg <= target + precision:
-               best_x = mid
-               high = mid
-           else:
-               low = mid
+            if blended_ghg <= target + precision:
+                best_x = mid
+                high = mid
+            else:
+                low = mid
 
-           if high - low < precision:
-               break
+            if high - low < precision:
+                break
 
         if best_x is None or best_x > 1.0:
             st.warning("⚠️ Consider alternative fuels.")
