@@ -408,13 +408,13 @@ if penalty > 0:
         ghg_sub = co2_sub + ch4_sub + sub_props["wtt"]
         
         target = target_intensity(year)
-        precision = 1e-12
+        precision = 1e-5
         low, high = 0.0, 1.0
         best_x = None
         for _ in range(100):
             mid = (low + high) / 2
             blended_ghg = mid * ghg_sub + (1 - mid) * ghg_initial
-            if blended_ghg < target - precision:
+            if blended_ghg <= target + precision:
                 best_x = mid
                 high = mid
             else:
