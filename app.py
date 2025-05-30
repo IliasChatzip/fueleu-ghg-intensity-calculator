@@ -603,11 +603,14 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt="--- Cost Analysis ---", ln=True)
         pdf.set_font("Arial", size=10)
         pdf.multi_cell(0, 10, "These scenarios estimate different compliance pathways. Mitigation fuels are added **on top** of initial fuel selections. Substitution replaces a **fraction** of an existing fuel for compliance.")
-        
+        pdf.set_font("Arial", style="B", size=9)
         pdf.cell(200, 10, txt=f"- Initial fuels + Penalty: {conservative_total:,.2f} Eur", ln=True)
+        pdf.set_font("Arial", style="B", size=9)
         pdf.cell(200, 10, txt=f"- Initial fuels + Pooling, no Penalty: {total_with_pooling:,.2f} Eur", ln=True)
+        pdf.set_font("Arial", style="B", size=9)
         pdf.cell(200, 10, txt=f"- Initial fuels + Mitigation fuels, no Penalty: {total_with_mitigation:,.2f} Eur", ln=True)
         if penalty > 0 and total_substitution_cost and best_x is not None:
+            pdf.set_font("Arial", style="B", size=9)
             pdf.cell(200, 10, txt=f"- Sub-Mitigation, no Penalty: {total_substitution_cost:,.2f} Eur", ln=True)
             pdf.cell(200, 10, txt=f"Substitution Ratio: {best_x*100:.1f}% of {initial_fuel} replaced by {substitute_fuel} for compliance.", ln=True)
                                         
