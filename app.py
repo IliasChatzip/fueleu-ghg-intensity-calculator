@@ -10,7 +10,7 @@ import math
 import re
 
 # === PAGE CONFIG ===
-st.set_page_config(page_title="FuelEU GHG Calculator", layout="wide")
+st.set_page_config(page_title="Fuel EU GHG Calculator", layout="wide")
 
 # === STABLE RESET HANDLER ===
 def reset_app():
