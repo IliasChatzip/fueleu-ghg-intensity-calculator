@@ -449,7 +449,7 @@ if qty_initial > 0 and price_initial > 0.0 and substitution_price_usd > 0.0:
         mitigation_fuel_cost = replaced_mass * substitution_price_eur
         remaining_fuel_cost = (qty_initial - replaced_mass) * price_initial
 
-        additional_substitution_cost = (replaced_mass * (substitution_price_eur-price_initial)
+        additional_substitution_cost = (replaced_mass * (substitution_price_eur-price_initial))
         substitution_total_cost = mitigation_fuel_cost + remaining_fuel_cost
 
         other_fuel_costs = sum(
