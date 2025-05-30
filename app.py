@@ -393,19 +393,23 @@ default_substitute_fuel = "Biodiesel (UCO,B20)"
 default_substitute_index = mitigation_fuels.index(default_substitute_fuel) if default_substitute_fuel in mitigation_fuels else 0
 
 initial_fuel = st.selectbox("Select Fuel to Replace", initial_fuels, key="sub_initial")
-substitute_fuel = st.selectbox("Select Mitigation Fuel to Use", mitigation_fuels,index=default_substitute_index, key="sub_mitigation")
+substitute_fuel = st.selectbox("Select Mitigation Fuel to Use", mitigation_fuels, index=default_substitute_index, key="sub_mitigation")
 
 qty_initial = fuel_inputs.get(initial_fuel, 0.0)
 price_initial = fuel_price_inputs.get(initial_fuel, 0.0) * exchange_rate
 substitution_price_usd = st.number_input(
-    f"{substitute_fuel} - Price for Sub-Mitigation Option (USD/t)",
+    f"{substitute_fuel} - Price for Substitution Mode (USD/t)",
     min_value=0.0, value=0.0, step=10.0, key="substitution_price_input"
 )
 substitution_price_eur = substitution_price_usd * exchange_rate
 
+additional_substitution_cost = None
+replaced_mass = None
+
 if qty_initial > 0 and price_initial > 0.0 and substitution_price_usd > 0.0:
-    st.subheader("Sub-Mitigation Option (Minimum Replacement for Bare Compliance)")
+    st.subheader("Sub-Mitigation Scenario (Bare Compliance Replacement)")
     st.markdown("Estimate compliance by replacing the smallest possible fraction of a high-emission fuel with a mitigation fuel, ensuring GHG intensity is just below the FuelEU target.")
+
     initial_props = next(f for f in FUELS if f["name"] == initial_fuel)
     sub_props = next(f for f in FUELS if f["name"] == substitute_fuel)
 
@@ -439,22 +443,29 @@ if qty_initial > 0 and price_initial > 0.0 and substitution_price_usd > 0.0:
         st.warning("Selected mitigation fuel cannot achieve compliance even with 100% replacement.")
         total_substitution_cost = None
     else:
-        st.success(f"To comply with the FuelEU target of {target:.12f} gCO2eq/MJ, you need to replace at least **{best_x*100:.12f}%** of {initial_fuel} with {substitute_fuel}.")
-        qty_sub = best_x * qty_initial
-        qty_remain = (1 - best_x) * qty_initial
+        replaced_mass = best_x * qty_initial
 
-        substitution_cost = (qty_sub * substitution_price_eur) + (qty_remain * price_initial)
+        initial_fuel_cost = qty_initial * price_initial
+        mitigation_fuel_cost = replaced_mass * substitution_price_eur
+        remaining_fuel_cost = (qty_initial - replaced_mass) * price_initial
+
+        additional_substitution_cost = (replaced_mass * (substitution_price_eur-price_initial)
+        substitution_total_cost = mitigation_fuel_cost + remaining_fuel_cost
+
         other_fuel_costs = sum(
             fuel_inputs.get(f["name"], 0.0) * fuel_price_inputs.get(f["name"], 0.0) * exchange_rate
             for f in FUELS if f["name"] not in [initial_fuel]
         )
-        total_substitution_cost = substitution_cost + other_fuel_costs
+        total_substitution_cost = substitution_total_cost + other_fuel_costs
 
-        st.metric("Estimated Sub-Mitigation Scenario Cost (Eur)", f"{total_substitution_cost:,.2f}")
-        st.metric("Scenario 4: Sub-Mitigation Option (No Penalty)", f"{total_substitution_cost:,.2f} Eur")
-
+        st.success(f"To comply with the FuelEU target of {target:.12f} gCO2eq/MJ, you need to replace at least **{best_x*100:.12f}%** of {initial_fuel} with {substitute_fuel}.")
+        st.markdown(f"**Replaced {initial_fuel} mass**: {replaced_mass:,.1f} tonnes")
+        st.markdown(f"**Added {substitute_fuel} mass**: {replaced_mass:,.1f} tonnes")
+        st.markdown(f"**Additional substitution cost **: {additional_substitution_cost:,.2f} EUR")
+        st.metric("Scenario 4: Sub-Mitigation (No Penalty)", f"{total_substitution_cost:,.2f} Eur")
 else:
     st.info("Enter valid fuel quantities and prices to estimate substitution cost.")
+
 
 # === COMPLIANCE CHART ===
 years = list(range(2020, 2051, 5))
