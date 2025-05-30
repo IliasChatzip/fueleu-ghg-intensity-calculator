@@ -374,13 +374,14 @@ if penalty > 0:
         if user_entered_mitigation_price:
             # User entered price: Only show scenarios
             st.markdown("### Total Cost Scenarios")
+            st.info("💡 These scenarios estimate different compliance cost pathways. Mitigation fuels are added **on top** of initial fuel selections. Substitution replaces a **fraction** of an existing fuel for compliance.")
             scenario1 = total_cost + penalty
             scenario2 = total_with_pooling
             scenario3 = total_cost + mitigation_total_cost
             scenario4 = substitution_cost if substitution_cost is not None else None
-            st.metric("Scenario 1: Initial Fuels + Penalty", f"{scenario1:,.2f} Eur")
-            st.metric("Scenario 2: Initial Fuels + Pooling (No Penalty)", f"{scenario2:,.2f} Eur")
-            st.metric("Scenario 3: Initial Fuels + Mitigation Fuels (No Penalty)", f"{scenario3:,.2f} Eur")
+            st.metric("Initial Fuels + Penalty", f"{scenario1:,.2f} Eur")
+            st.metric("Initial Fuels + Pooling (No Penalty)", f"{scenario2:,.2f} Eur")
+            st.metric("Initial Fuels + Mitigation Fuels (No Penalty)", f"{scenario3:,.2f} Eur")
 
         else:
              # No price: show mitigation table (quantity report)
@@ -574,11 +575,11 @@ if st.button("Export to PDF"):
             
         pdf.ln(5)
         pdf.set_font("Arial", "B", size=12)
-        pdf.cell(200, 10, txt=f"Scenario 1 (Initial fuels + Penalty): {total_with_penalty:,.2f} Eur", ln=True)
-        pdf.cell(200, 10, txt=f"Scenario 2 (Initial fuels + Pooling, no Penalty): {total_with_pooling:,.2f} Eur", ln=True)
-        pdf.cell(200, 10, txt=f"Scenario 3 (Initial fuels + Mitigation fuels, no Penalty): {total_with_mitigation:,.2f} Eur", ln=True)
+        pdf.cell(200, 10, txt=f"(Initial fuels + Penalty): {total_with_penalty:,.2f} Eur", ln=True)
+        pdf.cell(200, 10, txt=f"(Initial fuels + Pooling, no Penalty): {total_with_pooling:,.2f} Eur", ln=True)
+        pdf.cell(200, 10, txt=f"(Initial fuels + Mitigation fuels, no Penalty): {total_with_mitigation:,.2f} Eur", ln=True)
         if total_substitution_cost and best_x is not None:
-            pdf.cell(200, 10, txt=f"Scenario 4 (Sub-Mitigation, no Penalty): {total_substitution_cost:,.2f} Eur", ln=True)
+            pdf.cell(200, 10, txt=f"(Sub-Mitigation, no Penalty): {total_substitution_cost:,.2f} Eur", ln=True)
             pdf.cell(200, 10, txt=f"Substitution Ratio: {best_x*100:.12f}% of {initial_fuel} replaced by {substitute_fuel} for compliance.", ln=True)
                                         
         # Export
