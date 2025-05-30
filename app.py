@@ -269,7 +269,7 @@ st.metric("Compliance Balance (MJ)", f"{compliance_balance:,.0f}")
 balance_label = "Surplus" if co2_balance_gco2eq < 0 else "Deficit"
 st.metric(f"CO2 {balance_label} (gCO2eq)", f"{co2_balance_gco2eq:,.0f}")
 st.metric("Estimated Penalty (Eur)", f"{penalty:,.2f}")
-if rows:
+if rows and user_entered_prices:
     conservative_total = total_cost + penalty
     st.metric("Total Cost of Selected Fuels + Penalty", f"{conservative_total:,.2f} Eur")
 
