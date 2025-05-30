@@ -408,7 +408,7 @@ additional_substitution_cost = None
 replaced_mass = None
 
 if qty_initial > 0 and price_initial > 0.0 and substitution_price_usd > 0.0:
-    st.subheader("Sub-Mitigation Scenario (Bare Compliance Replacement)")
+    st.subheader("Sub-Mitigation Option (Bare Compliance Replacement)")
     st.markdown("Estimate compliance by replacing the smallest possible fraction of a high-emission fuel with a mitigation fuel, ensuring GHG intensity is just below the FuelEU target.")
 
     initial_props = next(f for f in FUELS if f["name"] == initial_fuel)
