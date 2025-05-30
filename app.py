@@ -441,7 +441,7 @@ if penalty > 0:
         
             total_substitution_cost = substitution_total_cost + other_fuel_costs
 
-            st.success(f"To comply with the FuelEU target of {target:.12f} gCO2eq/MJ, you need to replace at least **{best_x*100:.12f}%** of {initial_fuel} with {substitute_fuel}.")
+            st.success(f"To comply with the FuelEU target of {target:.2f} gCO2eq/MJ, you need to replace at least **{best_x*100:.12f}%** of {initial_fuel} with {substitute_fuel}.")
             st.markdown(f"**Replaced {initial_fuel} mass**: {replaced_mass:,.1f} tonnes")
             st.markdown(f"**Added {substitute_fuel} mass**: {replaced_mass:,.1f} tonnes")
             st.markdown(f"**Additional substitution cost **: {additional_substitution_cost:,.2f} EUR")
