@@ -376,7 +376,7 @@ if penalty > 0:
             scenario1 = total_cost + penalty
             scenario2 = total_with_pooling
             scenario3 = total_cost + mitigation_total_cost
-            scenario4 = substitution_cost if substitution_cost is not None else None
+            scenario4 = total_substitution_cost if total_substitution_cost is not None else None
             st.metric("Scenario 1: Initial Fuels + Penalty", f"{scenario1:,.2f} Eur")
             st.metric("Scenario 2: Initial Fuels + Pooling (No Penalty)", f"{scenario2:,.2f} Eur")
             st.metric("Scenario 3: Initial Fuels + Mitigation Fuels (No Penalty)", f"{scenario3:,.2f} Eur")
@@ -438,9 +438,9 @@ if initial_fuels and mitigation_fuels:
                 fuel_inputs.get(f["name"], 0.0) * fuel_price_inputs.get(f["name"], 0.0) * exchange_rate
                 for f in FUELS if f["name"] not in [initial_fuel]
             )
-            scenario4 = substitution_cost + other_fuel_costs
+            total_substitution_cost = substitution_cost + other_fuel_costs
 
-            st.metric("Estimated Substitution Scenario Cost (Eur)", f"{scenario4:,.2f}")
+            st.metric("Estimated Substitution Scenario Cost (Eur)", f"{total_substitution_cost:,.2f}")
 
         else:
             st.info("Enter valid fuel prices to estimate substitution cost.")
@@ -458,7 +458,14 @@ fig, ax = plt.subplots(figsize=(8, 4))
 ax.plot(years, targets, linestyle='--', marker='o', label='EU Target')
 for x, y in zip(years, targets):
     ax.annotate(f"{y:.2f}", (x, y), textcoords="offset points", xytext=(0,5), ha='center', fontsize=8)
+computed_ghg = st.session_state.get("computed_ghg", ghg_intensity)
 ax.axhline(st.session_state["computed_ghg"], color='red', linestyle='-', label='Your GHG Intensity')
+ax.annotate(f"{computed_ghg:.2f} gCO2eq/MJ",
+            xy=(2035, computed_ghg),
+            xytext=(10, 0),
+            textcoords="offset points",
+            ha="left", va="center",
+            color="red", fontsize=9, fontweight="bold")
 ax.set_xlabel("Year")
 ax.set_ylabel("gCO2eq/MJ")
 ax.set_title("Your Performance vs Sector Target")
@@ -480,7 +487,6 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt=f"EU Target for {year}: {target_intensity(year):.2f} gCO2eq/MJ", ln=True)
         pdf.cell(200, 10, txt=f"GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ", ln=True)
         pdf.cell(200, 10, txt=f"Compliance Balance: {compliance_balance:,.0f} MJ", ln=True)
-        co2_balance_gco2eq = (target_intensity(year) - ghg_intensity) * compliance_balance
         balance_label = "Surplus" if co2_balance_gco2eq < 0 else "Deficit"
         pdf.cell(200, 10, txt=f"CO2 {balance_label}: {co2_balance_gco2eq:,.0f} gCO2eq", ln=True)
         pdf.cell(200, 10, txt=f"Penalty: {penalty:,.2f} Eur", ln=True)
@@ -561,7 +567,7 @@ if st.button("Export to PDF"):
                 fuel_inputs.get(f["name"], 0.0) * fuel_price_inputs.get(f["name"], 0.0) * exchange_rate
                 for f in FUELS if f["name"] not in [initial_fuel]
             )
-            pdf.cell(200, 10, txt=f"Scenario 4 (Substitution Mode, no Penalty): {substitution_cost:,.2f} Eur", ln=True)
+            pdf.cell(200, 10, txt=f"Scenario 4 (Substitution Mode, no Penalty): {total_substitution_cost:,.2f} Eur", ln=True)
                                         
         # Export
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
