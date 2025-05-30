@@ -369,6 +369,9 @@ if penalty > 0:
             
         mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
         user_entered_mitigation_price = price_usd > 0
+
+        if substitution_cost is not None:
+                st.metric("Scenario 4: Substitution Mode (No Penalty)", f"{total_substitution_cost:,.2f} Eur")
             
         if user_entered_mitigation_price:
             # User entered price: Only show scenarios
@@ -380,9 +383,6 @@ if penalty > 0:
             st.metric("Scenario 1: Initial Fuels + Penalty", f"{scenario1:,.2f} Eur")
             st.metric("Scenario 2: Initial Fuels + Pooling (No Penalty)", f"{scenario2:,.2f} Eur")
             st.metric("Scenario 3: Initial Fuels + Mitigation Fuels (No Penalty)", f"{scenario3:,.2f} Eur")
-                        
-            if substitution_cost is not None:
-                st.metric("Scenario 4: Substitution Mode (No Penalty)", f"{total_substitution_cost:,.2f} Eur")
 
         else:
              # No price: show mitigation table (quantity report)
