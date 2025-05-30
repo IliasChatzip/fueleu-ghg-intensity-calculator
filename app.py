@@ -295,7 +295,7 @@ if deficit_tonnes > 0:
        total_with_pooling = total_cost + pooling_cost_eur
 
     else:
-       st.info("Enter a non-zero pooling price to activate Scenario 2.")
+       st.info("Enter a non-zero pooling price to activate Pooling Scenario.")
 
 
 # === MITIGATION OPTIONS ===
