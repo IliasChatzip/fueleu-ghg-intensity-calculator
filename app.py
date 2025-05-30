@@ -361,6 +361,9 @@ if penalty > 0:
         default_index = fuel_names.index(default_fuel) if default_fuel in fuel_names else 0
         selected_fuel = st.selectbox("Select Mitigation Fuel for Price Input",fuel_names,index=default_index)
         price_usd = st.number_input(f"{selected_fuel} - Price (USD/t)", min_value=0.0, value=0.0, step=10.0, key="mitigation_price_input")
+
+        if price_usd > 0:
+            user_entered_mitigation_price = True
         
         for row in mitigation_rows:
             row["Price (USD/t)"] = price_usd if row["Fuel"] == selected_fuel else 0.0
