@@ -389,14 +389,13 @@ if penalty > 0:
              df_mit = pd.DataFrame(mitigation_rows)
              st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
 
-st.markdown("This tool estimates how much of a high-emission fuel (e.g., HFO) you need to replace with a cleaner fuel (e.g., Biodiesel) to comply with FuelEU targets without increasing total energy consumption.")
 
 # === SUBSTITUTION SCENARIO ===
 st.subheader("Substitution Scenario (Fixed Total Energy)")
 
 if initial_fuels and mitigation_fuels:
-    st.markdown("Estimate compliance by replacing a portion of a high-emission fuel with a mitigation fuel, keeping the same total energy.")
-
+    st.markdown("This tool estimates how much of a high-emission fuel (e.g., HFO) you need to replace with a cleaner fuel (e.g., Biodiesel) to comply with FuelEU targets without increasing total energy consumption.")
+    
     initial_fuel = st.selectbox("Select Fuel to Replace", initial_fuels, key="sub_initial")
     substitute_fuel = st.selectbox("Select Mitigation Fuel to Use", mitigation_fuels, key="sub_mitigation")
 
