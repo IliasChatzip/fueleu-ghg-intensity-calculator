@@ -273,7 +273,7 @@ if rows:
 # === POOLING OPTION ===
 
 show_pooling_option = False
-pooling_price = 0.0
+pooling_price_usd_per_tonne = 0.0
 pooling_cost = 0.0
 total_with_pooling = 0.0
 deficit_tonnes = co2_balance_gco2eq / 1_000_000
@@ -382,7 +382,7 @@ if penalty > 0:
             st.metric("Scenario 3: Initial Fuels + Mitigation Fuels (No Penalty)", f"{scenario3:,.2f} Eur")
                         
             if substitution_cost is not None:
-                st.metric("Scenario 4: Substitution Mode (No Penalty)", f"{substitution_cost:,.2f} Eur")
+                st.metric("Scenario 4: Substitution Mode (No Penalty)", f"{total_substitution_cost:,.2f} Eur")
 
         else:
              # No price: show mitigation table (quantity report)
