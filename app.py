@@ -270,7 +270,8 @@ if rows and user_entered_prices:
 
 show_pooling_option = False
 pooling_price_usd_per_tonne = 0.0
-pooling_cost = 0.0
+pooling_cost_usd = 0.0
+pooling_cost_eur = 0.0
 total_with_pooling = 0.0
 deficit_tonnes = compliance_balance / 1_000_000
 
