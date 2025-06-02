@@ -390,7 +390,7 @@ if penalty > 0:
     additional_substitution_cost = None
     replaced_mass = None
 
-    if qty_initial > 0 and price_initial > 0.0 and substitution_price_usd > 0.0:
+    if qty_initial > 0:
         st.markdown("Estimate compliance by replacing the smallest possible fraction of a high-emission fuel with a mitigation fuel, ensuring GHG intensity is just below the FuelEU target.")
         
         initial_props = next(f for f in FUELS if f["name"] == initial_fuel)
@@ -448,26 +448,28 @@ if penalty > 0:
         else:
             replaced_mass = best_x * qty_initial
 
-            initial_fuel_cost = qty_initial * price_initial
-            mitigation_fuel_cost = replaced_mass * substitution_price_eur
-            remaining_fuel_cost = (qty_initial - replaced_mass) * price_initial
-
-            additional_substitution_cost = (replaced_mass * (substitution_price_eur-price_initial))
-            substitution_total_cost = mitigation_fuel_cost + remaining_fuel_cost
-            other_fuel_costs = sum(
-            fuel_inputs.get(f["name"], 0.0) * fuel_price_inputs.get(f["name"], 0.0) * exchange_rate
-            for f in FUELS if f["name"] not in [initial_fuel]
-                )
-        
-            total_substitution_cost = substitution_total_cost + other_fuel_costs
+            if price_initial > 0.0 and substitution_price_usd > 0.0:
+                mitigation_fuel_cost = replaced_mass * substitution_price_eur
+                remaining_fuel_cost = (qty_initial - replaced_mass) * price_initial
+                additional_substitution_cost = (replaced_mass * (substitution_price_eur - price_initial))
+                substitution_total_cost = mitigation_fuel_cost + remaining_fuel_cost
+                other_fuel_costs = sum(
+                    fuel_inputs.get(f["name"], 0.0) * fuel_price_inputs.get(f["name"], 0.0) * exchange_rate
+                    for f in FUELS if f["name"] not in [initial_fuel]
+                    )
+                total_substitution_cost = substitution_total_cost + other_fuel_costs
+            else:
+                mitigation_fuel_cost = None
+                additional_substitution_cost = None
+                total_substitution_cost = None
 
             st.success(f"To comply with the FuelEU target of {target:.2f} gCO2eq/MJ, you need to replace at least **{best_x*100:.2f}%** of {initial_fuel} with {substitute_fuel}.")
             st.markdown(f"**Replaced {initial_fuel} mass**: {replaced_mass:,.1f} tonnes")
             st.markdown(f"**Added {substitute_fuel} mass**: {replaced_mass:,.1f} tonnes")
-            st.markdown(f"**Additional substitution cost **: {additional_substitution_cost:,.2f} EUR")
-
-    else:
-           st.info("Enter valid fuel quantities and prices to estimate substitution cost.")
+            if additional_substitution_cost is not None:
+                st.markdown(f"**Additional substitution cost**: {additional_substitution_cost:,.2f} EUR")
+            else:
+                st.markdown(f"**Additional substitution cost**: N/A (missing prices)")
         
 if mitigation_rows:
     if user_entered_mitigation_price:
@@ -598,17 +600,16 @@ if st.button("Export to PDF"):
         pdf.set_font("Arial", size=11)
         pdf.cell(200, 10, txt="--- Sub-Mitigation Cost ---", ln=True)
 
-        if penalty > 0 and total_substitution_cost is not None and replaced_mass is not None and best_x is not None:
+        if penalty > 0 and replaced_mass is not None and best_x is not None:
             pdf.set_font("Arial", size=10)
             pdf.cell(200, 10, txt=f"Replaced {initial_fuel} with {substitute_fuel}: {replaced_mass:,.0f} tonnes", ln=True)
             pdf.cell(200, 10, txt=f"Substitution Ratio: {best_x*100:.1f}% of {initial_fuel} replaced by {substitute_fuel} for compliance.", ln=True)
-            pdf.cell(200, 10, txt=f"Additional substitution cost: {additional_substitution_cost:,.2f} EUR", ln=True)
-            pdf.cell(200, 10, txt=f"Total Substitution Cost: {total_substitution_cost:,.2f} EUR", ln=True)
-        else:
-            pdf.set_font("Arial", size=10)
-            pdf.cell(200, 10, txt="No valid substitution data available. Check fuel selections and prices.", ln=True)
-
-
+            if additional_substitution_cost is not None:
+                pdf.cell(200, 10, txt=f"Additional substitution cost: {additional_substitution_cost:,.2f} EUR", ln=True)
+                pdf.cell(200, 10, txt=f"Total Substitution Cost: {total_substitution_cost:,.2f} EUR", ln=True)
+            else:
+                pdf.cell(200, 10, txt="Cost data not available (missing fuel prices).", ln=True)
+            
             
         pdf.ln(5)
         pdf.set_font("Arial", "B", size=12)
