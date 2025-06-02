@@ -211,7 +211,6 @@ ghg_intensity = emissions / total_energy if total_energy else 0.0
 st.session_state["computed_ghg"] = ghg_intensity
 
 compliance_balance = total_energy * (target_intensity(year) - ghg_intensity)
-co2_balance_gco2eq = (target_intensity(year) - ghg_intensity) * compliance_balance
        
 if compliance_balance >= 0:
      penalty = 0
@@ -261,9 +260,7 @@ else:
 st.subheader("Summary")
 st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}")
 balance_label = "Surplus" if compliance_balance >= 0 else "Deficit"
-st.metric("Compliance Balance (MJ)", f"{compliance_balance:,.0f}")
-balance_label = "Surplus" if co2_balance_gco2eq < 0 else "Deficit"
-st.metric(f"CO2 {balance_label} (gCO2eq)", f"{co2_balance_gco2eq:,.0f}")
+st.metric("Compliance Balance (gCO2eq)", f"{compliance_balance:,.0f}")
 st.metric("Estimated Penalty (Eur)", f"{penalty:,.2f}")
 if rows and user_entered_prices:
     conservative_total = total_cost + penalty
@@ -275,7 +272,7 @@ show_pooling_option = False
 pooling_price_usd_per_tonne = 0.0
 pooling_cost = 0.0
 total_with_pooling = 0.0
-deficit_tonnes = co2_balance_gco2eq / 1_000_000
+deficit_tonnes = compliance_balance_gco2eq / 1_000_000
 
 if deficit_tonnes > 0.001:
     show_pooling_option = True
@@ -533,9 +530,7 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt=f"Year: {year} | GWP: {gwp_choice}", ln=True)
         pdf.cell(200, 10, txt=f"EU Target for {year}: {target_intensity(year):.2f} gCO2eq/MJ", ln=True)
         pdf.cell(200, 10, txt=f"GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ", ln=True)
-        pdf.cell(200, 10, txt=f"Compliance Balance: {compliance_balance:,.0f} MJ", ln=True)
-        balance_label = "Surplus" if co2_balance_gco2eq < 0 else "Deficit"
-        pdf.cell(200, 10, txt=f"CO2 {balance_label}: {co2_balance_gco2eq:,.0f} gCO2eq", ln=True)
+        pdf.cell(200, 10, txt=f"Compliance Balance: {compliance_balance:,.0f} gCO2eq", ln=True)
         pdf.cell(200, 10, txt=f"Penalty: {penalty:,.2f} Eur", ln=True)
         pdf.ln(10)
 
