@@ -285,7 +285,7 @@ if deficit_tonnes < 0:
         help="The cost per tCO2eq to buy compliance credits from the pool. If 0, pooling will not be applied.")
 
     if pooling_price_usd_per_tonne > 0:
-       pooling_cost_usd = pooling_price_usd_per_tonne * deficit_tonnes
+       pooling_cost_usd = pooling_price_usd_per_tonne * abs(deficit_tonnes)
        pooling_cost_eur = pooling_cost_usd * exchange_rate
        total_with_pooling = total_cost + pooling_cost_eur
 
