@@ -472,20 +472,19 @@ if penalty > 0:
                 st.markdown(f"**Additional substitution cost**: N/A (missing prices)")
         
 if mitigation_rows:
-    if user_entered_mitigation_price:
-        st.markdown("### Total Cost Scenarios")
-        st.info("💡 These scenarios estimate different compliance cost pathways. Mitigation fuels are added **on top** of initial fuel selections. Substitution replaces a **fraction** of an existing fuel for compliance.")
-        scenario1 = total_cost + penalty
-        scenario2 = total_with_pooling
-        scenario3 = total_cost + mitigation_total_cost
-        scenario4 = substitution_cost if substitution_cost is not None else None
-        st.metric("Initial Fuels + Penalty", f"{scenario1:,.2f} Eur")
-        st.metric("Initial Fuels + Pooling (No Penalty)", f"{scenario2:,.2f} Eur")
-        st.metric("Initial Fuels + Mitigation Fuels (No Penalty)", f"{scenario3:,.2f} Eur")
-        st.metric("Sub-Mitigation (No Penalty)", f"{total_substitution_cost:,.2f} Eur" if total_substitution_cost is not None else "N/A")
-    else:
-        df_mit = pd.DataFrame(mitigation_rows)
-        st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
+    st.markdown("### Total Cost Scenarios")
+    st.info("💡 These scenarios estimate different compliance cost pathways. Mitigation fuels are added **on top** of initial fuel selections. Substitution replaces a **fraction** of an existing fuel for compliance.")
+    scenario1 = total_cost + penalty if total_cost > 0 else None
+    scenario2 = total_with_pooling if total_cost > 0 else None
+    scenario3 = total_cost + mitigation_total_cost if total_cost > 0 else None
+    total_substitution_cost = substitution_cost if substitution_cost is not None else None
+    st.metric("Initial Fuels + Penalty", f"{scenario1:,.2f} Eur" if scenario1 is not None else "N/A")
+    st.metric("Initial Fuels + Pooling (No Penalty)", f"{scenario2:,.2f} Eur" if scenario2 is not None else "N/A")
+    st.metric("Initial Fuels + Mitigation Fuels (No Penalty)", f"{scenario3:,.2f} Eur" if scenario1 is not None else "N/A")
+    st.metric("Sub-Mitigation (No Penalty)", f"{total_substitution_cost:,.2f} Eur" if total_substitution_cost is not None else "N/A")
+else:
+    df_mit = pd.DataFrame(mitigation_rows)
+    st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
 
 else:
     if rows:
