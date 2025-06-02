@@ -272,7 +272,7 @@ show_pooling_option = False
 pooling_price_usd_per_tonne = 0.0
 pooling_cost = 0.0
 total_with_pooling = 0.0
-deficit_tonnes = compliance_balance_gco2eq / 1_000_000
+deficit_tonnes = compliance_balance / 1_000_000
 
 if deficit_tonnes > 0.001:
     show_pooling_option = True
