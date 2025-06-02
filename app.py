@@ -600,7 +600,7 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt=f"Replaced {initial_fuel} with {substitute_fuel}: {replaced_mass:,.0f} tonnes")
         pdf.set_font("Arial", size=10)
         pdf.cell(200, 10, txt=f"Substitution Ratio: {best_x*100:.0f}% of {initial_fuel} replaced by {substitute_fuel} for compliance.", ln=True)
-        pdf.set_font("Arial", size=11)
+        pdf.set_font("Arial", size=10)
         pdf.cell(200, 10, txt=f"Additional substitution cost: {additional_substitution_cost:,.2f} EUR")
 
             
