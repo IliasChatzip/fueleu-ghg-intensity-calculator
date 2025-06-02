@@ -525,7 +525,7 @@ if st.button("Export to PDF"):
     else:
         pdf = FPDF()
         pdf.add_page()
-        pdf.set_font("Arial", size=12)
+        pdf.set_font("Arial", size=11)
         pdf.cell(200, 10, txt="Fuel EU Maritime GHG & Penalty Report", ln=True, align="C")
         pdf.cell(200, 10, txt=f"Year: {year} | GWP: {gwp_choice}", ln=True)
         pdf.cell(200, 10, txt=f"EU Target for {year}: {target_intensity(year):.2f} gCO2eq/MJ", ln=True)
@@ -535,7 +535,7 @@ if st.button("Export to PDF"):
         pdf.ln(10)
 
         # Fuel Breakdown
-        pdf.set_font("Arial", size=11)
+        pdf.set_font("Arial", size=10)
         pdf.cell(200, 10, txt="--- Fuel Breakdown ---", ln=True)
         user_entered_prices = any(fuel_price_inputs.get(f["name"], 0.0) > 0.0 for f in FUELS)
         for row in rows:
@@ -549,7 +549,7 @@ if st.button("Export to PDF"):
 
         # Total Cost
         pdf.ln(5)
-        pdf.set_font("Arial", "B", size=12)
+        pdf.set_font("Arial", "B", size=11)
         pdf.cell(200, 10, txt=f"Total Fuel Cost: {total_cost:,.2f} Eur", ln=True)
         if user_entered_prices:
             pdf.set_font("Arial", size=10)
@@ -558,7 +558,7 @@ if st.button("Export to PDF"):
 
         # Pooling Option
         pdf.ln(5)
-        pdf.set_font("Arial", size=11)
+        pdf.set_font("Arial", size=10)
         pdf.cell(200, 10, txt="--- Pooling Cost ---", ln=True)
         
         if show_pooling_option and pooling_price_usd_per_tonne > 0:
@@ -570,7 +570,7 @@ if st.button("Export to PDF"):
 
         # Mitigation Options
         pdf.ln(5)
-        pdf.set_font("Arial", size=11)
+        pdf.set_font("Arial", size=10)
         pdf.cell(200, 10, txt="--- Mitigation Cost ---", ln=True)
 
         mitigation_with_price = [row for row in mitigation_rows if row.get("Price (USD/t)", 0) > 0]
@@ -588,16 +588,19 @@ if st.button("Export to PDF"):
                 mit_line = f"{row['Fuel']}: {row['Required Amount (t)']:,.0f} t"
                 pdf.cell(200, 10, txt=mit_line, ln=True)
             pdf.ln(5)
-            pdf.set_font("Arial", "B", size=12)
+            pdf.set_font("Arial", "B", size=11)
             pdf.cell(200, 10, txt="No mitigation fuel prices provided - quantities only report", ln=True)
 
         # Sub-Mitigation Option
         pdf.ln(5)
         pdf.set_font("Arial", size=11)
         pdf.cell(200, 10, txt="--- Sub-Mitigation Cost ---", ln=True)
-        pdf.cell(200, 10, txt=f"Replaced {initial_fuel} with {substitute_fuel}: {replaced_mass:,.1f} tonnes")
-        pdf.cell(200, 10, txt=f"Substitution Ratio: {best_x*100:.1f}% of {initial_fuel} replaced by {substitute_fuel} for compliance.", ln=True)
-        st.markdown(f"Additional substitution cost: {additional_substitution_cost:,.2f} EUR")
+        pdf.set_font("Arial", size=10)
+        pdf.cell(200, 10, txt=f"Replaced {initial_fuel} with {substitute_fuel}: {replaced_mass:,.0f} tonnes")
+        pdf.set_font("Arial", size=10)
+        pdf.cell(200, 10, txt=f"Substitution Ratio: {best_x*100:.0f}% of {initial_fuel} replaced by {substitute_fuel} for compliance.", ln=True)
+        pdf.set_font("Arial", size=11)
+        pdf.cell(200, 10, txt=f"Additional substitution cost: {additional_substitution_cost:,.2f} EUR")
 
             
         pdf.ln(5)
@@ -605,15 +608,15 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt="--- Cost Analysis ---", ln=True)
         pdf.set_font("Arial", size=10)
         pdf.multi_cell(0, 10, "These scenarios estimate different compliance pathways. Mitigation fuels are added **on top** of initial fuel selections.")
-        pdf.set_font("Arial", style="B", size=10)
+        pdf.set_font("Arial", style="B", size=11)
         pdf.cell(200, 10, txt=f"- Initial fuels + Penalty: {conservative_total:,.2f} Eur", ln=True)
-        pdf.set_font("Arial", style="B", size=10)
+        pdf.set_font("Arial", style="B", size=11)
         pdf.cell(200, 10, txt=f"- Initial fuels + Pooling, no Penalty: {total_with_pooling:,.2f} Eur", ln=True)
-        pdf.set_font("Arial", style="B", size=10)
+        pdf.set_font("Arial", style="B", size=11)
         pdf.cell(200, 10, txt=f"- Initial fuels + Mitigation fuels, no Penalty: {total_with_mitigation:,.2f} Eur", ln=True)
         if penalty > 0 and total_substitution_cost and best_x is not None:
-            pdf.set_font("Arial", style="B", size=10)
-            pdf.cell(200, 10, txt=f"- Sub-Mitigation, no Penalty: {total_substitution_cost:,.2f} Eur", ln=True)
+            pdf.set_font("Arial", style="B", size=11)
+            pdf.cell(200, 10, txt=f"- Sub-Mitigation fuels, no Penalty: {total_substitution_cost:,.2f} Eur", ln=True)
                                                     
         # Export
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
