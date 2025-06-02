@@ -591,6 +591,14 @@ if st.button("Export to PDF"):
             pdf.set_font("Arial", "B", size=12)
             pdf.cell(200, 10, txt="No mitigation fuel prices provided - quantities only report", ln=True)
 
+        # Sub-Mitigation Option
+        pdf.ln(5)
+        pdf.set_font("Arial", size=11)
+        pdf.cell(200, 10, txt="--- Sub-Mitigation Option ---", ln=True)
+        pdf.cell(200, 10, txt=f"Replaced {initial_fuel} with {substitute_fuel}: {replaced_mass:,.1f} tonnes")
+        pdf.cell(200, 10, txt=f"Substitution Ratio: {best_x*100:.1f}% of {initial_fuel} replaced by {substitute_fuel} for compliance.", ln=True)
+        st.markdown(f"Additional substitution cost: {additional_substitution_cost:,.2f} EUR")
+
             
         pdf.ln(5)
         pdf.set_font("Arial", "B", size=12)
@@ -606,8 +614,7 @@ if st.button("Export to PDF"):
         if penalty > 0 and total_substitution_cost and best_x is not None:
             pdf.set_font("Arial", style="B", size=10)
             pdf.cell(200, 10, txt=f"- Sub-Mitigation, no Penalty: {total_substitution_cost:,.2f} Eur", ln=True)
-            pdf.cell(200, 10, txt=f"Substitution Ratio: {best_x*100:.1f}% of {initial_fuel} replaced by {substitute_fuel} for compliance.", ln=True)
-                                        
+                                                    
         # Export
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
             pdf.output(tmp_pdf.name)
