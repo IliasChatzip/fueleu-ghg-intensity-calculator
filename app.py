@@ -616,22 +616,26 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt="--- Cost Analysis ---", ln=True)
         pdf.set_font("Arial", size=10)
         pdf.multi_cell(0, 10, "These scenarios estimate different compliance pathways. Mitigation fuels are added **on top** of initial fuel selections.")
-        if conservative_total is not None:
+        if total_cost is not None:
             pdf.set_font("Arial", style="B", size=11)
             pdf.cell(200, 10, txt=f"- Initial fuels + Penalty: {conservative_total:,.2f} Eur", ln=True)
         else:
             pdf.set_font("Arial", style="B", size=11)
             pdf.cell(200, 10, txt=f"- Initial fuels + Penalty: N/A", ln=True)
         
-        if total_with_pooling is not None:
+        if total_cost is not None:
             pdf.set_font("Arial", style="B", size=11)
             pdf.cell(200, 10, txt=f"- Initial fuels + Pooling, no Penalty: {total_with_pooling:,.2f} Eur", ln=True)
         else:
             pdf.set_font("Arial", style="B", size=11)
             pdf.cell(200, 10, txt=f"- Initial fuels + Pooling, no Penalty: N/A", ln=True)
         
-        pdf.set_font("Arial", style="B", size=11)
-        pdf.cell(200, 10, txt=f"- Initial fuels + Mitigation fuels, no Penalty: N/A", ln=True)
+        if total_cost is not None:
+            pdf.set_font("Arial", style="B", size=11)
+            pdf.cell(200, 10, txt=f"- Initial fuels + Mitigation fuels, no Penalty: {total_with_mitigation:,.2f} Eur", ln=True)                        
+        else:
+            pdf.set_font("Arial", style="B", size=11)
+            pdf.cell(200, 10, txt=f"- Initial fuels + Mitigation fuels, no Penalty: N/A", ln=True)
         
         if total_substitution_cost is not None:
             pdf.set_font("Arial", style="B", size=11)
