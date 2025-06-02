@@ -478,10 +478,10 @@ if penalty > 0:
         scenario2 = total_with_pooling if total_cost > 0 else None
         scenario3 = total_cost + mitigation_total_cost if total_cost > 0 else None
         total_substitution_cost = substitution_cost if substitution_cost is not None else None
-        st.metric("Initial Fuels + Penalty", f"{scenario1:,.2f} Eur" if scenario1 is not None else "N/A")
-        st.metric("Initial Fuels + Pooling (No Penalty)", f"{scenario2:,.2f} Eur" if scenario2 is not None else "N/A")
-        st.metric("Initial Fuels + Mitigation Fuels (No Penalty)", f"{scenario3:,.2f} Eur" if scenario1 is not None else "N/A")
-        st.metric("Sub-Mitigation (No Penalty)", f"{total_substitution_cost:,.2f} Eur" if total_substitution_cost is not None else "N/A")
+        st.metric("Initial Fuels + Penalty", f"{scenario1:,.2f} Eur" if scenario1 is not None else "N/A (missing prices)")
+        st.metric("Initial Fuels + Pooling (No Penalty)", f"{scenario2:,.2f} Eur" if scenario2 is not None else "N/A (missing prices)")
+        st.metric("Initial Fuels + Mitigation Fuels (No Penalty)", f"{scenario3:,.2f} Eur" if scenario1 is not None else "N/A (missing prices)")
+        st.metric("Sub-Mitigation (No Penalty)", f"{total_substitution_cost:,.2f} Eur" if total_substitution_cost is not None else "N/A (missing prices)")
     else:
         df_mit = pd.DataFrame(mitigation_rows)
         st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
@@ -620,28 +620,28 @@ if st.button("Export to PDF"):
             pdf.cell(200, 10, txt=f"- Initial fuels + Penalty: {conservative_total:,.2f} Eur", ln=True)
         else:
             pdf.set_font("Arial", style="B", size=11)
-            pdf.cell(200, 10, txt=f"- Initial fuels + Penalty: N/A", ln=True)
+            pdf.cell(200, 10, txt=f"- Initial fuels + Penalty: N/A (missing prices)", ln=True)
         
         if total_cost > 0:
             pdf.set_font("Arial", style="B", size=11)
             pdf.cell(200, 10, txt=f"- Initial fuels + Pooling, no Penalty: {total_with_pooling:,.2f} Eur", ln=True)
         else:
             pdf.set_font("Arial", style="B", size=11)
-            pdf.cell(200, 10, txt=f"- Initial fuels + Pooling, no Penalty: N/A", ln=True)
+            pdf.cell(200, 10, txt=f"- Initial fuels + Pooling, no Penalty: N/A (missing prices)", ln=True)
         
         if total_cost > 0:
             pdf.set_font("Arial", style="B", size=11)
             pdf.cell(200, 10, txt=f"- Initial fuels + Mitigation fuels, no Penalty: {total_with_mitigation:,.2f} Eur", ln=True)                        
         else:
             pdf.set_font("Arial", style="B", size=11)
-            pdf.cell(200, 10, txt=f"- Initial fuels + Mitigation fuels, no Penalty: N/A", ln=True)
+            pdf.cell(200, 10, txt=f"- Initial fuels + Mitigation fuels, no Penalty: N/A (missing prices)", ln=True)
         
         if total_substitution_cost is not None:
             pdf.set_font("Arial", style="B", size=11)
             pdf.cell(200, 10, txt=f"- Sub-Mitigation fuels, no Penalty: {total_substitution_cost:,.2f} Eur", ln=True)
         else:
             pdf.set_font("Arial", style="B", size=11)
-            pdf.cell(200, 10, txt="- Sub-Mitigation fuels, no Penalty: N/A", ln=True)
+            pdf.cell(200, 10, txt="- Sub-Mitigation fuels, no Penalty: N/A (missing prices)", ln=True)
 
                   
         # Export
