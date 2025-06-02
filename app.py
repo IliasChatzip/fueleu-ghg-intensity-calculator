@@ -516,7 +516,7 @@ st.pyplot(fig)
 
 conservative_total = total_cost + penalty
 total_with_mitigation = total_cost + mitigation_total_cost
-total_with_pooling = total_cost + pooling_cost_eur if pooling_price_usd_per_tonne > 0 else 0
+total_with_pooling = total_cost + pooling_cost_eur
 
 # === PDF EXPORT ===
 if st.button("Export to PDF"):
