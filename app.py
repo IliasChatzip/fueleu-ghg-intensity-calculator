@@ -556,7 +556,6 @@ if st.button("Export to PDF"):
             pdf.ln(3)
             pdf.cell(200, 10, txt=f"Conversion Rate Used: 1 USD = {exchange_rate:.6f} EUR", ln=True)
 
-        pooling_cost_eur = 0.0
         # Pooling Option
         pdf.ln(5)
         pdf.set_font("Arial", size=11)
