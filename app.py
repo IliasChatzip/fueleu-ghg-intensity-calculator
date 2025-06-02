@@ -620,7 +620,7 @@ if st.button("Export to PDF"):
             pdf.cell(200, 10, txt=f"- Initial fuels + Penalty: {conservative_total:,.2f} Eur", ln=True)
         else:
             pdf.set_font("Arial", style="B", size=11)
-            pdf.cell(200, 10, txt=f"- Initial fuels + Penalty: {penalty:,2f} Eur", ln=True)
+            pdf.cell(200, 10, txt=f"- Initial fuels + Penalty: {penalty:,.2f} Eur", ln=True)
         
         if total_cost > 0:
             pdf.set_font("Arial", style="B", size=11)
