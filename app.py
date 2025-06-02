@@ -592,9 +592,7 @@ if st.button("Export to PDF"):
             pdf.set_font("Arial", "B", size=11)
             pdf.cell(200, 10, txt="No mitigation fuel prices provided - quantities only report", ln=True)
 
-        if penalty > 0 and total_substitution_cost is not None and replaced_mass is not None:
-            pdf.cell(200, 10, txt=f"Replaced {initial_fuel} with {substitute_fuel}: {replaced_mass:,.0f} tonnes")
-
+        
         # Sub-Mitigation Option
         pdf.ln(5)
         pdf.set_font("Arial", size=11)
@@ -621,7 +619,9 @@ if st.button("Export to PDF"):
         if penalty > 0 and total_substitution_cost and best_x is not None:
             pdf.set_font("Arial", style="B", size=11)
             pdf.cell(200, 10, txt=f"- Sub-Mitigation fuels, no Penalty: {total_substitution_cost:,.2f} Eur", ln=True)
-                                                    
+             if penalty > 0 and total_substitution_cost is not None and replaced_mass is not None:
+                 pdf.cell(200, 10, txt=f"Replaced {initial_fuel} with {substitute_fuel}: {replaced_mass:,.0f} tonnes")                                       
+                 
         # Export
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
             pdf.output(tmp_pdf.name)
