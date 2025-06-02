@@ -616,11 +616,14 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt=f"- Initial fuels + Pooling, no Penalty: {total_with_pooling:,.2f} Eur", ln=True)
         pdf.set_font("Arial", style="B", size=11)
         pdf.cell(200, 10, txt=f"- Initial fuels + Mitigation fuels, no Penalty: {total_with_mitigation:,.2f} Eur", ln=True)
-        if penalty > 0 and total_substitution_cost and best_x is not None:
+        if penalty > 0 and total_substitution_cost is not None and best_x is not None and replaced_mass is not None:
             pdf.set_font("Arial", style="B", size=11)
             pdf.cell(200, 10, txt=f"- Sub-Mitigation fuels, no Penalty: {total_substitution_cost:,.2f} Eur", ln=True)
+            pdf.set_font("Arial", size=10)
             pdf.cell(200, 10, txt=f"Replaced {initial_fuel} with {substitute_fuel}: {replaced_mass:,.0f} tonnes", ln=True)
             pdf.cell(200, 10, txt=f"Substitution Ratio: {best_x*100:.0f}% of {initial_fuel} replaced by {substitute_fuel} for compliance.", ln=True)
+            pdf.cell(200, 10, txt=f"Additional substitution cost: {additional_substitution_cost:,.2f} EUR", ln=True)
+
                   
         # Export
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
