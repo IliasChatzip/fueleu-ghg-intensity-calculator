@@ -369,7 +369,7 @@ if penalty > 0:
             
         mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
         
-    else:
+        else:
             mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
             df_mit = pd.DataFrame(mitigation_rows)
             st.markdown("#### Mitigation Options (Fuel Quantities)")
