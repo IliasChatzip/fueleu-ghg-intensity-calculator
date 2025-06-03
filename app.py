@@ -475,7 +475,7 @@ if penalty > 0:
         st.markdown("### Total Cost Scenarios")
         st.info("💡 These scenarios estimate different compliance cost pathways. Mitigation fuels are added **on top** of initial fuel selections. Substitution replaces a **fraction** of an existing fuel for compliance.")
         scenario1 = total_cost + penalty if total_cost > 0 else None
-        scenario2 = total_with_pooling if total_cost > 0 and if pooling_price_usd_per_tonne > 0 else None
+        scenario2 = total_with_pooling if total_cost > 0 and pooling_price_usd_per_tonne > 0 else None
         scenario3 = total_cost + mitigation_total_cost if mitigation_total_cost > 0 else None
         total_substitution_cost if substitution_total_cost is not None else None
         st.metric("Initial Fuels + Penalty", f"{scenario1:,.2f} Eur" if scenario1 is not None else "N/A (missing prices)")
