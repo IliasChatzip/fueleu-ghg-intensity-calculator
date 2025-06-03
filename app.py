@@ -474,7 +474,7 @@ if penalty > 0:
     if mitigation_rows:
         st.markdown("### Total Cost Scenarios")
         st.info("💡 These scenarios estimate different compliance cost pathways. Mitigation fuels are added **on top** of initial fuel selections. Substitution replaces a **fraction** of an existing fuel for compliance.")
-        scenario1 = total_cost + penalty if total_cost > 0 else None
+        scenario1 = total_cost + penalty if total_cost > 0 or penalty > 0 else None
         scenario2 = total_with_pooling if total_cost > 0 and pooling_price_usd_per_tonne > 0 else None
         scenario3 = total_cost + mitigation_total_cost if mitigation_total_cost > 0 else None
         scenario4 = total_substitution_cost if substitution_price_usd > 0 else None
