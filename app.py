@@ -334,18 +334,18 @@ if penalty > 0:
 
                     new_ghg = new_emissions / new_energy if new_energy else Decimal("99999")
 
-            if new_ghg < target:
-                best_qty = mid
-                high = mid
-            else:
-                low = mid
+         if new_ghg < target:
+             best_qty = mid
+             high = mid
+        else:
+             low = mid
 
-            if (high - low) < tolerance:
-                break
+        if (high - low) < tolerance:
+            break
 
-            if best_qty is not None:
-                rounded_qty = math.ceil(float(best_qty))
-                mitigation_rows.append({"Fuel": fuel["name"],"Required Amount (t)": rounded_qty,})
+        if best_qty is not None:
+            rounded_qty = math.ceil(float(best_qty))
+            mitigation_rows.append({"Fuel": fuel["name"],"Required Amount (t)": rounded_qty,})
             
         if mitigation_rows:
             mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
