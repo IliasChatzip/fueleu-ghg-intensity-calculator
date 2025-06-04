@@ -337,7 +337,7 @@ if penalty > 0:
          if new_ghg < target:
              best_qty = mid
              high = mid
-        else:
+         else:
              low = mid
 
         if (high - low) < tolerance:
