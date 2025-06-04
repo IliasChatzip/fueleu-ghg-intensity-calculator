@@ -327,42 +327,42 @@ if penalty > 0:
 
                 if fuel["rfnbo"] and year <= 2033:
                     energy_mj *= Decimal(str(REWARD_FACTOR_RFNBO_MULTIPLIER))
-                    ttw = (co2_mj + ch4_mj + n2o_mj) * mass_g
-                    wtt = energy_mj * Decimal(str(fuel["wtt"]))
-                    new_emissions = dec_emissions + ttw + wtt
-                    new_energy = dec_energy + energy_mj
+                ttw = (co2_mj + ch4_mj + n2o_mj) * mass_g
+                wtt = energy_mj * Decimal(str(fuel["wtt"]))
+                new_emissions = dec_emissions + ttw + wtt
+                new_energy = dec_energy + energy_mj
 
-                    new_ghg = new_emissions / new_energy if new_energy else Decimal("99999")
+                new_ghg = new_emissions / new_energy if new_energy else Decimal("99999")
 
-          if new_ghg < target:
-              best_qty = mid
-              high = mid
-          else:
-              low = mid
+                if new_ghg < target:
+                    best_qty = mid
+                    high = mid
+                else:
+                    low = mid
 
-        if (high - low) < tolerance:
-            break
+                if (high - low) < tolerance:
+                    break
 
         if best_qty is not None:
             rounded_qty = math.ceil(float(best_qty))
             mitigation_rows.append({"Fuel": fuel["name"],"Required Amount (t)": rounded_qty,})
             
-        if mitigation_rows:
-            mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
-            default_fuel = "Biodiesel (UCO,B20)"
-            fuel_names = [row["Fuel"] for row in mitigation_rows]
-            default_index = fuel_names.index(default_fuel) if default_fuel in fuel_names else 0
-            selected_fuel = st.selectbox("Select Mitigation Fuel for Price Input",fuel_names,index=default_index)
-            price_usd = st.number_input(f"{selected_fuel} - Price (USD/t)", min_value=0.0, value=0.0, step=10.0, key="mitigation_price_input")
+    if mitigation_rows:
+        mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
+        default_fuel = "Biodiesel (UCO,B20)"
+        fuel_names = [row["Fuel"] for row in mitigation_rows]
+        default_index = fuel_names.index(default_fuel) if default_fuel in fuel_names else 0
+        selected_fuel = st.selectbox("Select Mitigation Fuel for Price Input",fuel_names,index=default_index)
+        price_usd = st.number_input(f"{selected_fuel} - Price (USD/t)", min_value=0.0, value=0.0, step=10.0, key="mitigation_price_input")
 
-            if price_usd > 0:
-                user_entered_mitigation_price = True
+        if price_usd > 0:
+            user_entered_mitigation_price = True
             for row in mitigation_rows:
                 row["Price (USD/t)"] = price_usd if row["Fuel"] == selected_fuel else 0.0
                 row["Estimated Cost (Eur)"] = row["Price (USD/t)"] * exchange_rate * row["Required Amount (t)"]
                 mititigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
         
-            else:
+        else:
                 mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
                 df_mit = pd.DataFrame(mitigation_rows)
                 st.markdown("#### Mitigation Options (Fuel Quantities)")
