@@ -299,7 +299,7 @@ if deficit_tonnes < 0:
 getcontext().prec = 12
 user_entered_mitigation_price = False
 if penalty > 0:
-    st.subheader("Mitigation Options (Penalty Offset)")
+    st.subheader("Mitigation Fuel Options (Penalty Offset)")
     st.info(" Mitigation fuel is an **addition** to the existing fuel selection, not a replacement. It supplements the initial fuels to help achieve compliance.")
     dec_ghg = Decimal(str(ghg_intensity))
     dec_emissions = Decimal(str(emissions))
@@ -370,7 +370,7 @@ if penalty > 0:
         else:
             mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
             df_mit = pd.DataFrame(mitigation_rows)
-            st.markdown("#### Mitigation Options (Fuel Quantities)")
+            st.markdown("#### Mitigation Fuel Options (Quantities)")
             st.dataframe(df_mit.style.format({
                 "Required Amount (t)": "{:,.0f}"}))
 
