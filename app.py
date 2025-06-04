@@ -299,42 +299,41 @@ if deficit_tonnes < 0:
 getcontext().prec = 12
 user_entered_mitigation_price = False
 if penalty > 0:
-    st.subheader("Mitigation Options (Penalty Offset)")
-    st.info(" Mitigation fuel is an **addition** to the existing fuel selection, not a replacement. It supplements the initial fuels to help achieve compliance.")
-    dec_ghg = Decimal(str(ghg_intensity))
-    dec_emissions = Decimal(str(emissions))
-    dec_energy = Decimal(str(total_energy))
-    target = Decimal(str(target_intensity(year)))
+    with st.expander ("Mitigation Options (Penalty Offset)", expand=False):
+        st.info(" Mitigation fuel is an **addition** to the existing fuel selection, not a replacement. It supplements the initial fuels to help achieve compliance.")
+        dec_ghg = Decimal(str(ghg_intensity))
+        dec_emissions = Decimal(str(emissions))
+        dec_energy = Decimal(str(total_energy))
+        target = Decimal(str(target_intensity(year)))
     
-    mitigation_rows = []
-    for fuel in FUELS:
-        co2_mj = Decimal(str(fuel["ttw_co2"])) * Decimal(str(1 - ops / 100)) * Decimal(str(wind))
-        ch4_mj = Decimal(str(fuel["ttw_ch4"])) * Decimal(str(gwp["CH4"]))
-        n2o_mj = Decimal(str(fuel["ttw_n20"])) * Decimal(str(gwp["N2O"]))
-        total_ghg_mj = Decimal(str(fuel["wtt"])) + co2_mj + ch4_mj + n2o_mj
+        mitigation_rows = []
+        for fuel in FUELS:
+            co2_mj = Decimal(str(fuel["ttw_co2"])) * Decimal(str(1 - ops / 100)) * Decimal(str(wind))
+            ch4_mj = Decimal(str(fuel["ttw_ch4"])) * Decimal(str(gwp["CH4"]))
+            n2o_mj = Decimal(str(fuel["ttw_n20"])) * Decimal(str(gwp["N2O"]))
+            total_ghg_mj = Decimal(str(fuel["wtt"])) + co2_mj + ch4_mj + n2o_mj
+            
 
-        if total_ghg_mj >= dec_ghg:
-            continue
+            if total_ghg_mj >= dec_ghg:
+                continue
+                low = Decimal("0.0")
+                high = Decimal("100000.0")
+                best_qty = None
+                tolerance = Decimal("0.00001")
 
-        low = Decimal("0.0")
-        high = Decimal("100000.0")
-        best_qty = None
-        tolerance = Decimal("0.00001")
+            for _ in range(50):
+                mid = (low + high) / 2
+                mass_g = mid * Decimal("1000000")
+                energy_mj = mass_g * Decimal(str(fuel["lcv"]))
 
-        for _ in range(50):
-            mid = (low + high) / 2
-            mass_g = mid * Decimal("1000000")
-            energy_mj = mass_g * Decimal(str(fuel["lcv"]))
+                if fuel["rfnbo"] and year <= 2033:
+                    energy_mj *= Decimal(str(REWARD_FACTOR_RFNBO_MULTIPLIER))
+                    ttw = (co2_mj + ch4_mj + n2o_mj) * mass_g
+                    wtt = energy_mj * Decimal(str(fuel["wtt"]))
+                    new_emissions = dec_emissions + ttw + wtt
+                    new_energy = dec_energy + energy_mj
 
-            if fuel["rfnbo"] and year <= 2033:
-                energy_mj *= Decimal(str(REWARD_FACTOR_RFNBO_MULTIPLIER))
-
-            ttw = (co2_mj + ch4_mj + n2o_mj) * mass_g
-            wtt = energy_mj * Decimal(str(fuel["wtt"]))
-            new_emissions = dec_emissions + ttw + wtt
-            new_energy = dec_energy + energy_mj
-
-            new_ghg = new_emissions / new_energy if new_energy else Decimal("99999")
+                    new_ghg = new_emissions / new_energy if new_energy else Decimal("99999")
 
             if new_ghg < target:
                 best_qty = mid
@@ -345,34 +344,30 @@ if penalty > 0:
             if (high - low) < tolerance:
                 break
 
-        if best_qty is not None:
-            rounded_qty = math.ceil(float(best_qty))
-            mitigation_rows.append({
-                "Fuel": fuel["name"],
-                "Required Amount (t)": rounded_qty,
-            })
+            if best_qty is not None:
+                rounded_qty = math.ceil(float(best_qty))
+                mitigation_rows.append({"Fuel": fuel["name"],"Required Amount (t)": rounded_qty,})
             
-    if mitigation_rows:
-        mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
-        default_fuel = "Biodiesel (UCO,B20)"
-        fuel_names = [row["Fuel"] for row in mitigation_rows]
-        default_index = fuel_names.index(default_fuel) if default_fuel in fuel_names else 0
-        selected_fuel = st.selectbox("Select Mitigation Fuel for Price Input",fuel_names,index=default_index)
-        price_usd = st.number_input(f"{selected_fuel} - Price (USD/t)", min_value=0.0, value=0.0, step=10.0, key="mitigation_price_input")
+        if mitigation_rows:
+            mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
+            default_fuel = "Biodiesel (UCO,B20)"
+            fuel_names = [row["Fuel"] for row in mitigation_rows]
+            default_index = fuel_names.index(default_fuel) if default_fuel in fuel_names else 0
+            selected_fuel = st.selectbox("Select Mitigation Fuel for Price Input",fuel_names,index=default_index)
+            price_usd = st.number_input(f"{selected_fuel} - Price (USD/t)", min_value=0.0, value=0.0, step=10.0, key="mitigation_price_input")
 
-        if price_usd > 0:
+            if price_usd > 0:
             user_entered_mitigation_price = True
             for row in mitigation_rows:
                 row["Price (USD/t)"] = price_usd if row["Fuel"] == selected_fuel else 0.0
                 row["Estimated Cost (Eur)"] = row["Price (USD/t)"] * exchange_rate * row["Required Amount (t)"]
-            mititigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
+                mititigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
         
-        else:
-            mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
-            df_mit = pd.DataFrame(mitigation_rows)
-            st.markdown("#### Mitigation Options (Fuel Quantities)")
-            st.dataframe(df_mit.style.format({
-                "Required Amount (t)": "{:,.0f}"}))
+            else:
+                mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
+                df_mit = pd.DataFrame(mitigation_rows)
+                st.markdown("#### Mitigation Options (Fuel Quantities)")
+                st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}"}))
 
 # === SUBSTITUTION SCENARIO ===
 
