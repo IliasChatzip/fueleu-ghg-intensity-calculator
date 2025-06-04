@@ -313,13 +313,12 @@ if penalty > 0:
             n2o_mj = Decimal(str(fuel["ttw_n20"])) * Decimal(str(gwp["N2O"]))
             total_ghg_mj = Decimal(str(fuel["wtt"])) + co2_mj + ch4_mj + n2o_mj
             
-
             if total_ghg_mj >= dec_ghg:
                 continue
-                low = Decimal("0.0")
-                high = Decimal("100000.0")
-                best_qty = None
-                tolerance = Decimal("0.00001")
+            low = Decimal("0.0")
+            high = Decimal("100000.0")
+            best_qty = None
+            tolerance = Decimal("0.00001")
 
             for _ in range(50):
                 mid = (low + high) / 2
