@@ -299,7 +299,7 @@ if deficit_tonnes < 0:
 getcontext().prec = 12
 user_entered_mitigation_price = False
 if penalty > 0:
-    with st.expander ("Mitigation Options (Penalty Offset)", expand=False):
+    with st.expander ("Mitigation Options (Penalty Offset)", expanded=False):
         st.info(" Mitigation fuel is an **addition** to the existing fuel selection, not a replacement. It supplements the initial fuels to help achieve compliance.")
         dec_ghg = Decimal(str(ghg_intensity))
         dec_emissions = Decimal(str(emissions))
