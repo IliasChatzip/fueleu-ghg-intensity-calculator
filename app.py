@@ -482,7 +482,6 @@ if penalty > 0:
    
     if mitigation_rows:
         st.markdown("### Total Cost Scenarios")
-        st.info("💡 These scenarios estimate different compliance cost pathways. Mitigation fuels are added **on top** of initial fuel selections. Substitution replaces a **fraction** of an existing fuel for compliance.")
         scenario1 = total_cost + penalty if total_cost > 0 or penalty > 0 else None
         scenario2 = total_with_pooling if total_cost > 0 and pooling_price_usd_per_tonne > 0 else None
         scenario3 = total_cost + mitigation_total_cost if mitigation_total_cost > 0 else None
@@ -578,7 +577,7 @@ if st.button("Export to PDF"):
                     f"{pooling_cost_eur:,.2f} Eur")
             pdf.cell(200, 10, txt=pooling_line, ln=True)
 
-        # Mitigation Options
+        # Bio Fuel Option
         pdf.ln(5)
         pdf.set_font("Arial", size=10)
         pdf.cell(200, 10, txt="--- Mitigation Cost ---", ln=True)
@@ -599,10 +598,10 @@ if st.button("Export to PDF"):
                 pdf.cell(200, 10, txt=mit_line, ln=True)
             pdf.ln(5)
             pdf.set_font("Arial", "B", size=11)
-            pdf.cell(200, 10, txt="No mitigation fuel prices provided - quantities only report", ln=True)
+            pdf.cell(200, 10, txt="No bio fuel prices provided - quantities only report", ln=True)
 
         
-        # Substitution Option
+        # Replacemnet Option
         pdf.ln(5)
         pdf.set_font("Arial", size=11)
         pdf.cell(200, 10, txt="--- Substitution Cost ---", ln=True)
@@ -612,17 +611,16 @@ if st.button("Export to PDF"):
             pdf.cell(200, 10, txt=f"Replaced {initial_fuel} with {substitute_fuel}: {replaced_mass:,.0f} tonnes", ln=True)
             pdf.cell(200, 10, txt=f"Substitution Ratio: {best_x*100:.1f}% of {initial_fuel} replaced by {substitute_fuel} for compliance.", ln=True)
             if additional_substitution_cost is not None:
-                pdf.cell(200, 10, txt=f"Additional substitution cost: {additional_substitution_cost:,.2f} EUR", ln=True)
-                pdf.cell(200, 10, txt=f"Total Substitution Cost: {total_substitution_cost:,.2f} EUR", ln=True)
+                pdf.cell(200, 10, txt=f"Additional cost: {additional_substitution_cost:,.2f} EUR", ln=True)
+                pdf.cell(200, 10, txt=f"Total Cost: {total_substitution_cost:,.2f} EUR", ln=True)
             else:
-                pdf.cell(200, 10, txt="Cost data not available (missing fuel prices).", ln=True)
+                pdf.cell(200, 10, txt="N/A (missing prices).", ln=True)
             
         
         pdf.ln(5)
         pdf.set_font("Arial", "B", size=12)
         pdf.cell(200, 10, txt="--- Cost Analysis ---", ln=True)
         pdf.set_font("Arial", size=10)
-        pdf.multi_cell(0, 10, "These scenarios estimate different compliance pathways. Mitigation fuels are added **on top** of initial fuel selections.")
         if total_cost > 0:
             pdf.set_font("Arial", style="B", size=11)
             pdf.cell(200, 10, txt=f"- Initial fuels + Penalty: {conservative_total:,.2f} Eur", ln=True)
@@ -639,17 +637,17 @@ if st.button("Export to PDF"):
         
         if total_cost > 0:
             pdf.set_font("Arial", style="B", size=11)
-            pdf.cell(200, 10, txt=f"- Initial fuels + Mitigation fuels, no Penalty: {total_with_mitigation:,.2f} Eur", ln=True)                        
+            pdf.cell(200, 10, txt=f"- Initial fuels + Bio fuels, no Penalty: {total_with_mitigation:,.2f} Eur", ln=True)                        
         else:
             pdf.set_font("Arial", style="B", size=11)
-            pdf.cell(200, 10, txt=f"- Initial fuels + Mitigation fuels, no Penalty: N/A (missing prices)", ln=True)
+            pdf.cell(200, 10, txt=f"- Initial fuels + Bio fuels, no Penalty: N/A (missing prices)", ln=True)
         
         if total_substitution_cost is not None:
             pdf.set_font("Arial", style="B", size=11)
-            pdf.cell(200, 10, txt=f"- Substitute fuels, no Penalty: {total_substitution_cost:,.2f} Eur", ln=True)
+            pdf.cell(200, 10, txt=f"- Replacement, no Penalty: {total_substitution_cost:,.2f} Eur", ln=True)
         else:
             pdf.set_font("Arial", style="B", size=11)
-            pdf.cell(200, 10, txt="- Substitute fuels, no Penalty: N/A (missing prices)", ln=True)
+            pdf.cell(200, 10, txt="- Replacement, no Penalty: N/A (missing prices)", ln=True)
 
                   
         # Export
