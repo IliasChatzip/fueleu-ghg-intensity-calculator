@@ -510,7 +510,7 @@ for x, y in zip(years, targets):
     ax.annotate(f"{y:.2f}", (x, y), textcoords="offset points", xytext=(0,5), ha='center', fontsize=8)
 computed_ghg = st.session_state.get("computed_ghg", ghg_intensity)
 target_value = [BASE_TARGET * (1 - REDUCTIONS[year])]
-line_color = 'red' if computed_ghg > targets else 'green'
+line_color = 'red' if computed_ghg > target_value else 'green'
 ax.axhline(computed_ghg, color=line_color, linestyle='-', label='Your GHG Intensity')
 ax.annotate(f"{computed_ghg:.2f}",
             xy=(2050, computed_ghg),
