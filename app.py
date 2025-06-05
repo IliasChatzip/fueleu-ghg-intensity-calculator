@@ -366,7 +366,7 @@ if penalty > 0:
             for row in mitigation_rows:
                 row["Price (USD/t)"] = price_usd if row["Fuel"] == selected_fuel else 0.0
                 row["Estimated Cost (Eur)"] = row["Price (USD/t)"] * exchange_rate * row["Required Amount (t)"]
-            mititigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
+            mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
         
         else:
             mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
