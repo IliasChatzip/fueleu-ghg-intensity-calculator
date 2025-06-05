@@ -94,12 +94,15 @@ def target_intensity(year: int) -> float:
         return BASE_TARGET * (1 - REDUCTIONS[2025])
     if year <= 2034:
         return BASE_TARGET * (1 - REDUCTIONS[2030])
-    if year == 2035:
+    if year <= 2039:
         return BASE_TARGET * (1 - REDUCTIONS[2035])
-    frac = (year - 2035) / (2050 - 2035)
-    red = REDUCTIONS[2035] + frac * (REDUCTIONS[2050] - REDUCTIONS[2035])
-    return BASE_TARGET * (1 - red)
-  
+    if year <= 2044:
+        return BASE_TARGET * (1 - REDUCTIONS[2040])
+    if year <= 2049:
+        return BASE_TARGET * (1 - REDUCTIONS[2045])
+      if year == 2050:
+        return BASE_TARGET * (1 - REDUCTIONS[2050])
+      
 # === USER INPUT ===
 st.title("Fuel EU - GHG Intensity & Penalty Calculator")
 st.sidebar.markdown("### Fuel Price Settings")
