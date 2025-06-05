@@ -381,7 +381,7 @@ if penalty > 0:
 # === SUBSTITUTION SCENARIO ===
 
 if penalty > 0:
-    st.subheader("Replacement Options (Bare Compliance with Fuel Replacement)")
+    st.subheader("Replacement Options (Compliance with Fuel Replacement)")
     default_substitute_fuel = "Biodiesel (UCO,B20)"
     default_substitute_index = mitigation_fuels.index(default_substitute_fuel) if default_substitute_fuel in mitigation_fuels else 0
 
