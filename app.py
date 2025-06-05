@@ -100,7 +100,7 @@ def target_intensity(year: int) -> float:
         return BASE_TARGET * (1 - REDUCTIONS[2040])
     if year <= 2049:
         return BASE_TARGET * (1 - REDUCTIONS[2045])
-      if year == 2050:
+    if year == 2050:
         return BASE_TARGET * (1 - REDUCTIONS[2050])
       
 # === USER INPUT ===
