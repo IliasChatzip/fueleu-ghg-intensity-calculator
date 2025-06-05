@@ -501,7 +501,7 @@ else:
 
 # === COMPLIANCE CHART ===
 years = sorted(REDUCTIONS.keys())
-targets = [BASE_TARGET * (1 - REDUCTIONS[year]) for year in years if years in REDUCTIONS]
+targets = [BASE_TARGET * (1 - REDUCTIONS[year]) for year in years if year in REDUCTIONS]
 
 st.subheader("Sector-wide GHG Intensity Targets")
 fig, ax = plt.subplots(figsize=(8, 4))
