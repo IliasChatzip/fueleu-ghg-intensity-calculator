@@ -298,13 +298,13 @@ if deficit_tonnes < 0:
        st.info("Enter a non-zero pooling price to activate Pooling Scenario.")
 
 
-# === MITIGATION OPTIONS ===
+# === BIO-FUELS OPTIONS ===
 
 getcontext().prec = 12
 user_entered_mitigation_price = False
 if penalty > 0:
-    st.subheader("Mitigation Fuel Options (Penalty Offset)")
-    st.info(" Mitigation fuel is an **addition** to the existing fuel selection, not a replacement. It supplements the initial fuels to help achieve compliance.")
+    st.subheader("Bio Fuel Options (Penalty Offset)")
+    st.info(" This strategy increases total fuel consumption by supplementing the initial fuels with bio fuels to help achieve compliance.")
     dec_ghg = Decimal(str(ghg_intensity))
     dec_emissions = Decimal(str(emissions))
     dec_energy = Decimal(str(total_energy))
@@ -361,7 +361,7 @@ if penalty > 0:
         default_fuel = "Biodiesel (UCO,B20)"
         fuel_names = [row["Fuel"] for row in mitigation_rows]
         default_index = fuel_names.index(default_fuel) if default_fuel in fuel_names else 0
-        selected_fuel = st.selectbox("Select Mitigation Fuel for Price Input",fuel_names,index=default_index)
+        selected_fuel = st.selectbox("Select Bio Fuel for Price Input",fuel_names,index=default_index)
         price_usd = st.number_input(f"{selected_fuel} - Price (USD/t)", min_value=0.0, value=0.0, step=10.0, key="mitigation_price_input")
 
         if price_usd > 0:
@@ -374,19 +374,19 @@ if penalty > 0:
         else:
             mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
             df_mit = pd.DataFrame(mitigation_rows)
-            st.markdown("#### Mitigation Fuel Options (Quantities)")
+            st.markdown("#### Bio Fuel Options")
             st.dataframe(df_mit.style.format({
                 "Required Amount (t)": "{:,.0f}"}))
 
 # === SUBSTITUTION SCENARIO ===
 
 if penalty > 0:
-    st.subheader("Substitution Option (Bare Compliance Replacement)")
+    st.subheader("Replacement Options (Bare Compliance with Fuel Replacement)")
     default_substitute_fuel = "Biodiesel (UCO,B20)"
     default_substitute_index = mitigation_fuels.index(default_substitute_fuel) if default_substitute_fuel in mitigation_fuels else 0
 
     initial_fuel = st.selectbox("Select Fuel to Replace", initial_fuels, key="sub_initial")
-    substitute_fuel = st.selectbox("Select Mitigation Fuel to Use", mitigation_fuels, index=default_substitute_index, key="sub_mitigation")
+    substitute_fuel = st.selectbox("Select Bio Fuel to Use", mitigation_fuels, index=default_substitute_index, key="sub_mitigation")
 
     qty_initial = fuel_inputs.get(initial_fuel, 0.0)
     price_initial = fuel_price_inputs.get(initial_fuel, 0.0) * exchange_rate
@@ -400,7 +400,7 @@ if penalty > 0:
     replaced_mass = None
 
     if qty_initial > 0:
-        st.markdown("Estimate compliance by replacing the smallest possible fraction of a high-emission fuel with a mitigation fuel, ensuring GHG intensity is just below the FuelEU target.")
+        st.markdown("Estimate compliance by replacing the smallest possible fraction of a high-emission fuel with a bio fuel, ensuring GHG intensity is just below the FuelEU target.")
         
         initial_props = next(f for f in FUELS if f["name"] == initial_fuel)
         sub_props = next(f for f in FUELS if f["name"] == substitute_fuel)
@@ -452,7 +452,7 @@ if penalty > 0:
                 break
 
         if best_x is None or best_x > 1.0:
-            st.warning("⚠️ Consider alternative fuels.")
+            st.warning("⚠️ Consider alternative fuel.")
             total_substitution_cost = None
         else:
             replaced_mass = best_x * qty_initial
@@ -476,9 +476,9 @@ if penalty > 0:
             st.markdown(f"**Replaced {initial_fuel} mass**: {replaced_mass:,.1f} tonnes")
             st.markdown(f"**Added {substitute_fuel} mass**: {replaced_mass:,.1f} tonnes")
             if additional_substitution_cost is not None:
-                st.markdown(f"**Additional substitution cost**: {additional_substitution_cost:,.2f} EUR")
+                st.markdown(f"**Additional cost**: {additional_substitution_cost:,.2f} EUR")
             else:
-                st.markdown(f"**Additional substitution cost**: N/A (missing prices)")
+                st.markdown(f"**Additional cost**: N/A (missing prices)")
    
     if mitigation_rows:
         st.markdown("### Total Cost Scenarios")
@@ -489,15 +489,15 @@ if penalty > 0:
         scenario4 = total_substitution_cost if substitution_price_usd > 0 else None
         st.metric("Initial Fuels + Penalty", f"{scenario1:,.2f} Eur" if scenario1 is not None else "N/A (missing prices)")
         st.metric("Initial Fuels + Pooling (No Penalty)", f"{scenario2:,.2f} Eur" if scenario2 is not None else "N/A (missing prices)")
-        st.metric("Initial Fuels + Mitigation Fuels (No Penalty)", f"{scenario3:,.2f} Eur" if scenario3 is not None else "N/A (missing prices)")
-        st.metric("Substitution (No Penalty)", f"{scenario4:,.2f} Eur" if scenario4 is not None else "N/A (missing prices)")
+        st.metric("Initial Fuels + Bio Fuels (No Penalty)", f"{scenario3:,.2f} Eur" if scenario3 is not None else "N/A (missing prices)")
+        st.metric("Replacement (No Penalty)", f"{scenario4:,.2f} Eur" if scenario4 is not None else "N/A (missing prices)")
     else:
         df_mit = pd.DataFrame(mitigation_rows)
         st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
 
 else:
     if rows:
-        st.info("✅ Compliance already achieved! No mitigation required.")
+        st.info("✅ Compliance already achieved! No mitigation strategy required.")
 
 # === COMPLIANCE CHART ===
 years = sorted(REDUCTIONS.keys())
