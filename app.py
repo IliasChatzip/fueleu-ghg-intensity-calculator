@@ -281,7 +281,7 @@ deficit_tonnes = compliance_balance / 1_000_000
 
 if deficit_tonnes < 0:
     show_pooling_option = True
-    st.subheader("Pooling Option (Compliance Offset)")
+    st.subheader("Pooling Option")
     st.info(f"CO2 Deficit: {deficit_tonnes:,.2f} tCO2eq. You may offset this via pooling if you have access to external credits.")
 
     pooling_price_usd_per_tonne = st.number_input(
@@ -303,7 +303,7 @@ if deficit_tonnes < 0:
 getcontext().prec = 12
 user_entered_mitigation_price = False
 if penalty > 0:
-    st.subheader("Bio Fuel Options (Penalty Offset)")
+    st.subheader("Bio Fuel Options")
     st.info(" This strategy **increases total fuel consumption** by **supplementing** the initial fuels with bio fuels to help achieve compliance.")
     dec_ghg = Decimal(str(ghg_intensity))
     dec_emissions = Decimal(str(emissions))
@@ -381,7 +381,7 @@ if penalty > 0:
 # === SUBSTITUTION SCENARIO ===
 
 if penalty > 0:
-    st.subheader("Replacement Options (Compliance with Fuel Replacement)")
+    st.subheader("Replacement Options (Compliance via Fuel Replacement)")
     default_substitute_fuel = "Biodiesel (UCO,B20)"
     default_substitute_index = mitigation_fuels.index(default_substitute_fuel) if default_substitute_fuel in mitigation_fuels else 0
 
