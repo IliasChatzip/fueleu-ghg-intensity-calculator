@@ -501,7 +501,7 @@ else:
 
 # === COMPLIANCE CHART ===
 years = sorted(REDUCTIONS.keys())
-targets = [BASE_TARGET * (1 - REDUCTIONS[year]) for year in years]
+targets = [BASE_TARGET * (1 - REDUCTIONS[y]) for y in years]
 
 st.subheader("Sector-wide GHG Intensity Targets")
 fig, ax = plt.subplots(figsize=(8, 4))
@@ -509,10 +509,7 @@ ax.plot(years, targets, linestyle='--', marker='o', label='EU Target')
 for x, y in zip(years, targets):
     ax.annotate(f"{y:.2f}", (x, y), textcoords="offset points", xytext=(0,5), ha='center', fontsize=8)
 computed_ghg = st.session_state.get("computed_ghg", ghg_intensity)
-year = st.session_state.get("year", 2025)
-target_year = max([y for y in REDUCTIONS if y <= year])
-target_value = [BASE_TARGET * (1 - REDUCTIONS[target_year])]
-line_color = 'red' if computed_ghg > target_value else 'green'
+line_color = 'red' if computed_ghg > target_intensity(year) else 'green'
 ax.axhline(computed_ghg, color=line_color, linestyle='-', label='Your GHG Intensity')
 ax.annotate(f"{computed_ghg:.2f}",
             xy=(2050, computed_ghg),
