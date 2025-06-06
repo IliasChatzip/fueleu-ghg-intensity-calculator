@@ -270,7 +270,7 @@ if rows and user_entered_prices:
     conservative_total = total_cost + penalty
     st.metric("Total Cost of Selected Fuels + Penalty", f"{conservative_total:,.2f} Eur")
 
-if compliance_balance >= 0:
+if compliance_balance < 0:
     st.subheader("Mitigation Strategies")
         
     # === POOLING OPTION ===
@@ -498,7 +498,8 @@ if compliance_balance >= 0:
                 st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
 
 else:
-    st.info("✅ Compliance already achieved! No mitigation strategy required.")
+    if rows:
+        st.info("✅ Compliance already achieved! No mitigation strategy required.")
                 
 
 # === COMPLIANCE CHART ===
