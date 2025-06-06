@@ -272,229 +272,229 @@ if rows and user_entered_prices:
 
 with st.expander("Mitigation Strategies", expanded=False):
 
-# === POOLING OPTION ===
-
-show_pooling_option = False
-pooling_price_usd_per_tonne = 0.0
-pooling_cost_usd = 0.0
-pooling_cost_eur = 0.0
-total_with_pooling = 0.0
-deficit_tonnes = compliance_balance / 1_000_000
-
-if deficit_tonnes < 0:
-    show_pooling_option = True
-    st.subheader("Pooling Option")
-    st.info(f"CO2 Deficit: {deficit_tonnes:,.2f} tCO2eq. You may offset this via pooling if you have access to external credits.")
-
-    pooling_price_usd_per_tonne = st.number_input(
-        "Enter Pooling Price (USD/tCO2eq)",
-        min_value=0.0, value=0.0, step=0.01,
-        help="The cost per tCO2eq to buy compliance credits from the pool. If 0, pooling will not be applied.")
-
-    if pooling_price_usd_per_tonne > 0:
-       pooling_cost_usd = pooling_price_usd_per_tonne * abs(deficit_tonnes)
-       pooling_cost_eur = pooling_cost_usd * exchange_rate
-       total_with_pooling = total_cost + pooling_cost_eur
-
-    else:
-       st.info("Enter a non-zero pooling price to activate Pooling Scenario.")
-
-
-# === BIO-FUELS OPTIONS ===
-
-getcontext().prec = 12
-user_entered_mitigation_price = False
-if penalty > 0:
-    st.subheader("Bio Fuel Options")
-    st.info(" This strategy **increases total fuel consumption** by **supplementing** the initial fuels with bio fuels to help achieve compliance.")
-    dec_ghg = Decimal(str(ghg_intensity))
-    dec_emissions = Decimal(str(emissions))
-    dec_energy = Decimal(str(total_energy))
-    target = Decimal(str(target_intensity(year)))
+    # === POOLING OPTION ===
     
-    mitigation_rows = []
-    for fuel in FUELS:
-        co2_mj = Decimal(str(fuel["ttw_co2"])) * Decimal(str(1 - ops / 100)) * Decimal(str(wind))
-        ch4_mj = Decimal(str(fuel["ttw_ch4"])) * Decimal(str(gwp["CH4"]))
-        n2o_mj = Decimal(str(fuel["ttw_n20"])) * Decimal(str(gwp["N2O"]))
-        total_ghg_mj = Decimal(str(fuel["wtt"])) + co2_mj + ch4_mj + n2o_mj
-
-        if total_ghg_mj >= dec_ghg:
-            continue
-
-        low = Decimal("0.0")
-        high = Decimal("100000.0")
-        best_qty = None
-        tolerance = Decimal("0.00001")
-
-        for _ in range(50):
-            mid = (low + high) / 2
-            mass_g = mid * Decimal("1000000")
-            energy_mj = mass_g * Decimal(str(fuel["lcv"]))
-
-            if fuel["rfnbo"] and year <= 2033:
-                energy_mj *= Decimal(str(REWARD_FACTOR_RFNBO_MULTIPLIER))
-
-            ttw = (co2_mj + ch4_mj + n2o_mj) * mass_g
-            wtt = energy_mj * Decimal(str(fuel["wtt"]))
-            new_emissions = dec_emissions + ttw + wtt
-            new_energy = dec_energy + energy_mj
-
-            new_ghg = new_emissions / new_energy if new_energy else Decimal("99999")
-
-            if new_ghg < target:
-                best_qty = mid
-                high = mid
-            else:
-                low = mid
-
-            if (high - low) < tolerance:
-                break
-
-        if best_qty is not None:
-            rounded_qty = math.ceil(float(best_qty))
-            mitigation_rows.append({
-                "Fuel": fuel["name"],
-                "Required Amount (t)": rounded_qty,
-            })
-            
-    if mitigation_rows:
-        mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
-        default_fuel = "Biodiesel (UCO,B20)"
-        fuel_names = [row["Fuel"] for row in mitigation_rows]
-        default_index = fuel_names.index(default_fuel) if default_fuel in fuel_names else 0
-        selected_fuel = st.selectbox("Select Bio Fuel for Price Input",fuel_names,index=default_index)
-        price_usd = st.number_input(f"{selected_fuel} - Price (USD/t)", min_value=0.0, value=0.0, step=10.0, key="mitigation_price_input")
-
-        if price_usd > 0:
-            user_entered_mitigation_price = True
-            for row in mitigation_rows:
-                row["Price (USD/t)"] = price_usd if row["Fuel"] == selected_fuel else 0.0
-                row["Estimated Cost (Eur)"] = row["Price (USD/t)"] * exchange_rate * row["Required Amount (t)"]
-            mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
-        
+    show_pooling_option = False
+    pooling_price_usd_per_tonne = 0.0
+    pooling_cost_usd = 0.0
+    pooling_cost_eur = 0.0
+    total_with_pooling = 0.0
+    deficit_tonnes = compliance_balance / 1_000_000
+    
+    if deficit_tonnes < 0:
+        show_pooling_option = True
+        st.subheader("Pooling Option")
+        st.info(f"CO2 Deficit: {deficit_tonnes:,.2f} tCO2eq. You may offset this via pooling if you have access to external credits.")
+    
+        pooling_price_usd_per_tonne = st.number_input(
+            "Enter Pooling Price (USD/tCO2eq)",
+            min_value=0.0, value=0.0, step=0.01,
+            help="The cost per tCO2eq to buy compliance credits from the pool. If 0, pooling will not be applied.")
+    
+        if pooling_price_usd_per_tonne > 0:
+           pooling_cost_usd = pooling_price_usd_per_tonne * abs(deficit_tonnes)
+           pooling_cost_eur = pooling_cost_usd * exchange_rate
+           total_with_pooling = total_cost + pooling_cost_eur
+    
         else:
+           st.info("Enter a non-zero pooling price to activate Pooling Scenario.")
+    
+    
+    # === BIO-FUELS OPTIONS ===
+    
+    getcontext().prec = 12
+    user_entered_mitigation_price = False
+    if penalty > 0:
+        st.subheader("Bio Fuel Options")
+        st.info(" This strategy **increases total fuel consumption** by **supplementing** the initial fuels with bio fuels to help achieve compliance.")
+        dec_ghg = Decimal(str(ghg_intensity))
+        dec_emissions = Decimal(str(emissions))
+        dec_energy = Decimal(str(total_energy))
+        target = Decimal(str(target_intensity(year)))
+        
+        mitigation_rows = []
+        for fuel in FUELS:
+            co2_mj = Decimal(str(fuel["ttw_co2"])) * Decimal(str(1 - ops / 100)) * Decimal(str(wind))
+            ch4_mj = Decimal(str(fuel["ttw_ch4"])) * Decimal(str(gwp["CH4"]))
+            n2o_mj = Decimal(str(fuel["ttw_n20"])) * Decimal(str(gwp["N2O"]))
+            total_ghg_mj = Decimal(str(fuel["wtt"])) + co2_mj + ch4_mj + n2o_mj
+    
+            if total_ghg_mj >= dec_ghg:
+                continue
+    
+            low = Decimal("0.0")
+            high = Decimal("100000.0")
+            best_qty = None
+            tolerance = Decimal("0.00001")
+    
+            for _ in range(50):
+                mid = (low + high) / 2
+                mass_g = mid * Decimal("1000000")
+                energy_mj = mass_g * Decimal(str(fuel["lcv"]))
+    
+                if fuel["rfnbo"] and year <= 2033:
+                    energy_mj *= Decimal(str(REWARD_FACTOR_RFNBO_MULTIPLIER))
+    
+                ttw = (co2_mj + ch4_mj + n2o_mj) * mass_g
+                wtt = energy_mj * Decimal(str(fuel["wtt"]))
+                new_emissions = dec_emissions + ttw + wtt
+                new_energy = dec_energy + energy_mj
+    
+                new_ghg = new_emissions / new_energy if new_energy else Decimal("99999")
+    
+                if new_ghg < target:
+                    best_qty = mid
+                    high = mid
+                else:
+                    low = mid
+    
+                if (high - low) < tolerance:
+                    break
+    
+            if best_qty is not None:
+                rounded_qty = math.ceil(float(best_qty))
+                mitigation_rows.append({
+                    "Fuel": fuel["name"],
+                    "Required Amount (t)": rounded_qty,
+                })
+                
+        if mitigation_rows:
             mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
-            df_mit = pd.DataFrame(mitigation_rows)
-            st.markdown("#### Bio Fuel Options")
-            st.dataframe(df_mit.style.format({
-                "Required Amount (t)": "{:,.0f}"}))
-
-# === SUBSTITUTION SCENARIO ===
-
-if penalty > 0:
-    st.subheader("Replacement Options (Compliance via Fuel Replacement)")
-    default_substitute_fuel = "Biodiesel (UCO,B20)"
-    default_substitute_index = mitigation_fuels.index(default_substitute_fuel) if default_substitute_fuel in mitigation_fuels else 0
-
-    initial_fuel = st.selectbox("Select Fuel to Replace", initial_fuels, key="sub_initial")
-    substitute_fuel = st.selectbox("Select Bio Fuel to Use", mitigation_fuels, index=default_substitute_index, key="sub_mitigation")
-
-    qty_initial = fuel_inputs.get(initial_fuel, 0.0)
-    price_initial = fuel_price_inputs.get(initial_fuel, 0.0) * exchange_rate
-    substitution_price_usd = st.number_input(
-        f"{substitute_fuel} - Price for Mitigation fuel (USD/t)",
-        min_value=0.0, value=0.0, step=10.0, key="substitution_price_input"
-        )
-    substitution_price_eur = substitution_price_usd * exchange_rate
-
-    additional_substitution_cost = None
-    replaced_mass = None
-
-    if qty_initial > 0:
-        st.markdown("Estimate compliance by replacing the smallest possible fraction of a high-emission fuel with a bio fuel, ensuring GHG intensity is just below the FuelEU target.")
-        
-        initial_props = next(f for f in FUELS if f["name"] == initial_fuel)
-        sub_props = next(f for f in FUELS if f["name"] == substitute_fuel)
-        
-        co2_initial = initial_props["ttw_co2"] * (1 - ops / 100) * wind
-        ch4_initial = initial_props["ttw_ch4"] * gwp["CH4"]
-        n2o_initial = initial_props["ttw_n20"] * gwp["N2O"]
-        ghg_initial = co2_initial + ch4_initial + n2o_initial + initial_props["wtt"]
-        co2_sub = sub_props["ttw_co2"] * (1 - ops / 100) * wind
-        ch4_sub = sub_props["ttw_ch4"] * gwp["CH4"]
-        n2o_sub = sub_props["ttw_n20"] * gwp["N2O"]
-        ghg_sub = co2_sub + ch4_sub + sub_props["wtt"]
-        
-        target = target_intensity(year)
-        precision = 1e-5
-        low, high = 0.0, 1.0
-        best_x = None
-        for _ in range(100):
-            mid = (low + high) / 2
+            default_fuel = "Biodiesel (UCO,B20)"
+            fuel_names = [row["Fuel"] for row in mitigation_rows]
+            default_index = fuel_names.index(default_fuel) if default_fuel in fuel_names else 0
+            selected_fuel = st.selectbox("Select Bio Fuel for Price Input",fuel_names,index=default_index)
+            price_usd = st.number_input(f"{selected_fuel} - Price (USD/t)", min_value=0.0, value=0.0, step=10.0, key="mitigation_price_input")
+    
+            if price_usd > 0:
+                user_entered_mitigation_price = True
+                for row in mitigation_rows:
+                    row["Price (USD/t)"] = price_usd if row["Fuel"] == selected_fuel else 0.0
+                    row["Estimated Cost (Eur)"] = row["Price (USD/t)"] * exchange_rate * row["Required Amount (t)"]
+                mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
             
-            initial_mass_g = qty_initial * 1_000_000
-            sub_mass_g = initial_mass_g * mid
-            remain_mass_g = initial_mass_g * (1 - mid)
-
-            energy_initial = remain_mass_g * initial_props["lcv"]
-            energy_sub = sub_mass_g * sub_props["lcv"]
-            if sub_props["rfnbo"] and year <= 2033:
-                energy_sub *= REWARD_FACTOR_RFNBO_MULTIPLIER
-
-            total_energy_blend = energy_initial + energy_sub + (total_energy - (initial_mass_g * initial_props["lcv"]))
-
-            # Emissions
-            ttw_initial = remain_mass_g * (co2_initial + ch4_initial + n2o_initial)
-            ttw_sub = sub_mass_g * (co2_sub + ch4_sub + n2o_sub)
-            wtt_initial = energy_initial * initial_props["wtt"]
-            wtt_sub = energy_sub * sub_props["wtt"]
-
-            total_emissions_blend = emissions - (initial_mass_g * (co2_initial + ch4_initial + n2o_initial) + initial_mass_g * initial_props["lcv"] * initial_props["wtt"]) + ttw_initial + ttw_sub + wtt_initial + wtt_sub
-
-            blended_ghg = total_emissions_blend / total_energy_blend if total_energy_blend > 0 else 99999
-
-            if blended_ghg <= target + precision:
-                best_x = mid
-                high = mid
             else:
-                low = mid
-
-            if high - low < precision:
-                break
-
-        if best_x is None or best_x > 1.0:
-            st.warning("⚠️ Consider alternative fuel.")
-            total_substitution_cost = None
-        else:
-            replaced_mass = best_x * qty_initial
-
-            if price_initial > 0.0 and substitution_price_usd > 0.0:
-                mitigation_fuel_cost = replaced_mass * substitution_price_eur
-                remaining_fuel_cost = (qty_initial - replaced_mass) * price_initial
-                additional_substitution_cost = (replaced_mass * (substitution_price_eur - price_initial))
-                substitution_total_cost = mitigation_fuel_cost + remaining_fuel_cost
-                other_fuel_costs = sum(
-                    fuel_inputs.get(f["name"], 0.0) * fuel_price_inputs.get(f["name"], 0.0) * exchange_rate
-                    for f in FUELS if f["name"] not in [initial_fuel]
-                    )
-                total_substitution_cost = substitution_total_cost + other_fuel_costs
-            else:
-                mitigation_fuel_cost = None
-                additional_substitution_cost = None
+                mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
+                df_mit = pd.DataFrame(mitigation_rows)
+                st.markdown("#### Bio Fuel Options")
+                st.dataframe(df_mit.style.format({
+                    "Required Amount (t)": "{:,.0f}"}))
+    
+    # === SUBSTITUTION SCENARIO ===
+    
+    if penalty > 0:
+        st.subheader("Replacement Options (Compliance via Fuel Replacement)")
+        default_substitute_fuel = "Biodiesel (UCO,B20)"
+        default_substitute_index = mitigation_fuels.index(default_substitute_fuel) if default_substitute_fuel in mitigation_fuels else 0
+    
+        initial_fuel = st.selectbox("Select Fuel to Replace", initial_fuels, key="sub_initial")
+        substitute_fuel = st.selectbox("Select Bio Fuel to Use", mitigation_fuels, index=default_substitute_index, key="sub_mitigation")
+    
+        qty_initial = fuel_inputs.get(initial_fuel, 0.0)
+        price_initial = fuel_price_inputs.get(initial_fuel, 0.0) * exchange_rate
+        substitution_price_usd = st.number_input(
+            f"{substitute_fuel} - Price for Mitigation fuel (USD/t)",
+            min_value=0.0, value=0.0, step=10.0, key="substitution_price_input"
+            )
+        substitution_price_eur = substitution_price_usd * exchange_rate
+    
+        additional_substitution_cost = None
+        replaced_mass = None
+    
+        if qty_initial > 0:
+            st.markdown("Estimate compliance by replacing the smallest possible fraction of a high-emission fuel with a bio fuel, ensuring GHG intensity is just below the FuelEU target.")
+            
+            initial_props = next(f for f in FUELS if f["name"] == initial_fuel)
+            sub_props = next(f for f in FUELS if f["name"] == substitute_fuel)
+            
+            co2_initial = initial_props["ttw_co2"] * (1 - ops / 100) * wind
+            ch4_initial = initial_props["ttw_ch4"] * gwp["CH4"]
+            n2o_initial = initial_props["ttw_n20"] * gwp["N2O"]
+            ghg_initial = co2_initial + ch4_initial + n2o_initial + initial_props["wtt"]
+            co2_sub = sub_props["ttw_co2"] * (1 - ops / 100) * wind
+            ch4_sub = sub_props["ttw_ch4"] * gwp["CH4"]
+            n2o_sub = sub_props["ttw_n20"] * gwp["N2O"]
+            ghg_sub = co2_sub + ch4_sub + sub_props["wtt"]
+            
+            target = target_intensity(year)
+            precision = 1e-5
+            low, high = 0.0, 1.0
+            best_x = None
+            for _ in range(100):
+                mid = (low + high) / 2
+                
+                initial_mass_g = qty_initial * 1_000_000
+                sub_mass_g = initial_mass_g * mid
+                remain_mass_g = initial_mass_g * (1 - mid)
+    
+                energy_initial = remain_mass_g * initial_props["lcv"]
+                energy_sub = sub_mass_g * sub_props["lcv"]
+                if sub_props["rfnbo"] and year <= 2033:
+                    energy_sub *= REWARD_FACTOR_RFNBO_MULTIPLIER
+    
+                total_energy_blend = energy_initial + energy_sub + (total_energy - (initial_mass_g * initial_props["lcv"]))
+    
+                # Emissions
+                ttw_initial = remain_mass_g * (co2_initial + ch4_initial + n2o_initial)
+                ttw_sub = sub_mass_g * (co2_sub + ch4_sub + n2o_sub)
+                wtt_initial = energy_initial * initial_props["wtt"]
+                wtt_sub = energy_sub * sub_props["wtt"]
+    
+                total_emissions_blend = emissions - (initial_mass_g * (co2_initial + ch4_initial + n2o_initial) + initial_mass_g * initial_props["lcv"] * initial_props["wtt"]) + ttw_initial + ttw_sub + wtt_initial + wtt_sub
+    
+                blended_ghg = total_emissions_blend / total_energy_blend if total_energy_blend > 0 else 99999
+    
+                if blended_ghg <= target + precision:
+                    best_x = mid
+                    high = mid
+                else:
+                    low = mid
+    
+                if high - low < precision:
+                    break
+    
+            if best_x is None or best_x > 1.0:
+                st.warning("⚠️ Consider alternative fuel.")
                 total_substitution_cost = None
-
-            st.success(f"To comply with the FuelEU target of {target:.2f} gCO2eq/MJ, you need to replace at least **{best_x*100:.2f}%** of {initial_fuel} with {substitute_fuel}.")
-            st.markdown(f"**Replaced {initial_fuel} mass**: {replaced_mass:,.1f} tonnes")
-            st.markdown(f"**Added {substitute_fuel} mass**: {replaced_mass:,.1f} tonnes")
-            if additional_substitution_cost is not None:
-                st.markdown(f"**Additional cost**: {additional_substitution_cost:,.2f} EUR")
             else:
-                st.markdown(f"**Additional cost**: N/A (missing prices)")
-   
-    if mitigation_rows:
-        st.markdown("### Total Cost Scenarios")
-        scenario1 = total_cost + penalty if total_cost > 0 or penalty > 0 else None
-        scenario2 = total_with_pooling if total_cost > 0 and pooling_price_usd_per_tonne > 0 else None
-        scenario3 = total_cost + mitigation_total_cost if mitigation_total_cost > 0 else None
-        scenario4 = total_substitution_cost if substitution_price_usd > 0 else None
-        st.metric("Initial Fuels + Penalty", f"{scenario1:,.2f} Eur" if scenario1 is not None else "N/A (missing prices)")
-        st.metric("Initial Fuels + Pooling (No Penalty)", f"{scenario2:,.2f} Eur" if scenario2 is not None else "N/A (missing prices)")
-        st.metric("Initial Fuels + Bio Fuels (No Penalty)", f"{scenario3:,.2f} Eur" if scenario3 is not None else "N/A (missing prices)")
-        st.metric("Replacement (No Penalty)", f"{scenario4:,.2f} Eur" if scenario4 is not None else "N/A (missing prices)")
-    else:
-        df_mit = pd.DataFrame(mitigation_rows)
-        st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
+                replaced_mass = best_x * qty_initial
+    
+                if price_initial > 0.0 and substitution_price_usd > 0.0:
+                    mitigation_fuel_cost = replaced_mass * substitution_price_eur
+                    remaining_fuel_cost = (qty_initial - replaced_mass) * price_initial
+                    additional_substitution_cost = (replaced_mass * (substitution_price_eur - price_initial))
+                    substitution_total_cost = mitigation_fuel_cost + remaining_fuel_cost
+                    other_fuel_costs = sum(
+                        fuel_inputs.get(f["name"], 0.0) * fuel_price_inputs.get(f["name"], 0.0) * exchange_rate
+                        for f in FUELS if f["name"] not in [initial_fuel]
+                        )
+                    total_substitution_cost = substitution_total_cost + other_fuel_costs
+                else:
+                    mitigation_fuel_cost = None
+                    additional_substitution_cost = None
+                    total_substitution_cost = None
+    
+                st.success(f"To comply with the FuelEU target of {target:.2f} gCO2eq/MJ, you need to replace at least **{best_x*100:.2f}%** of {initial_fuel} with {substitute_fuel}.")
+                st.markdown(f"**Replaced {initial_fuel} mass**: {replaced_mass:,.1f} tonnes")
+                st.markdown(f"**Added {substitute_fuel} mass**: {replaced_mass:,.1f} tonnes")
+                if additional_substitution_cost is not None:
+                    st.markdown(f"**Additional cost**: {additional_substitution_cost:,.2f} EUR")
+                else:
+                    st.markdown(f"**Additional cost**: N/A (missing prices)")
+       
+        if mitigation_rows:
+            st.markdown("### Total Cost Scenarios")
+            scenario1 = total_cost + penalty if total_cost > 0 or penalty > 0 else None
+            scenario2 = total_with_pooling if total_cost > 0 and pooling_price_usd_per_tonne > 0 else None
+            scenario3 = total_cost + mitigation_total_cost if mitigation_total_cost > 0 else None
+            scenario4 = total_substitution_cost if substitution_price_usd > 0 else None
+            st.metric("Initial Fuels + Penalty", f"{scenario1:,.2f} Eur" if scenario1 is not None else "N/A (missing prices)")
+            st.metric("Initial Fuels + Pooling (No Penalty)", f"{scenario2:,.2f} Eur" if scenario2 is not None else "N/A (missing prices)")
+            st.metric("Initial Fuels + Bio Fuels (No Penalty)", f"{scenario3:,.2f} Eur" if scenario3 is not None else "N/A (missing prices)")
+            st.metric("Replacement (No Penalty)", f"{scenario4:,.2f} Eur" if scenario4 is not None else "N/A (missing prices)")
+        else:
+            df_mit = pd.DataFrame(mitigation_rows)
+            st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
 
 else:
     if rows:
