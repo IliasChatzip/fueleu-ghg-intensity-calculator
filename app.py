@@ -273,7 +273,7 @@ if rows and user_entered_prices:
 with st.expander("**Mitigation Strategies**", expanded=False):
     
     # === POOLING OPTION ===
-    with st.expander("📉 **Pooling**", expanded=False):
+    with st.expander("**Pooling**", expanded=False):
         show_pooling_option = False
         pooling_price_usd_per_tonne = 0.0
         pooling_cost_usd = 0.0
@@ -301,7 +301,7 @@ with st.expander("**Mitigation Strategies**", expanded=False):
     
     
     # === BIO-FUELS OPTIONS ===
-    with st.expander("📉 **Add Bio Fuel**", expanded=False):
+    with st.expander("**Add Bio Fuel**", expanded=False):
         getcontext().prec = 12
         user_entered_mitigation_price = False
         if penalty > 0:
@@ -381,7 +381,7 @@ with st.expander("**Mitigation Strategies**", expanded=False):
                         "Required Amount (t)": "{:,.0f}"}))
     
     # === SUBSTITUTION SCENARIO ===
-    with st.expander("📉 **Replace with Bio Fuel**", expanded=False):
+    with st.expander("**Replace with Bio Fuel**", expanded=False):
         if penalty > 0:
             st.subheader("Replacement Options (Compliance via Fuel Replacement)")
             default_substitute_fuel = "Biodiesel (UCO,B20)"
@@ -496,9 +496,9 @@ with st.expander("**Mitigation Strategies**", expanded=False):
                 df_mit = pd.DataFrame(mitigation_rows)
                 st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
 
-        else:
-            if rows:
-                st.info("✅ Compliance already achieved! No mitigation strategy required.")
+    else:
+        if rows:
+            st.info("✅ Compliance already achieved! No mitigation strategy required.")
 
 # === COMPLIANCE CHART ===
 years = sorted(REDUCTIONS.keys())
