@@ -495,10 +495,7 @@ with st.expander("**Mitigation Strategies**", expanded=False):
             else:
                 df_mit = pd.DataFrame(mitigation_rows)
                 st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
-
-        else:
-            if rows:
-                st.info("✅ Compliance already achieved! No mitigation strategy required.")
+                
 
 # === COMPLIANCE CHART ===
 years = sorted(REDUCTIONS.keys())
