@@ -270,6 +270,8 @@ if rows and user_entered_prices:
     conservative_total = total_cost + penalty
     st.metric("Total Cost of Selected Fuels + Penalty", f"{conservative_total:,.2f} Eur")
 
+with st.expander("Mitigation Strategies", expanded=False):
+
 # === POOLING OPTION ===
 
 show_pooling_option = False
