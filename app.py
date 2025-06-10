@@ -534,7 +534,8 @@ pooling_cost_eur = 0.0
 total_with_pooling = total_cost + pooling_cost_eur
 conservative_total = total_cost + penalty
 total_with_mitigation = total_cost + mitigation_total_cost
-total_with_pooling = total_cost + pooling_cost_eur
+total_substitution_cost = substitution_total_cost + other_fuel_costs
+
 
 # === PDF EXPORT ===
 if st.button("Export to PDF"):
@@ -589,7 +590,7 @@ if st.button("Export to PDF"):
         # Bio Fuel Option
         pdf.ln(5)
         pdf.set_font("Arial", size=10)
-        pdf.cell(200, 10, txt="--- Mitigation Cost ---", ln=True)
+        pdf.cell(200, 10, txt="--- Bio Fuel Cost ---", ln=True)
 
         mitigation_with_price = [row for row in mitigation_rows if row.get("Price (USD/t)", 0) > 0]
 
@@ -613,7 +614,7 @@ if st.button("Export to PDF"):
         # Replacemnet Option
         pdf.ln(5)
         pdf.set_font("Arial", size=11)
-        pdf.cell(200, 10, txt="--- Substitution Cost ---", ln=True)
+        pdf.cell(200, 10, txt="--- Replacement Cost ---", ln=True)
 
         if penalty > 0 and replaced_mass is not None and best_x is not None:
             pdf.set_font("Arial", size=10)
