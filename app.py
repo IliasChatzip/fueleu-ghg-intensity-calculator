@@ -271,18 +271,18 @@ if rows and user_entered_prices:
     conservative_total = total_cost + penalty
     st.metric("Total Cost of Selected Fuels + Penalty", f"{conservative_total:,.2f} Eur")
 
+show_pooling_option = False
+pooling_price_usd_per_tonne = 0.0
+pooling_cost_usd = 0.0
+pooling_cost_eur = 0.0
+total_with_pooling = 0.0
+deficit_tonnes = compliance_balance / 1_000_000
 if compliance_balance < 0:
     st.subheader("Mitigation Strategies")
         
     # === POOLING OPTION ===
-    show_pooling_option = False
-    with st.expander("**Pooling**", expanded=False):
-        pooling_price_usd_per_tonne = 0.0
-        pooling_cost_usd = 0.0
-        pooling_cost_eur = 0.0
-        total_with_pooling = 0.0
-        deficit_tonnes = compliance_balance / 1_000_000
-        
+
+    with st.expander("**Pooling**", expanded=False):    
         if deficit_tonnes < 0:
             show_pooling_option = True
             st.subheader("Pooling Option")
