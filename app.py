@@ -275,8 +275,8 @@ if compliance_balance < 0:
     st.subheader("Mitigation Strategies")
         
     # === POOLING OPTION ===
+    show_pooling_option = False
     with st.expander("**Pooling**", expanded=False):
-        show_pooling_option = False
         pooling_price_usd_per_tonne = 0.0
         pooling_cost_usd = 0.0
         pooling_cost_eur = 0.0
