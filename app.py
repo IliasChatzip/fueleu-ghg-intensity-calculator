@@ -38,52 +38,52 @@ GWP_VALUES = {
 
 # === FUEL DATABASE ===
 FUELS = [
-    {"name": "Heavy Fuel Oil (HFO)",                                    "lcv": 0.0405,  "wtt": 13.5,  "ttw_co2": 3.114,  "ttw_ch4": 0.00005,  "ttw_n20": 0.00018,  "rfnbo": False},
-    {"name": "Low Sulphur Fuel Oil (LSFO)",                             "lcv": 0.0405,  "wtt": 13.7,  "ttw_co2": 3.114,  "ttw_ch4": 0.00005,  "ttw_n20": 0.00018,  "rfnbo": False},
-    {"name": "Very Low Sulphur Fuel Oil (VLSFO)",                       "lcv": 0.041,   "wtt": 13.2,  "ttw_co2": 3.206,  "ttw_ch4": 0.00005,  "ttw_n20": 0.00018,  "rfnbo": False},
-    {"name": "Ultra Low Sulphur Fuel Oil (ULSFO)",                      "lcv": 0.0405,  "wtt": 13.2,  "ttw_co2": 3.114,  "ttw_ch4": 0.00005,  "ttw_n20": 0.00018,  "rfnbo": False},
-    {"name": "Low Fuel Oil (LFO)",                                      "lcv": 0.041,   "wtt": 13.2,  "ttw_co2": 3.151,  "ttw_ch4": 0.00005,  "ttw_n20": 0.00018,  "rfnbo": False},
-    {"name": "Marine Diesel/Gas Oil (MDO/MGO)",                         "lcv": 0.0427,  "wtt": 14.4,  "ttw_co2": 3.206,  "ttw_ch4": 0.00005,  "ttw_n20": 0.00018,  "rfnbo": False},
-    {"name": "Liquefied Natural Gas (LNG)",                             "lcv": 0.0491,  "wtt": 18.5,  "ttw_co2": 2.750,  "ttw_ch4": 0.001276, "ttw_n20": 0.00011,  "rfnbo": False},
-    {"name": "Liquefied Petroleum Gas (LPG)",                           "lcv": 0.0460,  "wtt": 7.8,   "ttw_co2": 3.015,  "ttw_ch4": 0.007,    "ttw_n20": 0.0,      "rfnbo": False},
-    {"name": "Fossil Hydrogen (H2)",                                    "lcv": 0.12,    "wtt": 132,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": False},
-    {"name": "Fossil Ammonia (NH3)",                                    "lcv": 0.0186,  "wtt": 121,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": False},
-    {"name": "Fossil Methanol",                                         "lcv": 0.0199,  "wtt": 31.3,  "ttw_co2": 1.375,  "ttw_ch4": 0.003,    "ttw_n20": 0.0,      "rfnbo": False},
-    {"name": "Biodiesel (Rapeseed Oil,B100)",                           "lcv": 0.0430,  "wtt": 1.5,   "ttw_co2": 2.834,  "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": False},
-    {"name": "Biodiesel (Corn Oil,B100)",                               "lcv": 0.0430,  "wtt": 31.6,  "ttw_co2": 2.834,  "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": False},
-    {"name": "Biodiesel (Wheat Straw,B100)",                            "lcv": 0.0430,  "wtt": 15.7,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": False},
-    {"name": "Biodiesel (UCO,B20)",                                     "lcv": 0.0410,  "wtt": 13.88, "ttw_co2": 2.4912, "ttw_ch4": 0.00004,  "ttw_n20": 0.000144, "rfnbo": False},
-    {"name": "Biodiesel (UCO,B24)",                                     "lcv": 0.0411,  "wtt": 13.912,"ttw_co2": 2.36664,"ttw_ch4": 0.000038, "ttw_n20": 0.0001368,"rfnbo": False},
-    {"name": "Biodiesel (UCO,B30)",                                     "lcv": 0.0412,  "wtt": 13.93, "ttw_co2": 2.1798, "ttw_ch4": 0.000035, "ttw_n20": 0.000126, "rfnbo": False},
-    {"name": "Biodiesel (UCO + VLSFO,B30)",                             "lcv": 0.0416,  "wtt": 13.71, "ttw_co2": 2.2442, "ttw_ch4": 0.000035, "ttw_n20": 0.000126, "rfnbo": False},
-    {"name": "Biodiesel (UCO,B65)",                                     "lcv": 0.0421,  "wtt": 14.345,"ttw_co2": 1.0899, "ttw_ch4": 0.0000175,"ttw_n20": 0.000063, "rfnbo": False},
-    {"name": "Biodiesel (UCO,B80)",                                     "lcv": 0.0424,  "wtt": 14.62, "ttw_co2": 0.6228, "ttw_ch4": 0.00001,  "ttw_n20": 0.000036, "rfnbo": False},
-    {"name": "Biodiesel (UCO,B100)",                                    "lcv": 0.0430,  "wtt": 14.9,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": False},
-    {"name": "Biodiesel (Animal Fats,B100)",                            "lcv": 0.0430,  "wtt": 20.8,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": False},
-    {"name": "Biodiesel (Sunflower Oil,B100)",                          "lcv": 0.0430,  "wtt": 44.7,  "ttw_co2": 2.834,  "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": False},
-    {"name": "Biodiesel (Soybean Oil,B100)",                            "lcv": 0.0430,  "wtt": 47.0,  "ttw_co2": 2.834,  "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": False},
-    {"name": "Biodiesel (Palm Oil,B100)",                               "lcv": 0.0430,  "wtt": 75.7,  "ttw_co2": 2.834,  "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": False},
-    {"name": "Bioethanol (Sugar Beet,E100)",                            "lcv": 0.0268,  "wtt": 38.2,  "ttw_co2": 1.913,  "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": False},
-    {"name": "Bioethanol (Maize,E100)",                                 "lcv": 0.0268,  "wtt": 56.8,  "ttw_co2": 1.913,  "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": False},
-    {"name": "Bioethanol (Other cereals excluding maize,E100)",         "lcv": 0.0268,  "wtt": 58.5,  "ttw_co2": 1.913,  "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": False},
-    {"name": "Bioethanol (Wheat,E100)",                                 "lcv": 0.0268,  "wtt": 15.7,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": False},
-    {"name": "Bioethanol (Sugar Cane,E100)",                            "lcv": 0.0268,  "wtt": 28.6,  "ttw_co2": 1.913,  "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": False},
-    {"name": "Hydrotreated Vegetable Oil (Rape Seed,HVO100)",           "lcv": 0.0440,  "wtt": 50.1,  "ttw_co2": 3.115,  "ttw_ch4": 0.00005,  "ttw_n20": 0.00018,  "rfnbo": False},
-    {"name": "Hydrotreated Vegetable Oil (Sunflower,HVO100)",           "lcv": 0.0440,  "wtt": 43.6,  "ttw_co2": 3.115,  "ttw_ch4": 0.00005,  "ttw_n20": 0.00018,  "rfnbo": False},    
-    {"name": "Hydrotreated Vegetable Oil (Soybean,HVO100)",             "lcv": 0.0440,  "wtt": 46.5,  "ttw_co2": 3.115,  "ttw_ch4": 0.00005,  "ttw_n20": 0.00018,  "rfnbo": False},  
-    {"name": "Hydrotreated Vegetable Oil (Palm Oil,HVO100)",            "lcv": 0.0440,  "wtt": 73.3,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": False},
-    {"name": "Straight Vegetable Oil (Rape Seed,SVO100)",               "lcv": 0.0440,  "wtt": 40.0,  "ttw_co2": 3.115,  "ttw_ch4": 0.00005,  "ttw_n20": 0.00018,  "rfnbo": False},
-    {"name": "Straight Vegetable Oil (Sunflower,SVO100)",               "lcv": 0.0440,  "wtt": 34.3,  "ttw_co2": 3.115,  "ttw_ch4": 0.00005,  "ttw_n20": 0.00018,  "rfnbo": False},    
-    {"name": "Straight Vegetable Oil (Soybean,SVO100)",                 "lcv": 0.0440,  "wtt": 36.9,  "ttw_co2": 3.115,  "ttw_ch4": 0.00005,  "ttw_n20": 0.00018,  "rfnbo": False},  
-    {"name": "Straight Vegetable Oil (Palm Oil,SVO100)",                "lcv": 0.0440,  "wtt": 65.4,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": False},
-    {"name": "Bio-LNG",                                                 "lcv": 0.0491,  "wtt": 14.1,  "ttw_co2": 2.75,   "ttw_ch4": 0.14,     "ttw_n20": 0.00011,  "rfnbo": False},
-    {"name": "Bio-Hydrogen",                                            "lcv": 0.12,    "wtt": 0.0,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": False},
-    {"name": "Bio-Methanol",                                            "lcv": 0.0199,  "wtt": 13.5,  "ttw_co2": 0.0,    "ttw_ch4": 0.003,    "ttw_n20": 0.0,      "rfnbo": False},
-    {"name": "E-Methanol",                                              "lcv": 0.0199,  "wtt": 1.0,   "ttw_co2": 1.375,  "ttw_ch4": 0.00005,  "ttw_n20": 0.00018,  "rfnbo": True},
-    {"name": "E-Diesel",                                                "lcv": 0.0427,  "wtt": 1.0,   "ttw_co2": 3.206,  "ttw_ch4": 0.00005,  "ttw_n20": 0.00018,  "rfnbo": True},
-    {"name": "E-LNG",                                                   "lcv": 0.0491,  "wtt": 1.0,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": True},
-    {"name": "E-Hydrogen",                                              "lcv": 0.1200,  "wtt": 3.6,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": True},
-    {"name": "E-Ammonia",                                               "lcv": 0.0186,  "wtt": 0.0,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n20": 0.0,      "rfnbo": True},  
+    {"name": "Heavy Fuel Oil (HFO)",                                    "lcv": 0.0405,  "wtt": 13.5,  "ttw_co2": 3.114,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
+    {"name": "Low Sulphur Fuel Oil (LSFO)",                             "lcv": 0.0405,  "wtt": 13.7,  "ttw_co2": 3.114,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
+    {"name": "Very Low Sulphur Fuel Oil (VLSFO)",                       "lcv": 0.041,   "wtt": 13.2,  "ttw_co2": 3.206,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
+    {"name": "Ultra Low Sulphur Fuel Oil (ULSFO)",                      "lcv": 0.0405,  "wtt": 13.2,  "ttw_co2": 3.114,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
+    {"name": "Low Fuel Oil (LFO)",                                      "lcv": 0.041,   "wtt": 13.2,  "ttw_co2": 3.151,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
+    {"name": "Marine Diesel/Gas Oil (MDO/MGO)",                         "lcv": 0.0427,  "wtt": 14.4,  "ttw_co2": 3.206,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
+    {"name": "Liquefied Natural Gas (LNG)",                             "lcv": 0.0491,  "wtt": 18.5,  "ttw_co2": 2.750,  "ttw_ch4": 0.001276, "ttw_n2O": 0.00011,  "rfnbo": False},
+    {"name": "Liquefied Petroleum Gas (LPG)",                           "lcv": 0.0460,  "wtt": 7.8,   "ttw_co2": 3.015,  "ttw_ch4": 0.007,    "ttw_n2O": 0.0,      "rfnbo": False},
+    {"name": "Fossil Hydrogen (H2)",                                    "lcv": 0.12,    "wtt": 132,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+    {"name": "Fossil Ammonia (NH3)",                                    "lcv": 0.0186,  "wtt": 121,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+    {"name": "Fossil Methanol",                                         "lcv": 0.0199,  "wtt": 31.3,  "ttw_co2": 1.375,  "ttw_ch4": 0.003,    "ttw_n2O": 0.0,      "rfnbo": False},
+    {"name": "Biodiesel (Rapeseed Oil,B100)",                           "lcv": 0.0430,  "wtt": 1.5,   "ttw_co2": 2.834,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+    {"name": "Biodiesel (Corn Oil,B100)",                               "lcv": 0.0430,  "wtt": 31.6,  "ttw_co2": 2.834,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+    {"name": "Biodiesel (Wheat Straw,B100)",                            "lcv": 0.0430,  "wtt": 15.7,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+    {"name": "Biodiesel (UCO,B20)",                                     "lcv": 0.0410,  "wtt": 13.88, "ttw_co2": 2.4912, "ttw_ch4": 0.00004,  "ttw_n2O": 0.000144, "rfnbo": False},
+    {"name": "Biodiesel (UCO,B24)",                                     "lcv": 0.0411,  "wtt": 13.912,"ttw_co2": 2.36664,"ttw_ch4": 0.000038, "ttw_n2O": 0.0001368,"rfnbo": False},
+    {"name": "Biodiesel (UCO,B30)",                                     "lcv": 0.0412,  "wtt": 13.93, "ttw_co2": 2.1798, "ttw_ch4": 0.000035, "ttw_n2O": 0.000126, "rfnbo": False},
+    {"name": "Biodiesel (UCO + VLSFO,B30)",                             "lcv": 0.0416,  "wtt": 13.71, "ttw_co2": 2.2442, "ttw_ch4": 0.000035, "ttw_n2O": 0.000126, "rfnbo": False},
+    {"name": "Biodiesel (UCO,B65)",                                     "lcv": 0.0421,  "wtt": 14.345,"ttw_co2": 1.0899, "ttw_ch4": 0.0000175,"ttw_n2O": 0.000063, "rfnbo": False},
+    {"name": "Biodiesel (UCO,B80)",                                     "lcv": 0.0424,  "wtt": 14.62, "ttw_co2": 0.6228, "ttw_ch4": 0.00001,  "ttw_n2O": 0.000036, "rfnbo": False},
+    {"name": "Biodiesel (UCO,B100)",                                    "lcv": 0.0430,  "wtt": 14.9,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+    {"name": "Biodiesel (Animal Fats,B100)",                            "lcv": 0.0430,  "wtt": 20.8,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+    {"name": "Biodiesel (Sunflower Oil,B100)",                          "lcv": 0.0430,  "wtt": 44.7,  "ttw_co2": 2.834,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+    {"name": "Biodiesel (Soybean Oil,B100)",                            "lcv": 0.0430,  "wtt": 47.0,  "ttw_co2": 2.834,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+    {"name": "Biodiesel (Palm Oil,B100)",                               "lcv": 0.0430,  "wtt": 75.7,  "ttw_co2": 2.834,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+    {"name": "Bioethanol (Sugar Beet,E100)",                            "lcv": 0.0268,  "wtt": 38.2,  "ttw_co2": 1.913,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+    {"name": "Bioethanol (Maize,E100)",                                 "lcv": 0.0268,  "wtt": 56.8,  "ttw_co2": 1.913,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+    {"name": "Bioethanol (Other cereals excluding maize,E100)",         "lcv": 0.0268,  "wtt": 58.5,  "ttw_co2": 1.913,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+    {"name": "Bioethanol (Wheat,E100)",                                 "lcv": 0.0268,  "wtt": 15.7,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+    {"name": "Bioethanol (Sugar Cane,E100)",                            "lcv": 0.0268,  "wtt": 28.6,  "ttw_co2": 1.913,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+    {"name": "Hydrotreated Vegetable Oil (Rape Seed,HVO100)",           "lcv": 0.0440,  "wtt": 50.1,  "ttw_co2": 3.115,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
+    {"name": "Hydrotreated Vegetable Oil (Sunflower,HVO100)",           "lcv": 0.0440,  "wtt": 43.6,  "ttw_co2": 3.115,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},    
+    {"name": "Hydrotreated Vegetable Oil (Soybean,HVO100)",             "lcv": 0.0440,  "wtt": 46.5,  "ttw_co2": 3.115,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},  
+    {"name": "Hydrotreated Vegetable Oil (Palm Oil,HVO100)",            "lcv": 0.0440,  "wtt": 73.3,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+    {"name": "Straight Vegetable Oil (Rape Seed,SVO100)",               "lcv": 0.0440,  "wtt": 40.0,  "ttw_co2": 3.115,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
+    {"name": "Straight Vegetable Oil (Sunflower,SVO100)",               "lcv": 0.0440,  "wtt": 34.3,  "ttw_co2": 3.115,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},    
+    {"name": "Straight Vegetable Oil (Soybean,SVO100)",                 "lcv": 0.0440,  "wtt": 36.9,  "ttw_co2": 3.115,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},  
+    {"name": "Straight Vegetable Oil (Palm Oil,SVO100)",                "lcv": 0.0440,  "wtt": 65.4,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+    {"name": "Bio-LNG",                                                 "lcv": 0.0491,  "wtt": 14.1,  "ttw_co2": 2.75,   "ttw_ch4": 0.14,     "ttw_n2O": 0.00011,  "rfnbo": False},
+    {"name": "Bio-Hydrogen",                                            "lcv": 0.12,    "wtt": 0.0,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+    {"name": "Bio-Methanol",                                            "lcv": 0.0199,  "wtt": 13.5,  "ttw_co2": 0.0,    "ttw_ch4": 0.003,    "ttw_n2O": 0.0,      "rfnbo": False},
+    {"name": "E-Methanol",                                              "lcv": 0.0199,  "wtt": 1.0,   "ttw_co2": 1.375,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": True},
+    {"name": "E-Diesel",                                                "lcv": 0.0427,  "wtt": 1.0,   "ttw_co2": 3.206,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": True},
+    {"name": "E-LNG",                                                   "lcv": 0.0491,  "wtt": 1.0,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": True},
+    {"name": "E-Hydrogen",                                              "lcv": 0.1200,  "wtt": 3.6,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": True},
+    {"name": "E-Ammonia",                                               "lcv": 0.0186,  "wtt": 0.0,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": True},  
 ]
     
 # === TARGET FUNCTION ===
@@ -187,7 +187,7 @@ for fuel in FUELS:
             
         co2_total = fuel["ttw_co2"] * mass_g * (1 - ops / 100) * wind
         ch4_total = fuel["ttw_ch4"] * mass_g * gwp["CH4"]
-        n2o_total = fuel["ttw_n20"] * mass_g * gwp["N2O"]
+        n2o_total = fuel["ttw_n2O"] * mass_g * gwp["N2O"]
         ttw_total = co2_total + ch4_total + n2o_total
         wtt_total = energy * fuel["wtt"]
         total_emissions = ttw_total + wtt_total
@@ -318,7 +318,7 @@ if compliance_balance < 0:
             for fuel in FUELS:
                 co2_mj = Decimal(str(fuel["ttw_co2"])) * Decimal(str(1 - ops / 100)) * Decimal(str(wind))
                 ch4_mj = Decimal(str(fuel["ttw_ch4"])) * Decimal(str(gwp["CH4"]))
-                n2o_mj = Decimal(str(fuel["ttw_n20"])) * Decimal(str(gwp["N2O"]))
+                n2o_mj = Decimal(str(fuel["ttw_n2O"])) * Decimal(str(gwp["N2O"]))
                 total_ghg_mj = Decimal(str(fuel["wtt"])) + co2_mj + ch4_mj + n2o_mj
         
                 if total_ghg_mj >= dec_ghg:
@@ -411,11 +411,11 @@ if compliance_balance < 0:
                 
                 co2_initial = initial_props["ttw_co2"] * (1 - ops / 100) * wind
                 ch4_initial = initial_props["ttw_ch4"] * gwp["CH4"]
-                n2o_initial = initial_props["ttw_n20"] * gwp["N2O"]
+                n2o_initial = initial_props["ttw_n2O"] * gwp["N2O"]
                 ghg_initial = co2_initial + ch4_initial + n2o_initial + initial_props["wtt"]
                 co2_sub = sub_props["ttw_co2"] * (1 - ops / 100) * wind
                 ch4_sub = sub_props["ttw_ch4"] * gwp["CH4"]
-                n2o_sub = sub_props["ttw_n20"] * gwp["N2O"]
+                n2o_sub = sub_props["ttw_n2O"] * gwp["N2O"]
                 ghg_sub = co2_sub + ch4_sub + sub_props["wtt"]
                 
                 target = target_intensity(year)
