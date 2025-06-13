@@ -83,6 +83,7 @@ FUELS = [
     {"name": "Straight Vegetable Oil (Soybean,SVO100)",                                                      "lcv": 0.0440,  "wtt": 36.9,  "ttw_co2": 3.115,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},  
     {"name": "Straight Vegetable Oil (Palm Oil from open effluent pond,SVO100)",                             "lcv": 0.0440,  "wtt": 65.4,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
     {"name": "Straight Vegetable Oil (Palm Oil, process with methane capture at oil mill,SVO100)",           "lcv": 0.0440,  "wtt": 57.2,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+    {"name": "Straight Vegetable Oil (UCO ,SVO100)",                                                         "lcv": 0.0440,  "wtt": 2.2,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
     {"name": "Bio-LNG",                                                                                      "lcv": 0.0491,  "wtt": 14.1,  "ttw_co2": 2.75,   "ttw_ch4": 0.14,     "ttw_n2O": 0.00011,  "rfnbo": False},
     {"name": "Bio-Hydrogen",                                                                                 "lcv": 0.12,    "wtt": 0.0,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
     {"name": "Bio-Methanol (waste wood methanol)",                                                           "lcv": 0.0199,  "wtt": 13.5,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
