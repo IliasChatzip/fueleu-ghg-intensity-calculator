@@ -44,7 +44,10 @@ FUELS = [
     {"name": "Ultra Low Sulphur Fuel Oil (ULSFO)",                                                           "lcv": 0.0405,  "wtt": 13.2,  "ttw_co2": 3.114,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
     {"name": "Low Fuel Oil (LFO)",                                                                           "lcv": 0.041,   "wtt": 13.2,  "ttw_co2": 3.151,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
     {"name": "Marine Diesel/Gas Oil (MDO/MGO)",                                                              "lcv": 0.0427,  "wtt": 14.4,  "ttw_co2": 3.206,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
-    {"name": "Liquefied Natural Gas (LNG)",                                                                  "lcv": 0.0491,  "wtt": 18.5,  "ttw_co2": 2.750,  "ttw_ch4": 0.001276, "ttw_n2O": 0.00011,  "rfnbo": False},
+    {"name": "Liquefied Natural Gas (LNG Otto dual fuel medium speed)",                                      "lcv": 0.0491,  "wtt": 18.5,  "ttw_co2": 2.750,  "ttw_ch4": 0.0,      "ttw_n2O": 0.00011,  "rfnbo": False, "ch4_slip":3.1},
+    {"name": "Liquefied Natural Gas (LNG Otto dual fuel slow speed)",                                        "lcv": 0.0491,  "wtt": 18.5,  "ttw_co2": 2.750,  "ttw_ch4": 0.0,      "ttw_n2O": 0.00011,  "rfnbo": False, "ch4_slip":1.7},
+    {"name": "Liquefied Natural Gas (LNG Diesel dual fuel slow speed)",                                      "lcv": 0.0491,  "wtt": 18.5,  "ttw_co2": 2.750,  "ttw_ch4": 0.0,      "ttw_n2O": 0.00011,  "rfnbo": False, "ch4_slip":0.2},
+    {"name": "Liquefied Natural Gas (LNG LBSI)",                                                             "lcv": 0.0491,  "wtt": 18.5,  "ttw_co2": 2.750,  "ttw_ch4": 0.0,      "ttw_n2O": 0.00011,  "rfnbo": False, "ch4_slip":2.6},
     {"name": "Liquefied Petroleum Gas (LPG)",                                                                "lcv": 0.0460,  "wtt": 7.8,   "ttw_co2": 3.015,  "ttw_ch4": 0.007,    "ttw_n2O": 0.0,      "rfnbo": False},
     {"name": "Fossil Hydrogen (H2)",                                                                         "lcv": 0.12,    "wtt": 132,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
     {"name": "Fossil Ammonia (NH3)",                                                                         "lcv": 0.0186,  "wtt": 121,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
@@ -84,14 +87,20 @@ FUELS = [
     {"name": "Straight Vegetable Oil (Palm Oil from open effluent pond,SVO100)",                             "lcv": 0.0440,  "wtt": 65.4,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
     {"name": "Straight Vegetable Oil (Palm Oil, process with methane capture at oil mill,SVO100)",           "lcv": 0.0440,  "wtt": 57.2,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
     {"name": "Straight Vegetable Oil (UCO ,SVO100)",                                                         "lcv": 0.0440,  "wtt": 2.2,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Bio-LNG",                                                                                      "lcv": 0.0491,  "wtt": 14.1,  "ttw_co2": 2.75,   "ttw_ch4": 0.14,     "ttw_n2O": 0.00011,  "rfnbo": False},
+    {"name": "Bio-LNG (Otto dual fuel medium speed)",                                                        "lcv": 0.0491,  "wtt": 14.1,  "ttw_co2": 2.75,   "ttw_ch4": 0.14,     "ttw_n2O": 0.00011,  "rfnbo": False, "ch4_slip":3.1},
+    {"name": "Bio-LNG (Otto dual fuel medium speed)",                                                        "lcv": 0.0491,  "wtt": 14.1,  "ttw_co2": 2.75,   "ttw_ch4": 0.14,     "ttw_n2O": 0.00011,  "rfnbo": False, "ch4_slip":1.7},
+    {"name": "Bio-LNG (Otto dual fuel medium speed)",                                                        "lcv": 0.0491,  "wtt": 14.1,  "ttw_co2": 2.75,   "ttw_ch4": 0.14,     "ttw_n2O": 0.00011,  "rfnbo": False, "ch4_slip":0.2},
+    {"name": "Bio-LNG (LBSI)",                                                                               "lcv": 0.0491,  "wtt": 14.1,  "ttw_co2": 2.75,   "ttw_ch4": 0.14,     "ttw_n2O": 0.00011,  "rfnbo": False, "ch4_slip":2.6},
     {"name": "Bio-Hydrogen",                                                                                 "lcv": 0.12,    "wtt": 0.0,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
     {"name": "Bio-Methanol (waste wood methanol)",                                                           "lcv": 0.0199,  "wtt": 13.5,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
     {"name": "Bio-Methanol (farmed wood methanol)",                                                          "lcv": 0.0199,  "wtt": 16.2,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
     {"name": "Bio-Methanol (from black-liquor gasification)",                                                "lcv": 0.0199,  "wtt": 10.4,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
     {"name": "E-Methanol",                                                                                   "lcv": 0.0199,  "wtt": 1.0,   "ttw_co2": 1.375,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": True},
     {"name": "E-Diesel",                                                                                     "lcv": 0.0427,  "wtt": 1.0,   "ttw_co2": 3.206,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": True},
-    {"name": "E-LNG",                                                                                        "lcv": 0.0491,  "wtt": 1.0,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": True},
+    {"name": "E-LNG (Otto dual fuel medium speed)",                                                          "lcv": 0.0491,  "wtt": 1.0,   "ttw_co2": 2.750,  "ttw_ch4": 0.0,      "ttw_n2O": 0.00011,  "rfnbo": True, "ch4_slip":3.1 },
+    {"name": "E-LNG (Otto dual fuel medium speed)",                                                          "lcv": 0.0491,  "wtt": 1.0,   "ttw_co2": 2.750,  "ttw_ch4": 0.0,      "ttw_n2O": 0.00011,  "rfnbo": True, "ch4_slip":1.7},
+    {"name": "E-LNG (Otto dual fuel medium speed)",                                                          "lcv": 0.0491,  "wtt": 1.0,   "ttw_co2": 2.750,  "ttw_ch4": 0.0,      "ttw_n2O": 0.00011,  "rfnbo": True, "ch4_slip":0.2},
+    {"name": "E-LNG (LBSI)",                                                                                 "lcv": 0.0491,  "wtt": 1.0,   "ttw_co2": 2.750,  "ttw_ch4": 0.0,      "ttw_n2O": 0.00011,  "rfnbo": True, "ch4_slip":2.6},
     {"name": "E-Hydrogen",                                                                                   "lcv": 0.1200,  "wtt": 3.6,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": True},
     {"name": "E-Ammonia",                                                                                    "lcv": 0.0186,  "wtt": 0.0,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": True},  
 ]
@@ -198,7 +207,11 @@ for fuel in FUELS:
         co2_total = fuel["ttw_co2"] * mass_g * (1 - ops / 100) * wind
         ch4_total = fuel["ttw_ch4"] * mass_g * gwp["CH4"]
         n2o_total = fuel["ttw_n2O"] * mass_g * gwp["N2O"]
-        ttw_total = co2_total + ch4_total + n2o_total
+        slip_total = 0.0
+        if "LNG" in fuel["name"] or "Methane" in fuel["name"]:
+            slip_g_per_mj = fuel.get("ch4_slip", 0.0)
+            slip_total = slip_g_per_mj * energy * gwp["CH4"]
+        ttw_total = co2_total + ch4_total + n2o_total + slip_total
         wtt_total = energy * fuel["wtt"]
         total_emissions = ttw_total + wtt_total
             
