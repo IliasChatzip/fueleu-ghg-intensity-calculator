@@ -136,7 +136,7 @@ mitigation_fuels = [f["name"] for f in FUELS if "Bio" in f["name"] or "Biodiesel
 categories = {
     "Fossil ": [f for f in FUELS if not f['rfnbo'] and "Bio" not in f['name'] and "Biodiesel" not in f['name'] and "E-" not in f['name'] and "Green" not in f['name'] and "Vegetable" not in f['name']],
     "Bio": [f for f in FUELS if "Bio" in f['name'] or "Biodiesel" in f['name'] or "Vegetable" in f['name']],
-    "RFNBO": [f for f in FUELS if f['rfnbo'] or "E-" in f['name'] or "Green" in f['name']]
+    "RFNBO": [f for f in FUELS if f['rfnbo'] or "E-" in f['name']0]
 }
 
 for category, fuels_in_cat in categories.items():
