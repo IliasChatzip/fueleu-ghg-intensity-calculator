@@ -208,7 +208,7 @@ for fuel in FUELS:
         ch4_total = fuel["ttw_ch4"] * mass_g * gwp["CH4"]
         n2o_total = fuel["ttw_n2O"] * mass_g * gwp["N2O"]
         slip_total = 0.0
-        if "LNG" in fuel["name"] or "Methane" in fuel["name"]:
+        if "LNG" in fuel["name"]:
             slip_g_per_mj = fuel.get("ch4_slip", 0.0)
             slip_total = slip_g_per_mj * energy * gwp["CH4"]
         ttw_total = co2_total + ch4_total + n2o_total + slip_total
