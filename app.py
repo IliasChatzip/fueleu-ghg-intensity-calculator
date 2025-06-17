@@ -385,7 +385,7 @@ if compliance_balance < 0:
                     
             if mitigation_rows:
                 mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
-                default_fuel = "Biodiesel (UCO,B20)"
+                default_fuel = "Biodiesel (UCO,B24)"
                 fuel_names = [row["Fuel"] for row in mitigation_rows]
                 default_index = fuel_names.index(default_fuel) if default_fuel in fuel_names else 0
                 selected_fuel = st.selectbox("Select Bio Fuel for Price Input",fuel_names,index=default_index)
@@ -409,7 +409,7 @@ if compliance_balance < 0:
     with st.expander("**Replace with Bio Fuel**", expanded=False):
         if penalty > 0:
             st.subheader("Replacement Options (Compliance via Fuel Replacement)")
-            default_substitute_fuel = "Biodiesel (UCO,B20)"
+            default_substitute_fuel = "Biodiesel (UCO,B24)"
             default_substitute_index = mitigation_fuels.index(default_substitute_fuel) if default_substitute_fuel in mitigation_fuels else 0
         
             initial_fuel = st.selectbox("Select Fuel to Replace", initial_fuels, key="sub_initial")
