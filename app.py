@@ -553,8 +553,7 @@ st.pyplot(fig)
 
 
 
-total_cost = 0.0
-pooling_cost_eur = 0.0
+
 total_with_pooling = total_cost + pooling_cost_eur
 conservative_total = total_cost + penalty
 total_with_mitigation = total_cost + mitigation_total_cost
