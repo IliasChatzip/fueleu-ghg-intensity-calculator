@@ -326,7 +326,7 @@ if compliance_balance < 0:
     
     
     # === BIO-FUELS OPTIONS ===
-    with st.expander("**Add Bio Fuel**", expanded=False, key="expander_biofuel"):
+    with st.expander("**Add Bio Fuel**", expanded=False):
         getcontext().prec = 12
         user_entered_mitigation_price = False
         if penalty > 0:
@@ -609,27 +609,26 @@ if st.button("Export to PDF"):
             pdf.cell(200, 10, txt=pooling_line, ln=True)
 
         # Bio Fuel Option
-        if st.session_state.get("expander_biofuel", False):
-            pdf.ln(5)
+        pdf.ln(5)
+        pdf.set_font("Arial", size=10)
+        pdf.cell(200, 10, txt="--- Bio Fuel Cost ---", ln=True)
+
+        mitigation_with_price = [row for row in mitigation_rows if row.get("Price (USD/t)", 0) > 0]
+        if mitigation_with_price:
             pdf.set_font("Arial", size=10)
-            pdf.cell(200, 10, txt="--- Bio Fuel Cost ---", ln=True)
-    
-            mitigation_with_price = [row for row in mitigation_rows if row.get("Price (USD/t)", 0) > 0]
-            if mitigation_with_price:
-                pdf.set_font("Arial", size=10)
-                for row in mitigation_with_price:
-                    line = (f"{row['Fuel']}: {row['Required Amount (t)']:,.0f} t @ "
-                            f"{row['Price (USD/t)']:,.2f} USD/t | "
-                            f"{row['Estimated Cost (Eur)']:,.2f} Eur")
-                    pdf.cell(200, 10, txt=line, ln=True)        
-            else:
-                mitigation_rows_sorted = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
-                for row in mitigation_rows_sorted:
-                    mit_line = f"{row['Fuel']}: {row['Required Amount (t)']:,.0f} t"
-                    pdf.cell(200, 10, txt=mit_line, ln=True)
-                pdf.ln(5)
-                pdf.set_font("Arial", "B", size=11)
-                pdf.cell(200, 10, txt="No bio fuel prices provided - quantities only report", ln=True)
+            for row in mitigation_with_price:
+                line = (f"{row['Fuel']}: {row['Required Amount (t)']:,.0f} t @ "
+                        f"{row['Price (USD/t)']:,.2f} USD/t | "
+                        f"{row['Estimated Cost (Eur)']:,.2f} Eur")
+                pdf.cell(200, 10, txt=line, ln=True)        
+        else:
+            mitigation_rows_sorted = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
+            for row in mitigation_rows_sorted:
+                mit_line = f"{row['Fuel']}: {row['Required Amount (t)']:,.0f} t"
+                pdf.cell(200, 10, txt=mit_line, ln=True)
+            pdf.ln(5)
+            pdf.set_font("Arial", "B", size=11)
+            pdf.cell(200, 10, txt="No bio fuel prices provided - quantities only report", ln=True)
 
         
         # Replacemnet Option
