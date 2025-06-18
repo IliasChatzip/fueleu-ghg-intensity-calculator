@@ -609,13 +609,12 @@ if st.button("Export to PDF"):
             pdf.cell(200, 10, txt=pooling_line, ln=True)
 
         # Bio Fuel Option
-        if st.session_state.get("expander_biofuel", False):  # Only if expanded
+        if st.session_state.get("expander_biofuel", False):
             pdf.ln(5)
             pdf.set_font("Arial", size=10)
             pdf.cell(200, 10, txt="--- Bio Fuel Cost ---", ln=True)
     
             mitigation_with_price = [row for row in mitigation_rows if row.get("Price (USD/t)", 0) > 0]
-    
             if mitigation_with_price:
                 pdf.set_font("Arial", size=10)
                 for row in mitigation_with_price:
