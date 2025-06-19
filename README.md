@@ -4,9 +4,9 @@ This is a Streamlit app for calculating fuel GHG intensity and compliance penalt
 
 ## Features
 
-- Calculates total and per-MJ GHG emissions for multiple fuel types, including biofuels and e-fuels.
+- Calculates total and per-MJ GHG emissions for multiple fuel types, including biofuels and Renewable Fuels of Non-Biological Origin.
 - Supports custom fuel quantities, prices, and compliance year selection.
-- Includes mitigation scenarios: penalty, pooling, biofuel addition, and substitution.
+- Includes mitigation scenarios: penalty, pooling, biofuel addition, and fuel replacement.
 - Visualizes sector targets and user performance with interactive charts.
 - Generates a PDF report summarizing inputs, results, and mitigation options.
 
