@@ -12,6 +12,14 @@ This is a Streamlit app for calculating fuel GHG intensity and compliance penalt
 
 ## How to Use
 
-1. **Run the app:**  
-   ```bash
-   streamlit run app.py
+1. **Install dependencies:**
+pip install -r requirements.txt
+
+2. **Run the app:**
+streamlit run app.py
+
+3. **Open the app in your broswer:**
+After running, Streamlit will give you a local link (usually http://localhost:8501)—open this in your browser
+
+4. **Export results:**
+Use the “Export to PDF” button in the web interface to download your results as a report
