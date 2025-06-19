@@ -107,7 +107,6 @@ FUELS = [
 ]
     
 # === TARGET FUNCTION ===
-
 def target_intensity(year: int) -> float:
     if year <= 2020:
         return BASE_TARGET
@@ -234,7 +233,6 @@ for fuel in FUELS:
             "GHG Intensity (gCO2eq/MJ)": ghg_intensity_mj,
            })
         
-# after all fuels processed
 ghg_intensity = emissions / total_energy if total_energy else 0.0
 st.session_state["computed_ghg"] = ghg_intensity
 
@@ -253,7 +251,6 @@ mitigation_rows = []
 
 
 # === Reset Handler ===
-
 if st.session_state.get("trigger_reset", False):
     exclude_keys = {"exchange_rate"}
     for key in list(st.session_state.keys()):
@@ -262,8 +259,8 @@ if st.session_state.get("trigger_reset", False):
     st.session_state["trigger_reset"] = False
     st.experimental_rerun()
 
-# === OUTPUT ===
 
+# === OUTPUT ===
 total_cost = 0.0
 
 st.subheader("Fuel Breakdown")
@@ -304,7 +301,6 @@ if compliance_balance < 0:
     st.subheader("Mitigation Strategies")
         
     # === POOLING OPTION ===
-
     with st.expander("**Pooling**", expanded=False):    
         if deficit_tonnes < 0:
             show_pooling_option = True
@@ -550,8 +546,6 @@ ax.set_title("Your Performance vs Sector Target")
 ax.legend()
 ax.grid(True)
 st.pyplot(fig)
-
-
 
 
 total_with_pooling = total_cost + pooling_cost_eur
