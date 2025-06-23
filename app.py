@@ -242,7 +242,7 @@ compliance_balance = total_energy * (target_intensity(year) - ghg_intensity) / 1
 if compliance_balance >= 0:
      penalty = 0
 else:
-     penalty = (abs(compliance_balance) / (ghg_intensity * VLSFO_ENERGY_CONTENT)) * PENALTY_RATE
+     penalty = (abs(compliance_balance) / (ghg_intensity * VLSFO_ENERGY_CONTENT)) * PENALTY_RATE * 1_000_000
 
 mitigation_total_cost = 0.0
 substitution_cost = None
