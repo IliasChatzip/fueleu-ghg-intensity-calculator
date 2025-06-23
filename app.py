@@ -216,7 +216,6 @@ for fuel in FUELS:
             
         total_energy += energy
         emissions += total_emissions
-        emissions_tonnes = emissions / 1_000_000
         
         ghg_intensity_mj = total_emissions / energy if energy else 0
         
@@ -233,7 +232,8 @@ for fuel in FUELS:
             "Energy (MJ)": energy,
             "GHG Intensity (gCO2eq/MJ)": ghg_intensity_mj,
            })
-        
+
+emissions_tonnes = emissions / 1_000_000
 ghg_intensity = emissions / total_energy if total_energy else 0.0
 st.session_state["computed_ghg"] = ghg_intensity
 
