@@ -285,7 +285,7 @@ else:
 st.subheader("Summary")
 st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}")
 balance_label = "Surplus" if compliance_balance >= 0 else "Deficit"
-st.metric("Total Emissions (gCO2eq)", f"{total_emissions:,.0f}")
+st.metric("Total Emissions (gCO2eq)", f"{emissions:,.0f}")
 st.metric("Compliance Balance (gCO2eq)", f"{compliance_balance:,.0f}")
 st.metric("Estimated Penalty (Eur)", f"{penalty:,.2f}")
 if rows and user_entered_prices:
