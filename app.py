@@ -565,6 +565,7 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt=f"Year: {year} | GWP: {gwp_choice}", ln=True)
         pdf.cell(200, 10, txt=f"EU Target for {year}: {target_intensity(year):.2f} gCO2eq/MJ", ln=True)
         pdf.cell(200, 10, txt=f"GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ", ln=True)
+        pdf.cell(200, 10, txt=f"Total Emissions: {emissions:,.0f} gCO2eq", ln=True)
         pdf.cell(200, 10, txt=f"Compliance Balance: {compliance_balance:,.0f} gCO2eq", ln=True)
         pdf.cell(200, 10, txt=f"Penalty: {penalty:,.2f} Eur", ln=True)
         pdf.ln(10)
