@@ -284,7 +284,7 @@ else:
     st.info("No fuel data provided yet.")
 
 st.subheader("Summary")
-st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.6f}")
+st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}")
 balance_label = "Surplus" if compliance_balance >= 0 else "Deficit"
 st.metric("Total Emissions (tCO2eq)", f"{emissions_tonnes:,.0f}")
 st.metric("Compliance Balance (tCO2eq)", f"{compliance_balance:,.0f}")
