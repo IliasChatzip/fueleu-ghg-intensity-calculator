@@ -298,7 +298,7 @@ pooling_price_usd_per_tonne = 0.0
 pooling_cost_usd = 0.0
 pooling_cost_eur = 0.0
 total_with_pooling = 0.0
-deficit_tonnes = compliance_balance / 1_000_000
+deficit_tonnes = compliance_balance
 if compliance_balance < 0:
     st.subheader("Mitigation Strategies")
         
