@@ -298,16 +298,16 @@ pooling_price_usd_per_tonne = 0.0
 pooling_cost_usd = 0.0
 pooling_cost_eur = 0.0
 total_with_pooling = 0.0
-deficit_tonnes = compliance_balance
+deficit = compliance_balance
 if compliance_balance < 0:
     st.subheader("Mitigation Strategies")
         
     # === POOLING OPTION ===
     with st.expander("**Pooling**", expanded=False):    
-        if deficit_tonnes < 0:
+        if deficit < 0:
             show_pooling_option = True
             st.subheader("Pooling Option")
-            st.info(f"CO2 Deficit: {deficit_tonnes:,.0f} tCO2eq. You may offset this via pooling if you have access to external credits.")
+            st.info(f"CO2 Deficit: {deficit:,.0f} tCO2eq. You may offset this via pooling if you have access to external credits.")
         
             pooling_price_usd_per_tonne = st.number_input(
                 "Enter Pooling Price (USD/tCO2eq)",
@@ -315,7 +315,7 @@ if compliance_balance < 0:
                 help="The cost per tCO2eq to buy compliance credits from the pool. If 0, pooling will not be applied.")
         
             if pooling_price_usd_per_tonne > 0:
-               pooling_cost_usd = pooling_price_usd_per_tonne * abs(deficit_tonnes)
+               pooling_cost_usd = pooling_price_usd_per_tonne * abs(deficit)
                pooling_cost_eur = pooling_cost_usd * exchange_rate
                total_with_pooling = total_cost + pooling_cost_eur
         
