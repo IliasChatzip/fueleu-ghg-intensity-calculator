@@ -568,7 +568,7 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt=f"GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ", ln=True)
         pdf.cell(200, 10, txt=f"Total Emissions: {emissions_tonnes:,.0f} tCO2eq", ln=True)
         pdf.cell(200, 10, txt=f"Compliance Balance: {compliance_balance:,.0f} tCO2eq", ln=True)
-        pdf.cell(200, 10, txt=f"Penalty: {penalty:,.2f} Eur", ln=True)
+        pdf.cell(200, 10, txt=f"Penalty: {penalty:,.0f} Eur", ln=True)
         pdf.ln(10)
 
         # Fuel Breakdown
