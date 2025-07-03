@@ -232,6 +232,7 @@ for fuel in FUELS:
             "GHG Intensity (gCO2eq/MJ)": ghg_intensity_mj,})
 
 emissions_tonnes = emissions / 1_000_000
+ets_cost_initial = emissions_tonnes * eua_ets_price
 ghg_intensity = emissions / total_energy if total_energy else 0.0
 st.session_state["computed_ghg"] = ghg_intensity
 
@@ -291,6 +292,10 @@ st.metric("Estimated Penalty (Eur)", f"{penalty:,.2f}")
 if rows and user_entered_prices:
     conservative_total = total_cost + penalty
     st.metric("Total Cost of Selected Fuels + Penalty", f"{conservative_total:,.2f} Eur")
+if eua_ets_price > 0.0:
+    ets_cost_initial = emissions_tonnes * eua_ets_price
+    st.metric("ETS Cost (Initial Fuels + Penalty)", f"{ets_cost_initial:,.2f} EUR")
+
 
 show_pooling_option = False
 pooling_price_usd_per_tonne = 0.0
