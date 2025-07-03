@@ -621,16 +621,7 @@ if st.button("Export to PDF"):
                 line = (f"{row['Fuel']}: {row['Required Amount (t)']:,.0f} t @ "
                         f"{row['Price (USD/t)']:,.2f} USD/t | "
                         f"{row['Estimated Cost (Eur)']:,.2f} Eur")
-                pdf.cell(200, 10, txt=line, ln=True)        
-        else:
-            mitigation_rows_sorted = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
-            for row in mitigation_rows_sorted:
-                mit_line = f"{row['Fuel']}: {row['Required Amount (t)']:,.0f} t"
-                pdf.cell(200, 10, txt=mit_line, ln=True)
-            pdf.ln(5)
-            pdf.set_font("Arial", "B", size=11)
-            pdf.cell(200, 10, txt="No bio fuel prices provided - quantities only report", ln=True)
-
+                pdf.cell(200, 10, txt=line, ln=True)
         
         # Replacemnet Option
         pdf.ln(5)
