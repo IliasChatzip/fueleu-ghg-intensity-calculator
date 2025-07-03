@@ -1,4 +1,4 @@
-import streamlit as st
+urimport streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 from fpdf import FPDF
@@ -294,7 +294,7 @@ if rows and user_entered_prices:
     st.metric("Total Cost of Selected Fuels + Penalty", f"{conservative_total:,.2f} Eur")
 if eua_ets_price > 0.0:
     ets_cost_initial = emissions_tonnes * eua_ets_price
-    st.metric("ETS Cost (Initial Fuels + Penalty)", f"{ets_cost_initial:,.2f} Eur")
+    st.metric("ETS Cost (Eur)", f"{ets_cost_initial:,.2f}")
 
 
 show_pooling_option = False
