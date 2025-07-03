@@ -139,7 +139,7 @@ categories = {
     "RFNBO": [f for f in FUELS if f['rfnbo'] or "E-" in f['name']]}
 
 for category, fuels_in_cat in categories.items():
-    with st.sidebar.expander(f"{category} Fuels", expanded=False):
+    with st.sidebar.expander(f"{category} Fuels", expanded=True):
         selected_fuels = st.multiselect(f"Select {category} Fuels", [f["name"] for f in fuels_in_cat], key=f"multiselect_{category}")
         for selected_fuel in selected_fuels:
             qty = st.number_input(f"{selected_fuel} (t)", min_value=0, step=1, value=0, format="%d", key=f"qty_{selected_fuel}")
