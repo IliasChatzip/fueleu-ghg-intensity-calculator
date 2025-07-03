@@ -289,12 +289,12 @@ balance_label = "Surplus" if compliance_balance >= 0 else "Deficit"
 st.metric("Total Emissions (tCO2eq)", f"{emissions_tonnes:,.2f}")
 st.metric("Compliance Balance (tCO2eq)", f"{compliance_balance:,.2f}")
 st.metric("Estimated Penalty (Eur)", f"{penalty:,.2f}")
-if rows and user_entered_prices:
-    conservative_total = total_cost + penalty
-    st.metric("Total Cost of Selected Fuels + Penalty", f"{conservative_total:,.2f} Eur")
 if eua_ets_price > 0.0:
     ets_cost_initial = emissions_tonnes * eua_ets_price
-    st.metric("ETS Cost (Eur)", f"{ets_cost_initial:,.2f}")
+    st.metric("EU ETS Cost (Eur)", f"{ets_cost_initial:,.2f}")
+if rows and user_entered_prices:
+    conservative_total = total_cost + penalty + ets_cost_initial
+    st.metric("Total Cost of Selected Fuels + Penalty + EU ETS", f"{conservative_total:,.2f} Eur")
 
 
 show_pooling_option = False
@@ -555,7 +555,7 @@ st.pyplot(fig)
 
 
 total_with_pooling = total_cost + pooling_cost_eur
-conservative_total = total_cost + penalty
+conservative_total = total_cost + penalty + ets_cost_initial
 total_with_mitigation = total_cost + mitigation_total_cost
 
 # === PDF EXPORT ===
@@ -654,7 +654,7 @@ if st.button("Export to PDF"):
         pdf.set_font("Arial", size=10)
         if total_cost > 0:
             pdf.set_font("Arial", style="B", size=11)
-            pdf.cell(200, 10, txt=f"- Initial fuels + Penalty: {conservative_total:,.2f} Eur", ln=True)
+            pdf.cell(200, 10, txt=f"- Initial fuels + Penalty + EU ETS: {conservative_total:,.2f} Eur", ln=True)
         else:
             pdf.set_font("Arial", style="B", size=11)
             pdf.cell(200, 10, txt=f"- Initial fuels + Penalty: N/A (missing prices)", ln=True)
