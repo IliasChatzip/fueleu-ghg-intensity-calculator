@@ -634,10 +634,7 @@ if st.button("Export to PDF"):
             pdf.cell(200, 10, txt=f"Substitution Ratio: {best_x*100:.1f}% of {initial_fuel} replaced by {substitute_fuel} for compliance.", ln=True)
             if additional_substitution_cost is not None:
                 pdf.cell(200, 10, txt=f"Additional cost: {additional_substitution_cost:,.2f} EUR", ln=True)
-                pdf.cell(200, 10, txt=f"Total Cost: {total_substitution_cost:,.2f} EUR", ln=True)
-            else:
-                pdf.cell(200, 10, txt="N/A (missing prices).", ln=True)
-            
+                pdf.cell(200, 10, txt=f"Total Cost: {total_substitution_cost:,.2f} EUR", ln=True)            
         
         pdf.ln(5)
         pdf.set_font("Arial", "B", size=12)
