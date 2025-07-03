@@ -151,7 +151,7 @@ for category, fuels_in_cat in categories.items():
 st.sidebar.header("EU ETS Pricing")
 eua_ets_price = st.sidebar.number_input("EU ETS Allowance Price (EUR/tCO2eq)",
     min_value=0.0,
-    value=180.0,
+    value=0.0,
     step=1.0,
     format="%.2f",
     help="Enter the current market price per tonne CO2eq for EU Emissions Trading System allowances (EUA).")
