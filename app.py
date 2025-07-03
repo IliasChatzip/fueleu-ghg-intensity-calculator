@@ -294,7 +294,7 @@ if rows and user_entered_prices:
     st.metric("Total Cost of Selected Fuels + Penalty", f"{conservative_total:,.2f} Eur")
 if eua_ets_price > 0.0:
     ets_cost_initial = emissions_tonnes * eua_ets_price
-    st.metric("ETS Cost (Initial Fuels + Penalty)", f"{ets_cost_initial:,.2f} EUR")
+    st.metric("ETS Cost (Initial Fuels + Penalty)", f"{ets_cost_initial:,.2f} Eur")
 
 
 show_pooling_option = False
