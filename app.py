@@ -147,47 +147,46 @@ for category, fuels_in_cat in categories.items():
             price = st.number_input(f"{selected_fuel} - Price (USD/t)",min_value=0.0,value=0.0,step=0.01, format="%.2f", key=f"price_{selected_fuel}")
             fuel_price_inputs[selected_fuel] = price
 
+# === EUA-ETS PRICE INPUT ===
+st.sidebar.header("EU ETS Pricing")
+eua_ets_price = st.sidebar.number_input("EU ETS Allowance Price (EUR/tCO2eq)",
+    min_value=0.0,
+    value=180.0,
+    step=1.0,
+    format="%.2f",
+    help="Enter the current market price per tonne CO2eq for EU Emissions Trading System allowances (EUA).")
 
 st.sidebar.markdown("---")
-exchange_rate = st.sidebar.number_input(
-    "EUR/USD Exchange Rate",
+exchange_rate = st.sidebar.number_input("EUR/USD Exchange Rate",
     min_value=0.000001,
     value=1.000000,
     step=0.000001,
     format="%.6f",
-    help="Exchange rate for converting USD fuel prices to EUR."
-)
+    help="Exchange rate for converting USD fuel prices to EUR.")
 
 st.sidebar.header("Input Parameters")
 
-year = st.sidebar.selectbox(
-    "Compliance Year",
+year = st.sidebar.selectbox("Compliance Year",
     [2020, 2025, 2030, 2035, 2040, 2045, 2050],
     index=1,
     help="Select the reporting year to compare against the target intensity."
 )
 
-gwp_choice = st.sidebar.radio(
-    "GWP Standard",
+gwp_choice = st.sidebar.radio("GWP Standard",
     ["AR4", "AR5"],
     index=0,
-    help="Choose Global Warming Potential values: AR4 (CH₄: 25, N₂O: 298) or AR5 (CH₄: 29.8, N₂O: 273). The current regulation is based on AR4 values for TtW. Based on EMSA, it can be expected that the TtW values will be changed to AR5 before January 2026. Use AR4 for 2025 and AR5 for the years after. AR5 is based on the latest IPCC values and gives higher CH₄ impact — recommended for accurate methane-emitting fuels (e.g., LNG)."
-)
+    help="Choose Global Warming Potential values: AR4 (CH₄: 25, N₂O: 298) or AR5 (CH₄: 29.8, N₂O: 273). The current regulation is based on AR4 values for TtW. Based on EMSA, it can be expected that the TtW values will be changed to AR5 before January 2026. Use AR4 for 2025 and AR5 for the years after. AR5 is based on the latest IPCC values and gives higher CH₄ impact — recommended for accurate methane-emitting fuels (e.g., LNG).")
 gwp = GWP_VALUES[gwp_choice]
 
-ops = st.sidebar.selectbox(
-    "OPS Reward Factor (%)",
+ops = st.sidebar.selectbox("OPS Reward Factor (%)",
     [0, 1, 2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
     index=0,
-    help="This is a reward factor of a ship which utilise the electricity from offshore power supply (OPS) connection point. This input is the percentage of electricity delivered to the ship per total amount of energy consumption onboard (max 20%)."
-)
+    help="This is a reward factor of a ship which utilise the electricity from offshore power supply (OPS) connection point. This input is the percentage of electricity delivered to the ship per total amount of energy consumption onboard (max 20%).")
 
-wind = st.sidebar.selectbox(
-    "Wind Reward Factor",
+wind = st.sidebar.selectbox("Wind Reward Factor",
     [1.00, 0.99, 0.97, 0.95],
     index=0,
-    help="This is a reward factor wind-assisted propulsion if it is installed onboard. Reference can be made to the Regulation (EU) 2023/1805 of The European Parliament and of The Counsil. In case of no wind-assisted propulsion onboard, Wind Reward Factor of 1 can be selected (lower = more assistance)."
-)
+    help="This is a reward factor wind-assisted propulsion if it is installed onboard. Reference can be made to the Regulation (EU) 2023/1805 of The European Parliament and of The Counsil. In case of no wind-assisted propulsion onboard, Wind Reward Factor of 1 can be selected (lower = more assistance).")
     
 # === CALCULATIONS ===
 total_energy = 0.0
@@ -230,8 +229,7 @@ for fuel in FUELS:
             "Cost (Eur)": cost,
             "Emissions (gCO2eq)": total_emissions,
             "Energy (MJ)": energy,
-            "GHG Intensity (gCO2eq/MJ)": ghg_intensity_mj,
-           })
+            "GHG Intensity (gCO2eq/MJ)": ghg_intensity_mj,})
 
 emissions_tonnes = emissions / 1_000_000
 ghg_intensity = emissions / total_energy if total_energy else 0.0
@@ -243,6 +241,7 @@ if compliance_balance >= 0:
      penalty = 0
 else:
      penalty = (abs(compliance_balance) / (ghg_intensity * VLSFO_ENERGY_CONTENT)) * PENALTY_RATE * 1_000_000
+    
 
 mitigation_total_cost = 0.0
 substitution_cost = None
