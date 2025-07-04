@@ -575,9 +575,6 @@ ax.legend()
 ax.grid(True)
 st.pyplot(fig)
 
-conservative_total = total_cost + penalty + ets_cost_initial
-total_with_pooling = total_cost + pooling_cost_eur + ets_cost_initial
-total_substitution_cost = substitution_total_cost + other_fuel_costs
 
 # === PDF EXPORT ===
 if st.button("Export to PDF"):
