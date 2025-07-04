@@ -393,8 +393,9 @@ if compliance_balance < 0:
                     user_entered_mitigation_price = True
                     for row in mitigation_rows:
                         row["Price (USD/t)"] = price_usd if row["Fuel"] == selected_fuel else 0.0
-                        row["Estimated Cost (Eur)"] = row["Price (USD/t)"] * exchange_rate * row["Required Amount (t)"] * new_emissions * eua_ets_price
+                        row["Estimated Cost (Eur)"] = row["Price (USD/t)"] * exchange_rate * row["Required Amount (t)"]
                     mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
+                    mitigation_ets_cost = (new_emissions / 1_000_000) * eua_ets_price
                 
                 else:
                     mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
@@ -509,7 +510,7 @@ if compliance_balance < 0:
         st.markdown("### Total Cost Scenarios")
         scenario1 = total_cost + penalty + ets_cost_initial if total_cost > 0 and penalty > 0 else None
         scenario2 = total_with_pooling if total_cost > 0 and pooling_price_usd_per_tonne > 0 else None
-        scenario3 = total_cost + mitigation_total_cost if mitigation_total_cost > 0 else None
+        scenario3 = total_cost + mitigation_total_cost + mitigation_ets_cost if mitigation_total_cost > 0 else None
         scenario4 = total_substitution_cost if substitution_price_usd > 0 else None
         st.metric("Initial Fuels + Penalty + EU ETS", f"{scenario1:,.2f} Eur" if scenario1 is not None else "N/A (missing prices)")
         st.metric("Initial Fuels + Pooling + EU ETS (No Penalty)", f"{scenario2:,.2f} Eur" if scenario2 is not None else "N/A (missing prices)")
@@ -552,7 +553,7 @@ st.pyplot(fig)
 
 total_with_pooling = total_cost + pooling_cost_eur + ets_cost_initial
 conservative_total = total_cost + penalty + ets_cost_initial
-total_with_mitigation = total_cost + mitigation_total_cost
+total_with_mitigation = total_cost + mitigation_total_cost + mitigation_ets_cost
 
 # === PDF EXPORT ===
 if st.button("Export to PDF"):
