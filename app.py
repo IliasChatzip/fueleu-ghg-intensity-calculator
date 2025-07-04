@@ -317,13 +317,10 @@ if compliance_balance < 0:
                 min_value=0.0, value=0.0, step=0.01,
                 help="The cost per tCO2eq to buy compliance credits from the pool. If 0, pooling will not be applied.")
         
-            if pooling_price_usd_per_tonne > 0:
+            if pooling_price_usd_per_tonne > 0 and eua_ets_price > 0.0:
                pooling_cost_usd = pooling_price_usd_per_tonne * abs(deficit)
                pooling_cost_eur = pooling_cost_usd * exchange_rate
-               total_with_pooling = total_cost + pooling_cost_eur
-        
-            else:
-               st.info("Enter a non-zero pooling price to activate Pooling Scenario.")
+               total_with_pooling = total_cost + pooling_cost_eur + ets_cost_initial
     
     
     # === BIO-FUELS OPTIONS ===
@@ -553,7 +550,7 @@ ax.grid(True)
 st.pyplot(fig)
 
 
-total_with_pooling = total_cost + pooling_cost_eur
+total_with_pooling = total_cost + pooling_cost_eur + ets_cost_initial
 conservative_total = total_cost + penalty + ets_cost_initial
 total_with_mitigation = total_cost + mitigation_total_cost
 
