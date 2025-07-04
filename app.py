@@ -375,10 +375,18 @@ if compliance_balance < 0:
                         break
         
                 if best_qty is not None:
+                    mass_g = Decimal(str(best_qty)) * Decimal("1000000")
+                    energy_mj = mass_g * Decimal(str(fuel["lcv"]))
+                    if fuel["rfnbo"] and year <= 2033:
+                        energy_mj *= Decimal(str(REWARD_FACTOR_RFNBO_MULTIPLIER))
+                    ttw = (co2_mj + ch4_mj + n2o_mj) * mass_g
+                    wtt = energy_mj * Decimal(str(fuel["wtt"]))
+                    new_emissions = dec_emissions + ttw + wtt
                     rounded_qty = math.ceil(float(best_qty))
                     mitigation_rows.append({
                         "Fuel": fuel["name"],
                         "Required Amount (t)": rounded_qty,
+                        "New Emissions (gCO2eq)": float(new_emissions)
                     })
                     
             if mitigation_rows:
@@ -395,7 +403,10 @@ if compliance_balance < 0:
                         row["Price (USD/t)"] = mitigation_price_usd if row["Fuel"] == selected_fuel else 0.0
                         row["Estimated Cost (Eur)"] = row["Price (USD/t)"] * exchange_rate * row["Required Amount (t)"]
                     mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
-                    mitigation_ets_cost = (new_emissions / 1_000_000) * eua_ets_price
+                    selected_row = next(row for row in mitigation_rows if row["Fuel"] == selected_fuel)
+                    if eua_ets_price > 0:                        
+                        mitigation_ets_cost = (selected_row["New Emissions (gCO2eq)"] / 1_000_000) * eua_ets_price
+                        st.markdown(f"**ETS Cost for Mitigation Scenario:** {mitigation_ets_cost:,.2f} EUR")
                 
                 else:
                     mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
