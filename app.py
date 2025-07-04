@@ -393,7 +393,7 @@ if compliance_balance < 0:
                     user_entered_mitigation_price = True
                     for row in mitigation_rows:
                         row["Price (USD/t)"] = price_usd if row["Fuel"] == selected_fuel else 0.0
-                        row["Estimated Cost (Eur)"] = row["Price (USD/t)"] * exchange_rate * row["Required Amount (t)"]
+                        row["Estimated Cost (Eur)"] = row["Price (USD/t)"] * exchange_rate * row["Required Amount (t)"] * new_emissions * eua_ets_price
                     mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
                 
                 else:
@@ -404,7 +404,7 @@ if compliance_balance < 0:
                         "Required Amount (t)": "{:,.0f}"}))
     
     # === SUBSTITUTION SCENARIO ===
-    with st.expander("**Replace with Bio Fuel**", expanded=False):
+    with st.expander("**Replace high emission fuel with Bio Fuel**", expanded=False):
         if penalty > 0:
             st.subheader("Replacement Options (Compliance via Fuel Replacement)")
             default_substitute_fuel = "Biodiesel (UCO,B24)"
@@ -507,13 +507,13 @@ if compliance_balance < 0:
            
     if mitigation_rows:
         st.markdown("### Total Cost Scenarios")
-        scenario1 = total_cost + penalty + ets_cost_initial if total_cost > 0 and penalty > 0 and eua_ets_price > 0 else None
-        scenario2 = total_with_pooling if total_cost > 0 and pooling_price_usd_per_tonne > 0 and eua_ets_price > 0 else None
+        scenario1 = total_cost + penalty + ets_cost_initial if total_cost > 0 and penalty > 0 else None
+        scenario2 = total_with_pooling if total_cost > 0 and pooling_price_usd_per_tonne > 0 else None
         scenario3 = total_cost + mitigation_total_cost if mitigation_total_cost > 0 else None
         scenario4 = total_substitution_cost if substitution_price_usd > 0 else None
         st.metric("Initial Fuels + Penalty + EU ETS", f"{scenario1:,.2f} Eur" if scenario1 is not None else "N/A (missing prices)")
         st.metric("Initial Fuels + Pooling + EU ETS (No Penalty)", f"{scenario2:,.2f} Eur" if scenario2 is not None else "N/A (missing prices)")
-        st.metric("Initial Fuels + Bio Fuels (No Penalty)", f"{scenario3:,.2f} Eur" if scenario3 is not None else "N/A (missing prices)")
+        st.metric("Initial Fuels + Bio Fuels + EU ETS (No Penalty)", f"{scenario3:,.2f} Eur" if scenario3 is not None else "N/A (missing prices)")
         st.metric("Replacement (No Penalty)", f"{scenario4:,.2f} Eur" if scenario4 is not None else "N/A (missing prices)")
     else:
         df_mit = pd.DataFrame(mitigation_rows)
@@ -653,10 +653,10 @@ if st.button("Export to PDF"):
         
         if total_cost and mitigation_total_cost > 0:
             pdf.set_font("Arial", style="B", size=11)
-            pdf.cell(200, 10, txt=f"- Initial fuels + Bio fuels, no Penalty: {total_with_mitigation:,.2f} Eur", ln=True)                        
+            pdf.cell(200, 10, txt=f"- Initial fuels + Bio fuels + EU ETS, no Penalty: {total_with_mitigation:,.2f} Eur", ln=True)                        
         else:
             pdf.set_font("Arial", style="B", size=11)
-            pdf.cell(200, 10, txt=f"- Initial fuels + Bio fuels, no Penalty: N/A (missing prices)", ln=True)
+            pdf.cell(200, 10, txt=f"- Initial fuels + Bio fuels + EU ETS, no Penalty: N/A (missing prices)", ln=True)
         
         if total_substitution_cost is not None:
             pdf.set_font("Arial", style="B", size=11)
