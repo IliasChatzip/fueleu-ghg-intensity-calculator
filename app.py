@@ -406,7 +406,7 @@ if compliance_balance < 0:
                     selected_row = next(row for row in mitigation_rows if row["Fuel"] == selected_fuel)
                     if eua_ets_price > 0:                        
                         mitigation_ets_cost = (selected_row["New Emissions (gCO2eq)"] / 1_000_000) * eua_ets_price
-                        st.markdown(f"**ETS Cost:** {mitigation_ets_cost:,.2f} EUR")
+                        st.markdown(f"**EU ETS Cost:** {mitigation_ets_cost:,.2f} EUR")
                 
                 else:
                     mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
@@ -494,17 +494,27 @@ if compliance_balance < 0:
                     total_substitution_cost = None
                 else:
                     replaced_mass = best_x * qty_initial
+                    substitution_total_emissions  = total_emissions_blend
         
                     if price_initial > 0.0 and substitution_price_usd > 0.0:
                         mitigation_fuel_cost = replaced_mass * substitution_price_eur
                         remaining_fuel_cost = (qty_initial - replaced_mass) * price_initial
                         additional_substitution_cost = (replaced_mass * (substitution_price_eur - price_initial))
-                        substitution_total_cost = mitigation_fuel_cost + remaining_fuel_cost
-                        other_fuel_costs = sum(
-                            fuel_inputs.get(f["name"], 0.0) * fuel_price_inputs.get(f["name"], 0.0) * exchange_rate
-                            for f in FUELS if f["name"] not in [initial_fuel]
-                            )
-                        total_substitution_cost = substitution_total_cost + other_fuel_costs
+                        if substitution_total_emissions is not None and eua_ets_price > 0:
+                            substitution_ets_cost = (substitution_total_emissions / 1_000_000) * eua_ets_price
+                            substitution_total_cost = mitigation_fuel_cost + remaining_fuel_cost + substitution_ets_cost
+                            other_fuel_costs = sum(
+                                fuel_inputs.get(f["name"], 0.0) * fuel_price_inputs.get(f["name"], 0.0) * exchange_rate
+                                for f in FUELS if f["name"] not in [initial_fuel]
+                                )
+                            total_substitution_cost = substitution_total_cost + other_fuel_costs
+                        else:
+                            substitution_total_cost = mitigation_fuel_cost + remaining_fuel_cost
+                            other_fuel_costs = sum(
+                                fuel_inputs.get(f["name"], 0.0) * fuel_price_inputs.get(f["name"], 0.0) * exchange_rate
+                                for f in FUELS if f["name"] not in [initial_fuel]
+                                )
+                            total_substitution_cost = substitution_total_cost + other_fuel_costs
                     else:
                         mitigation_fuel_cost = None
                         additional_substitution_cost = None
@@ -514,9 +524,12 @@ if compliance_balance < 0:
                     st.markdown(f"**Replaced {initial_fuel} mass**: {replaced_mass:,.1f} tonnes")
                     st.markdown(f"**Added {substitute_fuel} mass**: {replaced_mass:,.1f} tonnes")
                     if additional_substitution_cost is not None:
-                        st.markdown(f"**Additional cost**: {additional_substitution_cost:,.2f} EUR")
+                        st.markdown(f"**Additional fuel cost**: {additional_substitution_cost:,.2f} EUR")
                     else:
-                        st.markdown(f"**Additional cost**: N/A (missing prices)")
+                        st.markdown(f"**Additional fuel cost**: N/A (missing prices)")
+                     if substitution_total_emissions is not None and eua_ets_price > 0:
+                         st.markdown(f"**EU ETS Cost**: {substitution_ets_cost:,.2f} EUR")
+                         
            
     if mitigation_rows:
         st.markdown("### Total Cost Scenarios")
@@ -527,7 +540,7 @@ if compliance_balance < 0:
         st.metric("Initial Fuels + Penalty + EU ETS", f"{scenario1:,.2f} Eur" if scenario1 is not None else "N/A (missing prices)")
         st.metric("Initial Fuels + Pooling + EU ETS (No Penalty)", f"{scenario2:,.2f} Eur" if scenario2 is not None else "N/A (missing prices)")
         st.metric("Initial Fuels + Bio Fuels + EU ETS (No Penalty)", f"{scenario3:,.2f} Eur" if scenario3 is not None else "N/A (missing prices)")
-        st.metric("Replacement (No Penalty)", f"{scenario4:,.2f} Eur" if scenario4 is not None else "N/A (missing prices)")
+        st.metric("Fuel Replacement + EU ETS (No Penalty)", f"{scenario4:,.2f} Eur" if scenario4 is not None else "N/A (missing prices)")
     else:
         df_mit = pd.DataFrame(mitigation_rows)
         st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
@@ -562,10 +575,10 @@ ax.legend()
 ax.grid(True)
 st.pyplot(fig)
 
-
-total_with_pooling = total_cost + pooling_cost_eur + ets_cost_initial
 conservative_total = total_cost + penalty + ets_cost_initial
+total_with_pooling = total_cost + pooling_cost_eur + ets_cost_initial
 total_with_mitigation = total_cost + mitigation_total_cost + mitigation_ets_cost
+total_substitution_cost = substitution_total_cost + other_fuel_costs
 
 # === PDF EXPORT ===
 if st.button("Export to PDF"):
@@ -673,10 +686,10 @@ if st.button("Export to PDF"):
         
         if total_substitution_cost is not None:
             pdf.set_font("Arial", style="B", size=11)
-            pdf.cell(200, 10, txt=f"- Replacement, no Penalty: {total_substitution_cost:,.2f} Eur", ln=True)
+            pdf.cell(200, 10, txt=f"- Fuel Replacement + EU ETS, no Penalty: {total_substitution_cost:,.2f} Eur", ln=True)
         else:
             pdf.set_font("Arial", style="B", size=11)
-            pdf.cell(200, 10, txt="- Replacement, no Penalty: N/A (missing prices)", ln=True)
+            pdf.cell(200, 10, txt="- Fuel Replacement + EU ETS, no Penalty: N/A (missing prices)", ln=True)
 
                   
         # Export
