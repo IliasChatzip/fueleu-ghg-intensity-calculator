@@ -413,7 +413,8 @@ if compliance_balance < 0:
                     df_mit = pd.DataFrame(mitigation_rows)
                     st.markdown("#### Bio Fuel Options")
                     st.dataframe(df_mit.style.format({
-                        "Required Amount (t)": "{:,.0f}"}))
+                        "Required Amount (t)": "{:,.0f}",
+                        "New Emissions (gCO2eq)": "{:,.0f}"}))
     
     # === SUBSTITUTION SCENARIO ===
     with st.expander("**Replace high emission fuel with Bio Fuel**", expanded=False):
