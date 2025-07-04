@@ -286,11 +286,11 @@ st.subheader("Summary")
 st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}")
 balance_label = "Surplus" if compliance_balance >= 0 else "Deficit"
 st.metric("Total Emissions (tCO2eq)", f"{emissions_tonnes:,.2f}")
-st.metric("Compliance Balance (tCO2eq)", f"{compliance_balance:,.2f}")
-st.metric("Estimated Penalty (Eur)", f"{penalty:,.2f}")
 if eua_ets_price > 0.0:
     ets_cost_initial = emissions_tonnes * eua_ets_price
     st.metric("EU ETS Cost (Eur)", f"{ets_cost_initial:,.2f}")
+st.metric("Compliance Balance (tCO2eq)", f"{compliance_balance:,.2f}")
+st.metric("Estimated Penalty (Eur)", f"{penalty:,.2f}")
 if rows and user_entered_prices:
     conservative_total = total_cost + penalty + ets_cost_initial
     st.metric("Total Cost of Selected Fuels + Penalty + EU ETS (Eur)", f"{conservative_total:,.2f}")
