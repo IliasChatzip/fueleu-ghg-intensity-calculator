@@ -395,7 +395,7 @@ if compliance_balance < 0:
                 fuel_names = [row["Fuel"] for row in mitigation_rows]
                 default_index = fuel_names.index(default_fuel) if default_fuel in fuel_names else 0
                 selected_fuel = st.selectbox("Select Bio Fuel for Price Input",fuel_names,index=default_index)
-                mitigation_price_usd = st.number_input(f"{selected_fuel} - Price (USD/t)", min_value=0.0, value=0.0, step=10.0, key="mitigation_price_input")
+                mitigation_price_usd = st.number_input(f"{selected_fuel} - Price (USD/t)", min_value=0.0, value=0.0, step=10.0, key=f"mitigation_price_input_{selected_fuel.replace(' ','_')}")
         
                 if mitigation_price_usd > 0:
                     user_entered_mitigation_price = True
