@@ -577,7 +577,7 @@ st.pyplot(fig)
 
 conservative_total = total_cost + penalty + ets_cost_initial
 total_with_pooling = total_cost + pooling_cost_eur + ets_cost_initial
-total_with_mitigation = total_cost + mitigation_total_cost + mitigation_ets_cost
+scenario3  = total_cost + mitigation_total_cost + mitigation_ets_cost
 total_substitution_cost = substitution_total_cost + other_fuel_costs
 
 # === PDF EXPORT ===
@@ -679,7 +679,7 @@ if st.button("Export to PDF"):
         
         if total_cost and mitigation_total_cost > 0:
             pdf.set_font("Arial", style="B", size=11)
-            pdf.cell(200, 10, txt=f"- Initial fuels + Bio fuels + EU ETS, no Penalty: {total_with_mitigation:,.2f} Eur", ln=True)                        
+            pdf.cell(200, 10, txt=f"- Initial fuels + Bio fuels + EU ETS, no Penalty: {scenario3 :,.2f} Eur", ln=True)                        
         else:
             pdf.set_font("Arial", style="B", size=11)
             pdf.cell(200, 10, txt=f"- Initial fuels + Bio fuels + EU ETS, no Penalty: N/A (missing prices)", ln=True)
