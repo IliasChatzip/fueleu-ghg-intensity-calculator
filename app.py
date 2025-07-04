@@ -507,7 +507,7 @@ if compliance_balance < 0:
            
     if mitigation_rows:
         st.markdown("### Total Cost Scenarios")
-        scenario1 = total_cost + penalty + ets_cost_initial if total_cost > 0 and penalty > 0 and ets_cost_initial > 0 else None
+        scenario1 = total_cost + penalty + ets_cost_initial if total_cost > 0 and penalty > 0 and eua_ets_price > 0 else None
         scenario2 = total_with_pooling if total_cost > 0 and pooling_price_usd_per_tonne > and eua_ets_price > 0 else None
         scenario3 = total_cost + mitigation_total_cost if mitigation_total_cost > 0 else None
         scenario4 = total_substitution_cost if substitution_price_usd > 0 else None
