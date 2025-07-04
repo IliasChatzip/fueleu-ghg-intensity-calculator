@@ -527,8 +527,8 @@ if compliance_balance < 0:
                         st.markdown(f"**Additional fuel cost**: {additional_substitution_cost:,.2f} EUR")
                     else:
                         st.markdown(f"**Additional fuel cost**: N/A (missing prices)")
-                     if substitution_total_emissions is not None and eua_ets_price > 0:
-                         st.markdown(f"**EU ETS Cost**: {substitution_ets_cost:,.2f} EUR")
+                    if substitution_total_emissions is not None and eua_ets_price > 0:
+                        st.markdown(f"**EU ETS Cost**: {substitution_ets_cost:,.2f} EUR")
                          
            
     if mitigation_rows:
