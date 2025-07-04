@@ -406,7 +406,7 @@ if compliance_balance < 0:
                     selected_row = next(row for row in mitigation_rows if row["Fuel"] == selected_fuel)
                     if eua_ets_price > 0:                        
                         mitigation_ets_cost = (selected_row["New Emissions (gCO2eq)"] / 1_000_000) * eua_ets_price
-                        st.markdown(f"**ETS Cost for Mitigation Scenario:** {mitigation_ets_cost:,.2f} EUR")
+                        st.markdown(f"**ETS Cost:** {mitigation_ets_cost:,.2f} EUR")
                 
                 else:
                     mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
