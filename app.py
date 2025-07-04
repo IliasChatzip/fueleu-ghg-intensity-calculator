@@ -508,11 +508,11 @@ if compliance_balance < 0:
     if mitigation_rows:
         st.markdown("### Total Cost Scenarios")
         scenario1 = total_cost + penalty + ets_cost_initial if total_cost > 0 and penalty > 0 and ets_cost_initial > 0 else None
-        scenario2 = total_with_pooling if total_cost > 0 and pooling_price_usd_per_tonne > and ets_cost_initial > 0 else None
+        scenario2 = total_with_pooling if total_cost > 0 and pooling_price_usd_per_tonne > and eua_ets_price > 0 else None
         scenario3 = total_cost + mitigation_total_cost if mitigation_total_cost > 0 else None
         scenario4 = total_substitution_cost if substitution_price_usd > 0 else None
-        st.metric("Initial Fuels + Penalty", f"{scenario1:,.2f} Eur" if scenario1 is not None else "N/A (missing prices)")
-        st.metric("Initial Fuels + Pooling (No Penalty)", f"{scenario2:,.2f} Eur" if scenario2 is not None else "N/A (missing prices)")
+        st.metric("Initial Fuels + Penalty + EU ETS", f"{scenario1:,.2f} Eur" if scenario1 is not None else "N/A (missing prices)")
+        st.metric("Initial Fuels + Pooling + EU ETS (No Penalty)", f"{scenario2:,.2f} Eur" if scenario2 is not None else "N/A (missing prices)")
         st.metric("Initial Fuels + Bio Fuels (No Penalty)", f"{scenario3:,.2f} Eur" if scenario3 is not None else "N/A (missing prices)")
         st.metric("Replacement (No Penalty)", f"{scenario4:,.2f} Eur" if scenario4 is not None else "N/A (missing prices)")
     else:
@@ -567,6 +567,7 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt=f"EU Target for {year}: {target_intensity(year):.2f} gCO2eq/MJ", ln=True)
         pdf.cell(200, 10, txt=f"GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ", ln=True)
         pdf.cell(200, 10, txt=f"Total Emissions: {emissions_tonnes:,.0f} tCO2eq", ln=True)
+        pdf.cell(200, 10, txt=f"EU ETS: {ets_cost_initial:,.0f} Eur", ln=True)
         pdf.cell(200, 10, txt=f"Compliance Balance: {compliance_balance:,.0f} tCO2eq", ln=True)
         pdf.cell(200, 10, txt=f"Penalty: {penalty:,.0f} Eur", ln=True)
         pdf.ln(10)
@@ -636,19 +637,19 @@ if st.button("Export to PDF"):
         pdf.set_font("Arial", "B", size=12)
         pdf.cell(200, 10, txt="--- Cost Analysis ---", ln=True)
         pdf.set_font("Arial", size=10)
-        if total_cost > 0:
+        if total_cost > 0 and eua_ets_price > 0:
             pdf.set_font("Arial", style="B", size=11)
             pdf.cell(200, 10, txt=f"- Initial fuels + Penalty + EU ETS: {conservative_total:,.2f} Eur", ln=True)
         else:
             pdf.set_font("Arial", style="B", size=11)
-            pdf.cell(200, 10, txt=f"- Initial fuels + Penalty: N/A (missing prices)", ln=True)
+            pdf.cell(200, 10, txt=f"- Initial fuels + Penalty + EU ETS: N/A (missing prices)", ln=True)
         
-        if total_cost and pooling_price_usd_per_tonne > 0:
+        if total_cost and pooling_price_usd_per_tonne > 0 and eua_ets_price > 0:
             pdf.set_font("Arial", style="B", size=11)
-            pdf.cell(200, 10, txt=f"- Initial fuels + Pooling, no Penalty: {total_with_pooling:,.2f} Eur", ln=True)
+            pdf.cell(200, 10, txt=f"- Initial fuels + Pooling + EU ETS, no Penalty: {total_with_pooling:,.2f} Eur", ln=True)
         else:
             pdf.set_font("Arial", style="B", size=11)
-            pdf.cell(200, 10, txt=f"- Initial fuels + Pooling, no Penalty: N/A (missing prices)", ln=True)
+            pdf.cell(200, 10, txt=f"- Initial fuels + Pooling + EU ETS, no Penalty: N/A (missing prices)", ln=True)
         
         if total_cost and mitigation_total_cost > 0:
             pdf.set_font("Arial", style="B", size=11)
