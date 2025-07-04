@@ -125,7 +125,6 @@ def target_intensity(year: int) -> float:
       
 # === USER INPUT ===
 st.title("Fuel EU - GHG Intensity & Penalty Calculator")
-st.sidebar.markdown("### Fuel Price Settings")
 st.sidebar.info("Enter fuel prices in USD & provide exchange rate.")
 st.sidebar.subheader("Fuel Inputs")
 fuel_inputs = {}
@@ -139,7 +138,7 @@ categories = {
     "RFNBO": [f for f in FUELS if f['rfnbo'] or "E-" in f['name']]}
 
 for category, fuels_in_cat in categories.items():
-    with st.sidebar.expander(f"{category} Fuels", expanded=True):
+    with st.sidebar.expander(f"{category} Fuels", expanded=False):
         selected_fuels = st.multiselect(f"Select {category} Fuels", [f["name"] for f in fuels_in_cat], key=f"multiselect_{category}")
         for selected_fuel in selected_fuels:
             qty = st.number_input(f"{selected_fuel} (t)", min_value=0, step=1, value=0, format="%d", key=f"qty_{selected_fuel}")
