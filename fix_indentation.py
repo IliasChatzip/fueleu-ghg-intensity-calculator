@@ -1,4 +1,3 @@
-# fix_indentation.py
 # Replaces all tab characters with 4 spaces in app.py
 
 INPUT_FILE = "app.py"
