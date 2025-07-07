@@ -646,7 +646,7 @@ if st.button("Export to PDF"):
                 line = (f"{row['Fuel']}: {row['Required Amount (t)']:,.0f} t @ "
                         f"{row['Price (USD/t)']:,.2f} USD/t | "
                         f"{row['Estimated Cost (Eur)']:,.2f} Eur")
-                        pdf.cell(200, 10, txt=line, ln=True)
+                pdf.cell(200, 10, txt=line, ln=True)
                 if eua_ets_price > 0:
                     pdf.cell(200, 10, txt=f"EU ETS Cost: {new_blend_ets_cost:,.0f} Eur")
                     
