@@ -589,7 +589,7 @@ if st.button("Export to PDF"):
     else:
         pdf = FPDF()
         pdf.add_page()
-        pdf.set_font("Arial", size=11)
+        pdf.set_font("Arial", style="BU" ,size=11)
         pdf.cell(200, 10, txt="Fuel EU Maritime GHG & Penalty Report", ln=True, align="C")
         pdf.cell(200, 10, txt=f"Year: {year} | GWP: {gwp_choice}", ln=True)
         pdf.cell(200, 10, txt=f"EU Target for {year}: {target_intensity(year):.2f} gCO2eq/MJ", ln=True)
@@ -601,8 +601,8 @@ if st.button("Export to PDF"):
         pdf.ln(10)
 
         # Fuel Breakdown
-        pdf.set_font("Arial", size=10)
-        pdf.cell(200, 10, txt="--- Fuel Breakdown ---", ln=True)
+        pdf.set_font("Arial", "U" ,size=10)
+        pdf.cell(200, 10, txt="Fuel Breakdown", ln=True)
         user_entered_prices = any(fuel_price_inputs.get(f["name"], 0.0) > 0.0 for f in FUELS)
         for row in rows:
             fuel_name = row['Fuel']
