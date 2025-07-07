@@ -522,11 +522,11 @@ if compliance_balance < 0:
            
     if mitigation_rows:
         st.markdown("### Total Cost Scenarios")
-        scenario1 = conservative_total if total_cost > 0 and penalty > 0 else None
-        scenario2 = total_with_pooling if total_cost > 0 and pooling_price_usd_per_tonne > 0 else None
-        scenario3 = total_cost + added_biofuel_cost + new_blend_ets_cost if total_cost > 0 and added_biofuel_cost > 0 else None
-        scenario4 = total_substitution_cost if substitution_price_usd > 0 else None
         if eua_ets_price > 0:
+            scenario1 = conservative_total if total_cost > 0 and penalty > 0 else None
+            scenario2 = total_with_pooling if total_cost > 0 and pooling_price_usd_per_tonne > 0 else None
+            scenario3 = total_cost + added_biofuel_cost + new_blend_ets_cost if total_cost and added_biofuel_cost > 0 else None
+            scenario4 = total_substitution_cost if substitution_price_usd > 0 else None
             st.metric("Initial Fuels + Penalty + EU ETS", f"{scenario1:,.2f} Eur" if scenario1 is not None else "N/A (missing prices)")
             st.metric("Initial Fuels + Pooling + EU ETS (No Penalty)", f"{scenario2:,.2f} Eur" if scenario2 is not None else "N/A (missing prices)")
             st.metric("Initial Fuels + Bio Fuels + EU ETS (No Penalty)", f"{scenario3:,.2f} Eur" if scenario3 is not None else "N/A (missing prices)")
