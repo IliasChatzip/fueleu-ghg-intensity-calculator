@@ -103,8 +103,7 @@ FUELS = [
     {"name": "E-LNG (Diesel dual fuel slow speed)",                                                          "lcv": 0.0491,  "wtt": 1.0,   "ttw_co2": 2.750,  "ttw_ch4": 0.0,      "ttw_n2O": 0.00011,  "rfnbo": True, "ch4_slip":0.2},
     {"name": "E-LNG (LBSI)",                                                                                 "lcv": 0.0491,  "wtt": 1.0,   "ttw_co2": 2.750,  "ttw_ch4": 0.0,      "ttw_n2O": 0.00011,  "rfnbo": True, "ch4_slip":2.6},
     {"name": "E-Hydrogen",                                                                                   "lcv": 0.1200,  "wtt": 3.6,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": True},
-    {"name": "E-Ammonia",                                                                                    "lcv": 0.0186,  "wtt": 0.0,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": True},  
-]
+    {"name": "E-Ammonia",                                                                                    "lcv": 0.0186,  "wtt": 0.0,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": True},]
     
 # === TARGET FUNCTION ===
 def target_intensity(year: int) -> float:
@@ -168,8 +167,7 @@ st.sidebar.header("Input Parameters")
 year = st.sidebar.selectbox("Compliance Year",
     [2020, 2025, 2030, 2035, 2040, 2045, 2050],
     index=1,
-    help="Select the reporting year to compare against the target intensity."
-)
+    help="Select the reporting year to compare against the target intensity.")
 
 gwp_choice = st.sidebar.radio("GWP Standard",
     ["AR4", "AR5"],
@@ -241,14 +239,12 @@ if compliance_balance >= 0:
      penalty = 0
 else:
      penalty = (abs(compliance_balance) / (ghg_intensity * VLSFO_ENERGY_CONTENT)) * PENALTY_RATE * 1_000_000
-    
 
-mitigation_total_cost = 0.0
+added_biofuel_cost = 0.0
 substitution_cost = None
 total_substitution_cost = None
 # Safeguard for mitigation_rows
 mitigation_rows = []
-
 
 # === Reset Handler ===
 if st.session_state.get("trigger_reset", False):
@@ -259,10 +255,8 @@ if st.session_state.get("trigger_reset", False):
     st.session_state["trigger_reset"] = False
     st.experimental_rerun()
 
-
 # === OUTPUT ===
 total_cost = 0.0
-
 st.subheader("Fuel Breakdown")
 if rows:
     df_raw = pd.DataFrame(rows).sort_values("Emissions (gCO2eq)", ascending=False).reset_index(drop=True)
@@ -294,7 +288,6 @@ st.metric("Estimated Penalty (Eur)", f"{penalty:,.2f}")
 if rows and user_entered_prices:
     conservative_total = total_cost + penalty + ets_cost_initial
     st.metric("Total Cost of Selected Fuels + Penalty + EU ETS (Eur)", f"{conservative_total:,.2f}")
-
 
 show_pooling_option = False
 pooling_price_usd_per_tonne = 0.0
@@ -386,8 +379,7 @@ if compliance_balance < 0:
                     mitigation_rows.append({
                         "Fuel": fuel["name"],
                         "Required Amount (t)": rounded_qty,
-                        "New Emissions (gCO2eq)": float(new_emissions)
-                    })
+                        "New Emissions (gCO2eq)": float(new_emissions)})
                     
             if mitigation_rows:
                 mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
@@ -402,11 +394,11 @@ if compliance_balance < 0:
                     for row in mitigation_rows:
                         row["Price (USD/t)"] = mitigation_price_usd if row["Fuel"] == selected_fuel else 0.0
                         row["Estimated Cost (Eur)"] = row["Price (USD/t)"] * exchange_rate * row["Required Amount (t)"]
-                    mitigation_total_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
+                    added_biofuel_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
                     selected_row = next(row for row in mitigation_rows if row["Fuel"] == selected_fuel)
                     if eua_ets_price > 0:                        
-                        mitigation_ets_cost = (selected_row["New Emissions (gCO2eq)"] / 1_000_000) * eua_ets_price
-                        st.markdown(f"**EU ETS Cost:** {mitigation_ets_cost:,.2f} EUR")
+                        new_blend_ets_cost = (selected_row["New Emissions (gCO2eq)"] / 1_000_000) * eua_ets_price
+                        st.markdown(f"**EU ETS Cost:** {new_blend_ets_cost:,.2f} EUR")
                 
                 else:
                     mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
@@ -531,9 +523,9 @@ if compliance_balance < 0:
            
     if mitigation_rows:
         st.markdown("### Total Cost Scenarios")
-        scenario1 = total_cost + penalty + ets_cost_initial if total_cost > 0 and penalty > 0 else None
+        scenario1 = conservative_total if total_cost > 0 and penalty > 0 else None
         scenario2 = total_with_pooling if total_cost > 0 and pooling_price_usd_per_tonne > 0 else None
-        scenario3 = total_cost + mitigation_total_cost + mitigation_ets_cost if mitigation_total_cost > 0 else None
+        scenario3 = total_cost + added_biofuel_cost + new_blend_ets_cost if added_biofuel_cost > 0 else None
         scenario4 = total_substitution_cost if substitution_price_usd > 0 else None
         st.metric("Initial Fuels + Penalty + EU ETS", f"{scenario1:,.2f} Eur" if scenario1 is not None else "N/A (missing prices)")
         st.metric("Initial Fuels + Pooling + EU ETS (No Penalty)", f"{scenario2:,.2f} Eur" if scenario2 is not None else "N/A (missing prices)")
@@ -671,7 +663,7 @@ if st.button("Export to PDF"):
             pdf.set_font("Arial", style="B", size=11)
             pdf.cell(200, 10, txt=f"- Initial fuels + Pooling + EU ETS, no Penalty: N/A (missing prices)", ln=True)
         
-        if total_cost and mitigation_total_cost > 0:
+        if total_cost and added_biofuel_cost > 0:
             pdf.set_font("Arial", style="B", size=11)
             pdf.cell(200, 10, txt=f"- Initial fuels + Bio fuels + EU ETS, no Penalty: {scenario3 :,.2f} Eur", ln=True)                        
         else:
@@ -685,7 +677,6 @@ if st.button("Export to PDF"):
             pdf.set_font("Arial", style="B", size=11)
             pdf.cell(200, 10, txt="- Fuel Replacement + EU ETS, no Penalty: N/A (missing prices)", ln=True)
 
-                  
         # Export
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
             pdf.output(tmp_pdf.name)
