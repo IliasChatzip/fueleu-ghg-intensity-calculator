@@ -618,9 +618,9 @@ if st.button("Export to PDF"):
         pdf.set_font("Arial", "B", size=11)
         pdf.cell(200, 10, txt=f"Total Initial Fuel Cost: {total_cost:,.2f} Eur", ln=True)
         if user_entered_prices:
-            pdf.set_font("Arial", size=10)
-            pdf.ln(2)
-            pdf.cell(200, 8, txt=f"Conversion Rate Used: 1 USD = {exchange_rate:.6f} Eur", ln=True)
+            pdf.set_font("Arial", size=8)
+            pdf.ln(1)
+            pdf.cell(200, 10, txt=f"Conversion Rate Used: 1 USD = {exchange_rate:.2f} Eur", ln=True)
 
         # Pooling Option
         if show_pooling_option and pooling_price_usd_per_tonne > 0:
@@ -632,6 +632,8 @@ if st.button("Export to PDF"):
                     f"{pooling_price_usd_per_tonne:,.2f} USD/t | "
                     f"{pooling_cost_eur:,.2f} Eur")
             pdf.cell(200, 10, txt=pooling_line, ln=True)
+            if eua_ets_price > 0:
+                    pdf.cell(200, 10, txt=f"EU ETS Cost: {ets_cost_initial:,.0f} Eur")
 
         # Bio Fuel Option
         mitigation_with_price = [row for row in mitigation_rows if row.get("Price (USD/t)", 0) > 0]
@@ -644,6 +646,7 @@ if st.button("Export to PDF"):
                 line = (f"{row['Fuel']}: {row['Required Amount (t)']:,.0f} t @ "
                         f"{row['Price (USD/t)']:,.2f} USD/t | "
                         f"{row['Estimated Cost (Eur)']:,.2f} Eur")
+                        pdf.cell(200, 10, txt=line, ln=True)
                 if eua_ets_price > 0:
                     pdf.cell(200, 10, txt=f"EU ETS Cost: {new_blend_ets_cost:,.0f} Eur")
                     
