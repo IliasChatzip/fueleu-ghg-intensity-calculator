@@ -15,7 +15,7 @@ st.set_page_config(page_title="Fuel EU GHG Calculator", layout="wide")
 # === STABLE RESET HANDLER ===
 def reset_app():
     for key in list(st.session_state.keys()):
-        del st.session_state[key]  # Clear all session state
+        del st.session_state[key]
     st.session_state["trigger_reset"] = False
     
 # === Check if Reset Was Triggered
