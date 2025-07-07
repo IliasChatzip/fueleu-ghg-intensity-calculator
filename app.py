@@ -285,9 +285,13 @@ if eua_ets_price > 0.0:
     st.metric("EU ETS Cost (Eur)", f"{ets_cost_initial:,.2f}")
 st.metric("Compliance Balance (tCO2eq)", f"{compliance_balance:,.2f}")
 st.metric("Estimated Penalty (Eur)", f"{penalty:,.2f}")
-if rows and user_entered_prices:
+if rows and user_entered_prices and eua_ets_price > 0:
     conservative_total = total_cost + penalty + ets_cost_initial
     st.metric("Total Cost of Selected Fuels + Penalty + EU ETS (Eur)", f"{conservative_total:,.2f}")
+else:
+    if rows and user_entered_prices:
+    conservative_total = total_cost + penalty
+    st.metric("Total Cost of Selected Fuels + Penalty (Eur)", f"{conservative_total:,.2f}")
 
 show_pooling_option = False
 pooling_price_usd_per_tonne = 0.0
@@ -532,6 +536,10 @@ if compliance_balance < 0:
             st.metric("Initial Fuels + Bio Fuels + EU ETS (No Penalty)", f"{scenario3:,.2f} Eur" if scenario3 is not None else "N/A (missing prices)")
             st.metric("Fuel Replacement + EU ETS (No Penalty)", f"{scenario4:,.2f} Eur" if scenario4 is not None else "N/A (missing prices)")
         else:
+            scenario1 = conservative_total if total_cost > 0 and penalty > 0 else None
+            scenario2 = total_with_pooling if total_cost > 0 and pooling_price_usd_per_tonne > 0 else None
+            scenario3 = total_cost + added_biofuel_cost if total_cost and added_biofuel_cost > 0 else None
+            scenario4 = total_substitution_cost if substitution_price_usd > 0 else None
             st.metric("Initial Fuels + Penalty", f"{scenario1:,.2f} Eur" if scenario1 is not None else "N/A (missing prices)")
             st.metric("Initial Fuels + Pooling (No Penalty)", f"{scenario2:,.2f} Eur" if scenario2 is not None else "N/A (missing prices)")
             st.metric("Initial Fuels + Bio Fuels (No Penalty)", f"{scenario3:,.2f} Eur" if scenario3 is not None else "N/A (missing prices)")
