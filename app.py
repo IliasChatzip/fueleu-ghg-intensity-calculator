@@ -616,11 +616,11 @@ if st.button("Export to PDF"):
         # Total Cost
         pdf.ln(5)
         pdf.set_font("Arial", "B", size=11)
-        pdf.cell(200, 10, txt=f"Total Fuel Cost: {total_cost:,.2f} Eur", ln=True)
+        pdf.cell(200, 10, txt=f"Total Initial Fuel Cost: {total_cost:,.2f} Eur", ln=True)
         if user_entered_prices:
             pdf.set_font("Arial", size=10)
-            pdf.ln(3)
-            pdf.cell(200, 10, txt=f"Conversion Rate Used: 1 USD = {exchange_rate:.6f} EUR", ln=True)
+            pdf.ln(2)
+            pdf.cell(200, 8, txt=f"Conversion Rate Used: 1 USD = {exchange_rate:.6f} Eur", ln=True)
 
         # Pooling Option
         if show_pooling_option and pooling_price_usd_per_tonne > 0:
@@ -644,11 +644,9 @@ if st.button("Export to PDF"):
                 line = (f"{row['Fuel']}: {row['Required Amount (t)']:,.0f} t @ "
                         f"{row['Price (USD/t)']:,.2f} USD/t | "
                         f"{row['Estimated Cost (Eur)']:,.2f} Eur")
-                pdf.cell(200, 10, txt=line, ln=True)
                 if eua_ets_price > 0:
-                    pdf.cell(200, 10, txt=f"EU ETS Cost: {new_blend_ets_cost:,.0f} EUR")
+                    pdf.cell(200, 10, txt=f"EU ETS Cost: {new_blend_ets_cost:,.0f} Eur")
                     
-        
         # Replacemnet Option
         if penalty > 0 and replaced_mass is not None and best_x is not None:
             pdf.ln(5)
@@ -659,8 +657,7 @@ if st.button("Export to PDF"):
             if eua_ets_price > 0:
                 pdf.cell(200, 10, txt=f"EU ETS Cost: {substitution_ets_cost:,.0f} Eur", ln=True)
             if additional_substitution_cost is not None:
-                pdf.cell(200, 10, txt=f"Additional fuel cost: {additional_substitution_cost:,.2f} EUR", ln=True)
-                pdf.cell(200, 10, txt=f"Total Cost: {total_substitution_cost:,.2f} EUR", ln=True)            
+                pdf.cell(200, 10, txt=f"Additional fuel cost: {additional_substitution_cost:,.2f} Eur", ln=True)           
         
         if total_cost > 0:
             pdf.ln(5)
