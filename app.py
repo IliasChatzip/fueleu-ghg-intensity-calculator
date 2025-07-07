@@ -315,7 +315,6 @@ if compliance_balance < 0:
                pooling_cost_eur = pooling_cost_usd * exchange_rate
                total_with_pooling = total_cost + pooling_cost_eur + ets_cost_initial
     
-    
     # === BIO-FUELS OPTIONS ===
     with st.expander("**Add Bio Fuel**", expanded=False):
         getcontext().prec = 12
@@ -525,12 +524,15 @@ if compliance_balance < 0:
         st.markdown("### Total Cost Scenarios")
         scenario1 = conservative_total if total_cost > 0 and penalty > 0 else None
         scenario2 = total_with_pooling if total_cost > 0 and pooling_price_usd_per_tonne > 0 else None
-        scenario3 = total_cost + added_biofuel_cost + new_blend_ets_cost if added_biofuel_cost > 0 else None
+        scenario3 = total_cost + added_biofuel_cost + new_blend_ets_cost if total_cost > 0 and added_biofuel_cost > 0 else None
         scenario4 = total_substitution_cost if substitution_price_usd > 0 else None
-        st.metric("Initial Fuels + Penalty + EU ETS", f"{scenario1:,.2f} Eur" if scenario1 is not None else "N/A (missing prices)")
-        st.metric("Initial Fuels + Pooling + EU ETS (No Penalty)", f"{scenario2:,.2f} Eur" if scenario2 is not None else "N/A (missing prices)")
-        st.metric("Initial Fuels + Bio Fuels + EU ETS (No Penalty)", f"{scenario3:,.2f} Eur" if scenario3 is not None else "N/A (missing prices)")
-        st.metric("Fuel Replacement + EU ETS (No Penalty)", f"{scenario4:,.2f} Eur" if scenario4 is not None else "N/A (missing prices)")
+        if eua_ets_price > 0:
+            st.metric("Initial Fuels + Penalty + EU ETS", f"{scenario1:,.2f} Eur" if scenario1 is not None else "N/A (missing prices)")
+            st.metric("Initial Fuels + Pooling + EU ETS (No Penalty)", f"{scenario2:,.2f} Eur" if scenario2 is not None else "N/A (missing prices)")
+            st.metric("Initial Fuels + Bio Fuels + EU ETS (No Penalty)", f"{scenario3:,.2f} Eur" if scenario3 is not None else "N/A (missing prices)")
+            st.metric("Fuel Replacement + EU ETS (No Penalty)", f"{scenario4:,.2f} Eur" if scenario4 is not None else "N/A (missing prices)")
+        else:
+            
     else:
         df_mit = pd.DataFrame(mitigation_rows)
         st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
