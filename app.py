@@ -532,7 +532,10 @@ if compliance_balance < 0:
             st.metric("Initial Fuels + Bio Fuels + EU ETS (No Penalty)", f"{scenario3:,.2f} Eur" if scenario3 is not None else "N/A (missing prices)")
             st.metric("Fuel Replacement + EU ETS (No Penalty)", f"{scenario4:,.2f} Eur" if scenario4 is not None else "N/A (missing prices)")
         else:
-            
+            st.metric("Initial Fuels + Penalty", f"{scenario1:,.2f} Eur" if scenario1 is not None else "N/A (missing prices)")
+            st.metric("Initial Fuels + Pooling (No Penalty)", f"{scenario2:,.2f} Eur" if scenario2 is not None else "N/A (missing prices)")
+            st.metric("Initial Fuels + Bio Fuels (No Penalty)", f"{scenario3:,.2f} Eur" if scenario3 is not None else "N/A (missing prices)")
+            st.metric("Fuel Replacement (No Penalty)", f"{scenario4:,.2f} Eur" if scenario4 is not None else "N/A (missing prices)")
     else:
         df_mit = pd.DataFrame(mitigation_rows)
         st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
@@ -651,34 +654,42 @@ if st.button("Export to PDF"):
         pdf.set_font("Arial", "B", size=12)
         pdf.cell(200, 10, txt="--- Cost Analysis ---", ln=True)
         pdf.set_font("Arial", size=10)
-        if total_cost > 0 and eua_ets_price > 0:
+        if total_cost and eua_ets_price > 0:
             pdf.set_font("Arial", style="B", size=11)
             pdf.cell(200, 10, txt=f"- Initial fuels + Penalty + EU ETS: {conservative_total:,.2f} Eur", ln=True)
         else:
-            pdf.set_font("Arial", style="B", size=11)
-            pdf.cell(200, 10, txt=f"- Initial fuels + Penalty + EU ETS: N/A (missing prices)", ln=True)
+            if total_cost > 0:
+                pdf.set_font("Arial", style="B", size=11)
+                pdf.cell(200, 10, txt=f"- Initial fuels + Penalty: {conservative_total:,.2f} Eur", ln=True)
+            else None
         
-        if total_cost and pooling_price_usd_per_tonne > 0 and eua_ets_price > 0:
+        if total_cost and pooling_price_usd_per_tonne and eua_ets_price > 0:
             pdf.set_font("Arial", style="B", size=11)
             pdf.cell(200, 10, txt=f"- Initial fuels + Pooling + EU ETS, no Penalty: {total_with_pooling:,.2f} Eur", ln=True)
         else:
-            pdf.set_font("Arial", style="B", size=11)
-            pdf.cell(200, 10, txt=f"- Initial fuels + Pooling + EU ETS, no Penalty: N/A (missing prices)", ln=True)
-        
-        if total_cost and added_biofuel_cost > 0:
+            if total_cost and pooling_price_usd_per_tonne > 0:
+                pdf.set_font("Arial", style="B", size=11)
+                pdf.cell(200, 10, txt=f"- Initial fuels + Pooling, no Penalty: {total_with_pooling:,.2f} Eur", ln=True)
+            else None
+                    
+        if total_cost and added_biofuel_cost and new_blend_ets_cost > 0:
             pdf.set_font("Arial", style="B", size=11)
             pdf.cell(200, 10, txt=f"- Initial fuels + Bio fuels + EU ETS, no Penalty: {scenario3 :,.2f} Eur", ln=True)                        
         else:
-            pdf.set_font("Arial", style="B", size=11)
-            pdf.cell(200, 10, txt=f"- Initial fuels + Bio fuels + EU ETS, no Penalty: N/A (missing prices)", ln=True)
+            if total_cost and added_biofuel_cost > 0:
+                pdf.set_font("Arial", style="B", size=11)
+                pdf.cell(200, 10, txt=f"- Initial fuels + Bio fuels, no Penalty: {scenario3 :,.2f} Eur", ln=True)
+            else None
         
-        if total_substitution_cost is not None:
+        if total_substitution_cost and substitution_total_emissions is not None and eua_ets_price > 0:
             pdf.set_font("Arial", style="B", size=11)
             pdf.cell(200, 10, txt=f"- Fuel Replacement + EU ETS, no Penalty: {total_substitution_cost:,.2f} Eur", ln=True)
         else:
-            pdf.set_font("Arial", style="B", size=11)
-            pdf.cell(200, 10, txt="- Fuel Replacement + EU ETS, no Penalty: N/A (missing prices)", ln=True)
-
+            if total_substitution_cost is not None:
+                pdf.set_font("Arial", style="B", size=11)
+                pdf.cell(200, 10, txt=f"- Fuel Replacement, no Penalty: {total_substitution_cost:,.2f} Eur", ln=True)
+            else None
+                
         # Export
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
             pdf.output(tmp_pdf.name)
