@@ -624,9 +624,9 @@ if st.button("Export to PDF"):
         # Pooling Option
         if show_pooling_option and pooling_price_usd_per_tonne > 0:
             pdf.ln(5)
-            pdf.set_font("Arial", size=10)
-            pdf.cell(200, 10, txt="--- Pooling Cost ---", ln=True)       
-            pdf.set_font("Arial", size=10)
+            pdf.set_font("Arial", style="BU", size=10)
+            pdf.cell(200, 10, txt="Pooling Cost", ln=True)       
+            pdf.set_font("Arial", style="" ,size=10)
             pooling_line = (f"CO2 Deficit Offset: {abs(deficit):,.0f} tCO2eq @ "
                     f"{pooling_price_usd_per_tonne:,.2f} USD/t | "
                     f"{pooling_cost_eur:,.2f} Eur")
@@ -639,9 +639,9 @@ if st.button("Export to PDF"):
         mitigation_with_price = [row for row in mitigation_rows if row.get("Price (USD/t)", 0) > 0]
         if mitigation_with_price:
             pdf.ln(5)
-            pdf.set_font("Arial", size=10)
-            pdf.cell(200, 10, txt="--- Bio Fuel Cost ---", ln=True)        
-            pdf.set_font("Arial", size=10)
+            pdf.set_font("Arial", style="BU", size=10)
+            pdf.cell(200, 10, txt="Added Bio Fuel Cost", ln=True)        
+            pdf.set_font("Arial", style="" ,size=10)
             for row in mitigation_with_price:
                 line = (f"{row['Fuel']}: {row['Required Amount (t)']:,.0f} t @ "
                         f"{row['Price (USD/t)']:,.2f} USD/t | "
@@ -654,9 +654,9 @@ if st.button("Export to PDF"):
         # Replacemnet Option
         if penalty > 0 and replaced_mass is not None and best_x is not None:
             pdf.ln(5)
-            pdf.set_font("Arial", size=11)
-            pdf.cell(200, 10, txt="--- Replacement Cost ---", ln=True)
-            pdf.set_font("Arial", size=10)
+            pdf.set_font("Arial", style="BU", size=10)
+            pdf.cell(200, 10, txt="Replacement Cost", ln=True)
+            pdf.set_font("Arial", style="" ,size=10)
             pdf.cell(200, 10, txt=f"Replaced {initial_fuel} with {substitute_fuel}: {replaced_mass:,.0f} tonnes", ln=True)
             if additional_substitution_cost is not None:
                 pdf.cell(200, 10, txt=f"Additional fuel cost: {additional_substitution_cost:,.2f} Eur", ln=True)
