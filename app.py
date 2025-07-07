@@ -646,7 +646,7 @@ if st.button("Export to PDF"):
                         f"{row['Estimated Cost (Eur)']:,.2f} Eur")
                 pdf.cell(200, 10, txt=line, ln=True)
                 if eua_ets_price > 0:
-                    pdf.cell(200, 10, txt=f"EU ETS Cost: {new_blend_ets_cost:,.0f} EUR", In=True)
+                    pdf.cell(200, 10, txt=f"EU ETS Cost: {new_blend_ets_cost:,.0f} EUR")
                     
         
         # Replacemnet Option
