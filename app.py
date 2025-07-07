@@ -317,7 +317,10 @@ if compliance_balance < 0:
             if pooling_price_usd_per_tonne > 0 and eua_ets_price > 0.0:
                pooling_cost_usd = pooling_price_usd_per_tonne * abs(deficit)
                pooling_cost_eur = pooling_cost_usd * exchange_rate
-               total_with_pooling = total_cost + pooling_cost_eur + ets_cost_initial
+                if eua_ets_price > 0:
+                   total_with_pooling = total_cost + pooling_cost_eur + ets_cost_initial
+                else:
+                    total_with_pooling = total_cost + pooling_cost_eur
     
     # === BIO-FUELS OPTIONS ===
     with st.expander("**Add Bio Fuel**", expanded=False):
