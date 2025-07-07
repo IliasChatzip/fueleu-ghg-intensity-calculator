@@ -619,9 +619,8 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt=f"Total Initial Fuel Cost: {total_cost:,.2f} Eur", ln=True)
         if user_entered_prices:
             pdf.set_font("Arial", size=8)
-            pdf.ln(1)
             pdf.cell(200, 10, txt=f"Conversion Rate Used: 1 USD = {exchange_rate:.2f} Eur", ln=True)
-
+            
         # Pooling Option
         if show_pooling_option and pooling_price_usd_per_tonne > 0:
             pdf.ln(5)
@@ -634,6 +633,7 @@ if st.button("Export to PDF"):
             pdf.cell(200, 10, txt=pooling_line, ln=True)
             if eua_ets_price > 0:
                     pdf.cell(200, 10, txt=f"EU ETS Cost: {ets_cost_initial:,.0f} Eur")
+            pdf.ln(5)    
 
         # Bio Fuel Option
         mitigation_with_price = [row for row in mitigation_rows if row.get("Price (USD/t)", 0) > 0]
@@ -649,6 +649,7 @@ if st.button("Export to PDF"):
                 pdf.cell(200, 10, txt=line, ln=True)
                 if eua_ets_price > 0:
                     pdf.cell(200, 10, txt=f"EU ETS Cost: {new_blend_ets_cost:,.0f} Eur")
+            pdf.ln(5)
                     
         # Replacemnet Option
         if penalty > 0 and replaced_mass is not None and best_x is not None:
@@ -657,10 +658,10 @@ if st.button("Export to PDF"):
             pdf.cell(200, 10, txt="--- Replacement Cost ---", ln=True)
             pdf.set_font("Arial", size=10)
             pdf.cell(200, 10, txt=f"Replaced {initial_fuel} with {substitute_fuel}: {replaced_mass:,.0f} tonnes", ln=True)
-            if eua_ets_price > 0:
-                pdf.cell(200, 10, txt=f"EU ETS Cost: {substitution_ets_cost:,.0f} Eur", ln=True)
             if additional_substitution_cost is not None:
-                pdf.cell(200, 10, txt=f"Additional fuel cost: {additional_substitution_cost:,.2f} Eur", ln=True)           
+                pdf.cell(200, 10, txt=f"Additional fuel cost: {additional_substitution_cost:,.2f} Eur", ln=True)
+            if eua_ets_price > 0:
+                pdf.cell(200, 10, txt=f"EU ETS Cost: {substitution_ets_cost:,.0f} Eur", ln=True)           
         
         if total_cost > 0:
             pdf.ln(5)
