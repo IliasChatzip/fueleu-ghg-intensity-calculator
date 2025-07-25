@@ -289,11 +289,15 @@ if rows and user_entered_prices and penalty and eua_ets_price > 0:
     conservative_total = total_cost + penalty + ets_cost_initial
     st.metric("Total Cost of Selected Fuels + Penalty + EU ETS (Eur)", f"{conservative_total:,.2f}")
 else:
-    if rows and user_entered_prices and penalty > 0:
-        conservative_total = total_cost + penalty
-        st.metric("Total Cost of Selected Fuels + Penalty (Eur)", f"{conservative_total:,.2f}")
+    if rows and user_entered_prices and eua_ets_price > 0:
+        conservative_total = total_cost + ets_cost_initial
+        st.metric("Total Cost of Selected Fuels + EU ETS (Eur)", f"{conservative_total:,.2f}")
     else:
-        st.metric("Total Cost of Selected Fuels (Eur)", f"{conservative_total:,.2f}")
+        if rows and user_entered_prices and penalty > 0:
+            conservative_total = total_cost + penalty
+            st.metric("Total Cost of Selected Fuels + Penalty (Eur)", f"{conservative_total:,.2f}")
+        else:
+            st.metric("Total Cost of Selected Fuels (Eur)", f"{conservative_total:,.2f}")
 
 show_pooling_option = False
 pooling_price_usd_per_tonne = 0.0
