@@ -291,7 +291,10 @@ if rows and user_entered_prices and eua_ets_price > 0:
 else:
     if rows and user_entered_prices:
         conservative_total = total_cost + penalty
-        st.metric("Total Cost of Selected Fuels + Penalty (Eur)", f"{conservative_total:,.2f}")
+        if penalty > 0:
+            st.metric("Total Cost of Selected Fuels + Penalty (Eur)", f"{conservative_total:,.2f}")
+        else:
+            st.metric("Total Cost of Selected Fuels (Eur)", f"{conservative_total:,.2f}")
 
 show_pooling_option = False
 pooling_price_usd_per_tonne = 0.0
