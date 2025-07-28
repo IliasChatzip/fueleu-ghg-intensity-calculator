@@ -147,7 +147,7 @@ for category, fuels_in_cat in categories.items():
 
 # === EUA-ETS PRICE INPUT ===
 st.sidebar.header("EU ETS Pricing")
-eua_ets_price = st.sidebar.number_input("EU ETS Allowance Price (EUR/tCO2eq)",
+eua_priceice = st.sidebar.number_input("EU ETS Allowance Price (EUR/tCO2eq)",
     min_value=0.0,
     value=0.0,
     step=1.0,
@@ -229,7 +229,7 @@ for fuel in FUELS:
             "GHG Intensity (gCO2eq/MJ)": ghg_intensity_mj,})
 
 emissions_tonnes = emissions / 1_000_000
-ets_cost_initial = emissions_tonnes * eua_ets_price
+ets_cost_initial = emissions_tonnes * eua_priceice
 ghg_intensity = emissions / total_energy if total_energy else 0.0
 st.session_state["computed_ghg"] = ghg_intensity
 
@@ -280,16 +280,16 @@ st.subheader("Summary")
 st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}")
 balance_label = "Surplus" if compliance_balance >= 0 else "Deficit"
 st.metric("Total Emissions (tCO2eq)", f"{emissions_tonnes:,.2f}")
-if eua_ets_price > 0.0:
-    ets_cost_initial = emissions_tonnes * eua_ets_price
+if eua_priceice > 0.0:
+    ets_cost_initial = emissions_tonnes * eua_priceice
     st.metric("EU ETS Cost (Eur)", f"{ets_cost_initial:,.2f}")
 st.metric("Compliance Balance (tCO2eq)", f"{compliance_balance:,.2f}")
 st.metric("Estimated Penalty (Eur)", f"{penalty:,.2f}")
-if rows and user_entered_prices and penalty and eua_ets_price > 0:
+if rows and user_entered_prices and penalty and eua_priceice > 0:
     conservative_total = total_cost + penalty + ets_cost_initial
     st.metric("Total Cost of Selected Fuels + Penalty + EU ETS (Eur)", f"{conservative_total:,.2f}")
 else:
-    if rows and user_entered_prices and eua_ets_price > 0:
+    if rows and user_entered_prices and eua_priceice > 0:
         conservative_total = total_cost + ets_cost_initial
         st.metric("Total Cost of Selected Fuels + EU ETS (Eur)", f"{conservative_total:,.2f}")
     else:
@@ -321,10 +321,10 @@ if compliance_balance < 0:
                 min_value=0.0, value=0.0, step=0.01,
                 help="The cost per tCO2eq to buy compliance credits from the pool. If 0, pooling will not be applied.")
         
-            if pooling_price_usd_per_tonne > 0 and eua_ets_price > 0.0:
+            if pooling_price_usd_per_tonne > 0 and eua_priceice > 0.0:
                pooling_cost_usd = pooling_price_usd_per_tonne * abs(deficit)
                pooling_cost_eur = pooling_cost_usd * exchange_rate
-            if eua_ets_price > 0:
+            if eua_priceice > 0:
                total_with_pooling = total_cost + pooling_cost_eur + ets_cost_initial
             else:
                 total_with_pooling = total_cost + pooling_cost_eur
@@ -409,8 +409,8 @@ if compliance_balance < 0:
                         row["Estimated Cost (Eur)"] = row["Price (USD/t)"] * exchange_rate * row["Required Amount (t)"]
                     added_biofuel_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
                     selected_row = next(row for row in mitigation_rows if row["Fuel"] == selected_fuel)
-                    if eua_ets_price > 0:                        
-                        new_blend_ets_cost = (selected_row["New Emissions (gCO2eq)"] / 1_000_000) * eua_ets_price
+                    if eua_priceice > 0:                        
+                        new_blend_ets_cost = (selected_row["New Emissions (gCO2eq)"] / 1_000_000) * eua_priceice
                         st.markdown(f"**EU ETS Cost:** {new_blend_ets_cost:,.2f} EUR")
                 
                 else:
@@ -505,8 +505,8 @@ if compliance_balance < 0:
                         mitigation_fuel_cost = replaced_mass * substitution_price_eur
                         remaining_fuel_cost = (qty_initial - replaced_mass) * price_initial
                         additional_substitution_cost = (replaced_mass * (substitution_price_eur - price_initial))
-                        if substitution_total_emissions is not None and eua_ets_price > 0:
-                            substitution_ets_cost = (substitution_total_emissions / 1_000_000) * eua_ets_price
+                        if substitution_total_emissions is not None and eua_priceice > 0:
+                            substitution_ets_cost = (substitution_total_emissions / 1_000_000) * eua_priceice
                             substitution_total_cost = mitigation_fuel_cost + remaining_fuel_cost + substitution_ets_cost
                             other_fuel_costs = sum(
                                 fuel_inputs.get(f["name"], 0.0) * fuel_price_inputs.get(f["name"], 0.0) * exchange_rate
@@ -530,13 +530,13 @@ if compliance_balance < 0:
                     st.markdown(f"**Added {substitute_fuel} mass**: {replaced_mass:,.1f} tonnes")
                     if additional_substitution_cost is not None:
                         st.markdown(f"**Additional fuel cost**: {additional_substitution_cost:,.2f} EUR")
-                    if substitution_total_emissions is not None and eua_ets_price > 0 and substitution_price_usd > 0:
+                    if substitution_total_emissions is not None and eua_priceice > 0 and substitution_price_usd > 0:
                         st.markdown(f"**EU ETS Cost**: {substitution_ets_cost:,.2f} EUR")
                          
            
     if mitigation_rows:
         st.markdown("### Total Cost Scenarios")
-        if eua_ets_price > 0:
+        if eua_priceice > 0:
             scenario1 = conservative_total if total_cost > 0 and penalty > 0 else None
             scenario2 = total_with_pooling if total_cost > 0 and pooling_price_usd_per_tonne > 0 else None
             scenario3 = total_cost + added_biofuel_cost + new_blend_ets_cost if total_cost and added_biofuel_cost > 0 else None
@@ -639,7 +639,7 @@ if st.button("Export to PDF"):
                     f"{pooling_price_usd_per_tonne:,.2f} USD/t | "
                     f"{pooling_cost_eur:,.2f} Eur")
             pdf.cell(200, 10, txt=pooling_line, ln=True)
-            if eua_ets_price > 0:
+            if eua_priceice > 0:
                     pdf.cell(200, 10, txt=f"EU ETS Cost: {ets_cost_initial:,.0f} Eur")
             pdf.ln(5)    
 
@@ -655,7 +655,7 @@ if st.button("Export to PDF"):
                         f"{row['Price (USD/t)']:,.2f} USD/t | "
                         f"{row['Estimated Cost (Eur)']:,.2f} Eur")
                 pdf.cell(200, 10, txt=line, ln=True)
-                if eua_ets_price > 0:
+                if eua_priceice > 0:
                     pdf.cell(200, 10, txt=f"EU ETS Cost: {new_blend_ets_cost:,.0f} Eur")
             pdf.ln(5)
                     
@@ -668,7 +668,7 @@ if st.button("Export to PDF"):
             pdf.cell(200, 10, txt=f"Replaced {initial_fuel} with {substitute_fuel}: {replaced_mass:,.0f} tonnes", ln=True)
             if additional_substitution_cost is not None:
                 pdf.cell(200, 10, txt=f"Additional fuel cost: {additional_substitution_cost:,.2f} Eur", ln=True)
-            if eua_ets_price > 0:
+            if eua_priceice > 0:
                 pdf.cell(200, 10, txt=f"EU ETS Cost: {substitution_ets_cost:,.0f} Eur", ln=True)           
         
         if total_cost > 0:
@@ -676,7 +676,7 @@ if st.button("Export to PDF"):
             pdf.set_font("Arial", "B", size=12)
             pdf.cell(200, 10, txt="--- Cost-Benefit Analysis ---", ln=True)
             pdf.set_font("Arial", size=10)
-        if total_cost and eua_ets_price > 0:
+        if total_cost and eua_priceice > 0:
             pdf.set_font("Arial", style="B", size=11)
             pdf.cell(200, 10, txt=f"- Initial fuels + Penalty + EU ETS: {conservative_total:,.2f} Eur", ln=True)
         else:
@@ -684,7 +684,7 @@ if st.button("Export to PDF"):
                 pdf.set_font("Arial", style="B", size=11)
                 pdf.cell(200, 10, txt=f"- Initial fuels + Penalty: {conservative_total:,.2f} Eur", ln=True)
         
-        if total_cost and pooling_price_usd_per_tonne and eua_ets_price > 0:
+        if total_cost and pooling_price_usd_per_tonne and eua_priceice > 0:
             pdf.set_font("Arial", style="B", size=11)
             pdf.cell(200, 10, txt=f"- Initial fuels + Pooling + EU ETS, no Penalty: {total_with_pooling:,.2f} Eur", ln=True)
         else:
@@ -692,7 +692,7 @@ if st.button("Export to PDF"):
                 pdf.set_font("Arial", style="B", size=11)
                 pdf.cell(200, 10, txt=f"- Initial fuels + Pooling, no Penalty: {total_with_pooling:,.2f} Eur", ln=True)
                     
-        if total_cost and added_biofuel_cost and eua_ets_price > 0:
+        if total_cost and added_biofuel_cost and eua_priceice > 0:
             pdf.set_font("Arial", style="B", size=11)
             pdf.cell(200, 10, txt=f"- Initial fuels + Bio fuels + EU ETS, no Penalty: {scenario3 :,.2f} Eur", ln=True)                        
         else:
@@ -700,7 +700,7 @@ if st.button("Export to PDF"):
                 pdf.set_font("Arial", style="B", size=11)
                 pdf.cell(200, 10, txt=f"- Initial fuels + Bio fuels, no Penalty: {scenario3 :,.2f} Eur", ln=True)
         
-        if total_substitution_cost and substitution_total_emissions is not None and eua_ets_price > 0:
+        if total_substitution_cost and substitution_total_emissions is not None and eua_priceice > 0:
             pdf.set_font("Arial", style="B", size=11)
             pdf.cell(200, 10, txt=f"- Fuel Replacement + EU ETS, no Penalty: {total_substitution_cost:,.2f} Eur", ln=True)
         else:
