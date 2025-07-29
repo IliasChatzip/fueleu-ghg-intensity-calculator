@@ -338,8 +338,7 @@ else:
             conservative_total = total_cost + penalty
             st.metric("Total Cost of Selected Fuels + Penalty (Eur)", f"{conservative_total:,.2f}")
         else:
-            conservative_total = total_cost
-            st.metric("Total Cost of Selected Fuels (Eur)", f"{conservative_total:,.2f}")
+            conservative_total = None
 
 show_pooling_option = False
 pooling_price_usd_per_tonne = 0.0
