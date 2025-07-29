@@ -275,6 +275,45 @@ if rows:
         fuel_price_inputs.get(row["Fuel"], 0.0) > 0.0 for row in rows)
 else:
     st.info("No fuel data provided yet.")
+    
+show_details = st.sidebar.checkbox(
+    "🔍 Show Fuel LCV & Emission Factors",
+    value=False,
+    help="Toggle to view underlying lcv and TtW/WtT emission factors for your selected fuels")
+def display_fuel_details(selected_inputs: dict, fuels_db: list):
+    """
+    Build and display a table of LCV and emission factors for fuels
+    that the user has selected (qty > 0).
+    """
+    selected = [name for name, qty in selected_inputs.items() if qty > 0]
+    if not selected:
+        st.info("No fuels selected yet to show details.")
+        return
+    detail_rows = []
+    for fuel in fuels_db:
+        if fuel['name'] in selected:
+            detail_rows.append({
+                "Fuel": fuel["name"],
+                "LCV (MJ/g)": fuel["lcv"],
+                "WtT Factor (gCO2eq/MJ)": fuel["wtt"],
+                "TtW CO2 (g/g)": fuel["ttw_co2"],
+                "TtW CH4 (g/g)": fuel["ttw_ch4"],
+                "TtW N2O (g/g)": fuel["ttw_n2O"],
+                # include slip if present
+                **({"CH4 Slip (g/MJ)": fuel.get("ch4_slip")} if "ch4_slip" in fuel else {})})
+
+    df_details = pd.DataFrame(detail_rows)
+    fmt = {
+        "LCV (MJ/g)": "{:.5f}",
+        "WtT Factor (gCO2eq/MJ)": "{:.2f}",
+        "TtW CO2 (g/g)": "{:.5f}",
+        "TtW CH4 (g/g)": "{:.5f}",
+        "TtW N2O (g/g)": "{:.5f}",
+        "CH4 Slip (g/MJ)": "{:.3f}",}
+    st.subheader("Fuel Details: LCV & Emission Factors")
+    st.dataframe(df_details.style.format(fmt))
+if show_details:
+    display_fuel_details(fuel_inputs, FUELS)
 
 st.subheader("Summary")
 st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}")
