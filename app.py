@@ -256,6 +256,7 @@ if st.session_state.get("trigger_reset", False):
     st.experimental_rerun()
 
 # === OUTPUT ===
+total_cost = 0.0
 def display_fuel_details(selected_inputs: dict, fuels_db: list):
     selected = [name for name, qty in selected_inputs.items() if qty > 0]
     if not selected:
@@ -272,7 +273,6 @@ def display_fuel_details(selected_inputs: dict, fuels_db: list):
                 "TtW CH4 (g/g)": fuel["ttw_ch4"],
                 "TtW N2O (g/g)": fuel["ttw_n2O"],
                 **({"CH4 Slip (g/MJ)": fuel.get("ch4_slip")} if "ch4_slip" in fuel else {})})
-
     df_details = pd.DataFrame(detail_rows)
     fmt = {
         "LCV (MJ/g)": "{:.5f}",
@@ -283,7 +283,6 @@ def display_fuel_details(selected_inputs: dict, fuels_db: list):
         "CH4 Slip (g/MJ)": "{:.3f}",}
     st.subheader("Fuel Details: LCV & Emission Factors")
     st.dataframe(df_details.style.format(fmt))
-
 col1, col2 = st.columns([7,2])
 with col1:
     st.subheader("Fuel Breakdown")
@@ -294,24 +293,30 @@ with col2:
         key="show_details_inline",
         help="Toggle LCV & emission factors for the selected fuels")
 if rows:
-    df_raw = pd.DataFrame(rows).sort_values("Emissions (gCO2eq)", ascending=False).reset_index(drop=True)
-    df_formatted = df_raw.style.format({
+df_raw = pd.DataFrame(rows).sort_values("Emissions (gCO2eq)", ascending=False).reset_index(drop=True)
+    user_entered_prices = any(r.get("Price per Tonne (USD)", 0) > 0 for r in rows)
+    cols = ["Fuel", "Quantity (t)"]
+    if user_entered_prices:
+        cols += ["Price per Tonne (USD)", "Cost (Eur)"]
+    cols += ["Emissions (gCO2eq)", "Energy (MJ)", "GHG Intensity (gCO2eq/MJ)"]
+    df_display = df_raw[cols]
+    fmt = {
         "Quantity (t)": "{:,.0f}",
-        "Price per Tonne (USD)": "{:,.2f}",
-        "Cost (Eur)": "{:,.2f}",
         "Emissions (gCO2eq)": "{:,.0f}",
         "Energy (MJ)": "{:,.0f}",
-        "GHG Intensity (gCO2eq/MJ)": "{:,.2f}"})
-    st.dataframe(df_formatted)
-    total_cost = sum(row["Cost (Eur)"] for row in rows)
-    st.metric("Total Fuel Cost (Eur)", f"{total_cost:,.2f}")
-    user_entered_prices = any(
-        fuel_price_inputs.get(row["Fuel"], 0.0) > 0.0 for row in rows)
+        "GHG Intensity (gCO2eq/MJ)": "{:,.2f}",}
+    if user_entered_prices:
+        fmt["Price per Tonne (USD)"] = "{:,.2f}"
+        fmt["Cost (Eur)"] = "{:,.2f}"
+    st.dataframe(df_display.style.format(fmt))
+    if user_entered_prices:
+        total_cost = sum(r.get("Cost (Eur)", 0) for r in rows)
+        st.metric("Total Fuel Cost (Eur)", f"{total_cost:,.2f}")
     if show_details:
         display_fuel_details(fuel_inputs, FUELS)
 else:
     st.info("No fuel data provided yet.")
-total_cost = 0.0
+
 st.subheader("Summary")
 st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}")
 balance_label = "Surplus" if compliance_balance >= 0 else "Deficit"
