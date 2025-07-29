@@ -280,7 +280,7 @@ def display_fuel_details(selected_inputs: dict, fuels_db: list):
         "TtW CO2 (g/g)": "{:.3f}",
         "TtW CH4 (g/g)": "{:.5f}",
         "TtW N2O (g/g)": "{:.5f}",
-        "CH4 Slip (g/MJ)": "{:.3f}",}
+        "CH4 Slip (g/MJ)": "{:.1f}",}
     st.subheader("LCV & Emission Factors")
     st.dataframe(df_details.style.format(fmt))
 col1, col2 = st.columns([7,2])
