@@ -62,7 +62,7 @@ FUELS = [
     {"name": "Biodiesel (UCO,B80)",                                                                          "lcv": 0.0379,  "wtt": 14.62, "ttw_co2": 0.6228, "ttw_ch4": 0.00001,  "ttw_n2O": 0.000036, "rfnbo": False},
     {"name": "Biodiesel (UCO,B100)",                                                                         "lcv": 0.0372,  "wtt": 14.9,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
     {"name": "Biodiesel (FAME,B100)",                                                                        "lcv": 0.0372,  "wtt": 16.1906,"ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Biodiesel (FAME,B24)",                                                                         "lcv": 0.0397,  "wtt": 13.912,"ttw_co2": 2.3459, "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+    {"name": "Biodiesel (FAME,B24)",                                                                         "lcv": 0.0397,  "wtt": 13.912,"ttw_co2": 2.3454, "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
     {"name": "Biodiesel (waste wood Fischer-Tropsch diesel,B100)",                                           "lcv": 0.0372,  "wtt": 13.7,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
     {"name": "Biodiesel (farmed wood Fischer-Tropsch diesel,B100)",                                          "lcv": 0.0372,  "wtt": 16.7,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
     {"name": "Biodiesel (Fischer-Tropsch diesel from black liquor gasification,B100)",                       "lcv": 0.0372,  "wtt": 10.2,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
