@@ -277,7 +277,7 @@ def display_fuel_details(selected_inputs: dict, fuels_db: list):
     fmt = {
         "LCV (MJ/g)": "{:.5f}",
         "WtT Factor (gCO2eq/MJ)": "{:.2f}",
-        "TtW CO2 (g/g)": "{:.5f}",
+        "TtW CO2 (g/g)": "{:.3f}",
         "TtW CH4 (g/g)": "{:.5f}",
         "TtW N2O (g/g)": "{:.5f}",
         "CH4 Slip (g/MJ)": "{:.3f}",}
