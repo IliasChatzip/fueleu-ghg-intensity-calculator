@@ -56,7 +56,7 @@ FUELS = [
     {"name": "Biodiesel (Rapeseed Oil,B100)",                                                                "lcv": 0.0372,  "wtt": 50.1,  "ttw_co2": 2.834,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
     {"name": "Biodiesel (Wheat Straw,B100)",                                                                 "lcv": 0.0372,  "wtt": 15.7,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
     {"name": "Biodiesel (UCO,B20)",                                                                          "lcv": 0.0398,  "wtt": 13.88, "ttw_co2": 2.4912, "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Biodiesel (UCO,B24)",                                                                          "lcv": 0.0397,  "wtt": 13.912,"ttw_co2": 2.36664,"ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+    {"name": "Biodiesel (UCO,B24)",                                                                          "lcv": 0.0397,  "wtt": 13.912,"ttw_co2": 2.36664,"ttw_ch4": 0.000038,      "ttw_n2O": 0.0001368,      "rfnbo": False},
     {"name": "Biodiesel (UCO,B30)",                                                                          "lcv": 0.0395,  "wtt": 13.93, "ttw_co2": 2.1798, "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
     {"name": "Biodiesel (UCO,B65)",                                                                          "lcv": 0.0383,  "wtt": 14.345,"ttw_co2": 1.0899, "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
     {"name": "Biodiesel (UCO,B80)",                                                                          "lcv": 0.0379,  "wtt": 14.62, "ttw_co2": 0.6228, "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
