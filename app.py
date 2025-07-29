@@ -294,26 +294,26 @@ with col2:
         help="Toggle LCV & emission factors for the selected fuels")
 if rows:
     df_raw = pd.DataFrame(rows).sort_values("Emissions (gCO2eq)", ascending=False).reset_index(drop=True)
-        user_entered_prices = any(r.get("Price per Tonne (USD)", 0) > 0 for r in rows)
-        cols = ["Fuel", "Quantity (t)"]
-        if user_entered_prices:
-            cols += ["Price per Tonne (USD)", "Cost (Eur)"]
-        cols += ["Emissions (gCO2eq)", "Energy (MJ)", "GHG Intensity (gCO2eq/MJ)"]
-        df_display = df_raw[cols]
-        fmt = {
-            "Quantity (t)": "{:,.0f}",
-            "Emissions (gCO2eq)": "{:,.0f}",
-            "Energy (MJ)": "{:,.0f}",
-            "GHG Intensity (gCO2eq/MJ)": "{:,.2f}",}
-        if user_entered_prices:
-            fmt["Price per Tonne (USD)"] = "{:,.2f}"
-            fmt["Cost (Eur)"] = "{:,.2f}"
-        st.dataframe(df_display.style.format(fmt))
-        if user_entered_prices:
-            total_cost = sum(r.get("Cost (Eur)", 0) for r in rows)
-            st.metric("Total Fuel Cost (Eur)", f"{total_cost:,.2f}")
-        if show_details:
-            display_fuel_details(fuel_inputs, FUELS)
+    user_entered_prices = any(r.get("Price per Tonne (USD)", 0) > 0 for r in rows)
+    cols = ["Fuel", "Quantity (t)"]
+    if user_entered_prices:
+        cols += ["Price per Tonne (USD)", "Cost (Eur)"]
+    cols += ["Emissions (gCO2eq)", "Energy (MJ)", "GHG Intensity (gCO2eq/MJ)"]
+    df_display = df_raw[cols]
+    fmt = {
+        "Quantity (t)": "{:,.0f}",
+        "Emissions (gCO2eq)": "{:,.0f}",
+        "Energy (MJ)": "{:,.0f}",
+        "GHG Intensity (gCO2eq/MJ)": "{:,.2f}",}
+    if user_entered_prices:
+        fmt["Price per Tonne (USD)"] = "{:,.2f}"
+        fmt["Cost (Eur)"] = "{:,.2f}"
+    st.dataframe(df_display.style.format(fmt))
+    if user_entered_prices:
+        total_cost = sum(r.get("Cost (Eur)", 0) for r in rows)
+        st.metric("Total Fuel Cost (Eur)", f"{total_cost:,.2f}")
+    if show_details:
+        display_fuel_details(fuel_inputs, FUELS)
 else:
     st.info("No fuel data provided yet.")
 
