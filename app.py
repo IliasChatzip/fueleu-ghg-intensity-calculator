@@ -310,7 +310,7 @@ if rows:
     user_entered_prices = any(
         fuel_price_inputs.get(row["Fuel"], 0.0) > 0.0 for row in rows)
     if show_details:
-    display_fuel_details(fuel_inputs, FUELS)
+        display_fuel_details(fuel_inputs, FUELS)
 else:
     st.info("No fuel data provided yet.")
 
