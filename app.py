@@ -257,7 +257,6 @@ if st.session_state.get("trigger_reset", False):
 
 # === OUTPUT ===
 total_cost = 0.0
-st.subheader("Fuel Breakdown")
 def display_fuel_details(selected_inputs: dict, fuels_db: list):
     selected = [name for name, qty in selected_inputs.items() if qty > 0]
     if not selected:
@@ -286,7 +285,7 @@ def display_fuel_details(selected_inputs: dict, fuels_db: list):
     st.subheader("Fuel Details: LCV & Emission Factors")
     st.dataframe(df_details.style.format(fmt))
 
-col1, col2 = st.columns([8, 1])
+col1, col2 = st.columns([7,2])
 with col1:
     st.subheader("Fuel Breakdown")
 with col2:
