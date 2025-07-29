@@ -274,7 +274,7 @@ def display_fuel_details(selected_inputs: dict, fuels_db: list):
                 **({"CH4 Slip (g/MJ)": fuel.get("ch4_slip")} if "ch4_slip" in fuel else {})})
     df_details = pd.DataFrame(detail_rows)
     fmt = {
-        "LCV (MJ/g)": "{:.5f}",
+        "LCV (MJ/g)": "{:.4f}",
         "WtT Factor (gCO2eq/MJ)": "{:.2f}",
         "TtW CO2 (g/g)": "{:.3f}",
         "TtW CH4 (g/g)": "{:.5f}",
