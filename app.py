@@ -277,15 +277,15 @@ def display_fuel_details(selected_inputs: dict, fuels_db: list, overrides: dict 
                 st.markdown(f"**{name} Parameters**")
                 col_lcv, col_wtt, col_co2, col_ch4, col_n2o = st.columns(5)
                 with col_lcv:
-                    lcv = st.number_input(f"LCV (MJ/g)", value=lcv, step=0.0001, key=f"tweak_lcv_{name}")
+                    lcv = st.number_input(f"LCV (MJ/g)", value=lcv, step=0.0001, format="%.4f", key=f"tweak_lcv_{name}")
                 with col_wtt:
-                    wtt = st.number_input(f"WtT (gCO₂e/MJ)", value=wtt, step=0.01, key=f"tweak_wtt_{name}")
+                    wtt = st.number_input(f"WtT (gCO₂e/MJ)", value=wtt, step=0.01, format="%.2f", key=f"tweak_wtt_{name}")
                 with col_co2:
-                    ttw_co2 = st.number_input(f"TtW CO₂ (g/g)", value=ttw_co2, step=0.001, key=f"tweak_co2_{name}")
+                    ttw_co2 = st.number_input(f"TtW CO₂ (g/g)", value=ttw_co2, step=0.001, format="%.3f", key=f"tweak_co2_{name}")
                 with col_ch4:
-                    ttw_ch4 = st.number_input(f"TtW CH₄ (g/g)", value=ttw_ch4, step=0.00001, key=f"tweak_ch4_{name}")
+                    ttw_ch4 = st.number_input(f"TtW CH₄ (g/g)", value=ttw_ch4, step=0.00001, format="%.5f", key=f"tweak_ch4_{name}")
                 with col_n2o:
-                    ttw_n2o = st.number_input(f"TtW N₂O (g/g)", value=ttw_n2o, step=0.00001, key=f"tweak_n2o_{name}")
+                    ttw_n2o = st.number_input(f"TtW N₂O (g/g)", value=ttw_n2o, step=0.00001, format="%.5f", key=f"tweak_n2o_{name}")
                 overrides[name] = {"lcv": lcv, "wtt": wtt, "ttw_co2": ttw_co2, "ttw_ch4": ttw_ch4, "ttw_n2O": ttw_n2o}
             row = {"Fuel": name,
                    "LCV (MJ/g)": lcv,
