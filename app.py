@@ -178,13 +178,15 @@ wind = st.sidebar.selectbox("Wind Reward Factor",
     help="This is a reward factor wind-assisted propulsion if it is installed onboard. Reference can be made to the Regulation (EU) 2023/1805 of The European Parliament and of The Counsil. In case of no wind-assisted propulsion onboard, Wind Reward Factor of 1 can be selected (lower = more assistance).")
     
 # === CALCULATIONS ===
-total_energy = 0.0
-emissions = 0.0
-rows = []
 parameter_overrides = globals().get('parameter_overrides', {})
-for fuel in FUELS:
-    qty = fuel_inputs.get(fuel["name"], 0.0)
-    if qty > 0:
+def compute_results(overrides: dict = None):
+    total_energy = 0.0
+    emissions = 0.0
+    rows = []
+    for fuel in FUELS:
+        qty = fuel_inputs.get(fuel["name"], 0.0)
+        if qty > 0:
+            continue
         o = parameter_overrides.get(fuel["name"], {})
         lcv     = o.get("lcv",     fuel["lcv"])
         wtt     = o.get("wtt",     fuel["wtt"])
@@ -214,15 +216,24 @@ for fuel in FUELS:
             "Emissions (gCO2eq)": total_emissions,
             "Energy (MJ)": energy,
             "GHG Intensity (gCO2eq/MJ)": ghg_intensity_mj,})
-emissions_tonnes = emissions / 1_000_000
-ets_cost_initial = emissions_tonnes * eua_price
-ghg_intensity = emissions / total_energy if total_energy else 0.0
-st.session_state["computed_ghg"] = ghg_intensity
-compliance_balance = total_energy * (target_intensity(year) - ghg_intensity) / 1_000_000       
-if compliance_balance >= 0:
-     penalty = 0
-else:
-     penalty = (abs(compliance_balance) / (ghg_intensity * VLSFO_ENERGY_CONTENT)) * PENALTY_RATE * 1_000_000
+    emissions_tonnes = emissions / 1_000_000
+    ets_cost_initial = emissions_tonnes * eua_price
+    ghg_intensity = emissions / total_energy if total_energy else 0.0
+    st.session_state["computed_ghg"] = ghg_intensity
+    compliance_balance = total_energy * (target_intensity(year) - ghg_intensity) / 1_000_000       
+    if compliance_balance >= 0:
+         penalty = 0
+    else:
+         penalty = (abs(compliance_balance) / (ghg_intensity * VLSFO_ENERGY_CONTENT)) * PENALTY_RATE * 1_000_000
+    return {
+        "rows": rows,
+        "total_energy": total_energy,
+        "emissions": emissions,
+        "ghg_intensity": ghg_intensity,
+        "compliance_balance": compliance_balance,
+        "penalty": penalty}
+base_results = compute_results(overrides={})
+
 added_biofuel_cost = 0.0
 substitution_cost = None
 total_substitution_cost = None
