@@ -315,7 +315,10 @@ with col2:
 show_tweaks = False
 if show_details:
     show_tweaks = st.checkbox("⚙️ Tweak Parameters", key="show_tweaks_inline", help="Adjust the values interactively and watch your results update immediately")
-rows_overridden = []
+if rows:
+    df_raw = pd.DataFrame(rows).sort_values("Emissions (gCO2eq)", ascending=False).reset_index(drop=True)
+    user_entered_prices = any(r.get("Price per Tonne (USD)", 0) > 0 for r in rows)
+    rows_overridden = []    
     for r in rows:
         name = r["Fuel"]
         qty = r["Quantity (t)"]
