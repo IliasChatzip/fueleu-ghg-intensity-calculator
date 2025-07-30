@@ -311,53 +311,6 @@ effective_results = base_results
 if show_tweaks and parameter_overrides:
     effective_results = compute_results(overrides=parameter_overrides)
 
-df_rows = effective_results["rows"]
-if df_rows:
-    user_entered_prices = any(r.get("Price per Tonne (USD)", 0) > 0 for r in df_rows)
-    df_display = pd.DataFrame(df_rows)
-    cols = ["Fuel", "Quantity (t)"]
-    if user_entered_prices:
-        cols += ["Price per Tonne (USD)", "Cost (Eur)"]
-    cols += ["Emissions (gCO2eq)", "Energy (MJ)", "GHG Intensity (gCO2eq/MJ)"]
-    df_display = df_display[cols]
-    fmt = {
-        "Quantity (t)": "{:,.0f}",
-        "Emissions (gCO2eq)": "{:,.0f}",
-        "Energy (MJ)": "{:,.0f}",
-        "GHG Intensity (gCO2eq/MJ)": "{:,.2f}"}
-    if user_entered_prices:
-        fmt["Price per Tonne (USD)"] = "{:,.2f}"
-        fmt["Cost (Eur)"] = "{:,.2f}"
-    st.dataframe(df_display.style.format(fmt))
-    if user_entered_prices:
-        total_cost = sum(r.get("Cost (Eur)", 0) for r in df_rows)
-        st.metric("Total Fuel Cost (Eur)", f"{total_cost:,.2f}")
-
-    # === SUMMARY METRICS ===
-    st.subheader("Summary")
-    st.metric("GHG Intensity (gCO2eq/MJ)", f"{effective_results['ghg_intensity']:.2f}")
-    st.metric("Total Emissions (tCO2eq)", f"{effective_results['emissions']/1e6:,.2f}")
-    if eua_price > 0.0:
-        ets_cost = (effective_results['emissions']/1e6) * eua_price
-        st.metric("EU ETS Cost (Eur)", f"{ets_cost:,.2f}")
-    st.metric("Compliance Balance (tCO2eq)", f"{effective_results['compliance_balance']:,.2f}")
-    st.metric("Estimated Penalty (Eur)", f"{effective_results['penalty']:,.2f}")
-    
-    # === TOTAL COST SCENARIOS ===
-    if user_entered_prices and eua_price > 0 and effective_results['penalty'] > 0:
-        total_with_penalty_ets = total_cost + effective_results['penalty'] + ets_cost
-        st.metric("Total Cost + Penalty + EU ETS (Eur)", f"{total_with_penalty_ets:,.2f}")
-    elif user_entered_prices and eua_price > 0:
-        total_with_ets = total_cost + ets_cost
-        st.metric("Total Cost + EU ETS (Eur)", f"{total_with_ets:,.2f}")
-    elif user_entered_prices and effective_results['penalty'] > 0:
-        total_with_penalty = total_cost + effective_results['penalty']
-        st.metric("Total Cost + Penalty (Eur)", f"{total_with_penalty:,.2f}")
-    if show_details:
-        display_fuel_details(fuel_inputs, FUELS, parameter_overrides, enable_tweaks=show_tweaks)
-else:
-    st.info("No fuel data provided yet.")
-
 penalty = effective_results["penalty"]
 compliance_balance = effective_results["compliance_balance"]
 emissions = effective_results["emissions"]
@@ -566,29 +519,39 @@ if deficit < 0:
                     if substitution_total_emissions is not None and eua_price > 0 and substitution_price_usd > 0:
                         st.markdown(f"**EU ETS Cost**: {substitution_ets_cost:,.2f} EUR")
                          
-    if mitigation_rows:
-        st.markdown("### Total Cost Scenarios")
-        if eua_price > 0:
-            scenario1 = conservative_total if total_cost > 0 and penalty > 0 else None
-            scenario2 = total_with_pooling if total_cost > 0 and pooling_price_usd_per_tonne > 0 else None
-            scenario3 = total_cost + added_biofuel_cost + new_blend_ets_cost if total_cost and added_biofuel_cost > 0 else None
-            scenario4 = total_substitution_cost if substitution_price_usd > 0 else None
-            st.metric("Initial Fuels + Penalty + EU ETS", f"{scenario1:,.2f} Eur" if scenario1 is not None else "N/A (missing prices)")
-            st.metric("Initial Fuels + Pooling + EU ETS (No Penalty)", f"{scenario2:,.2f} Eur" if scenario2 is not None else "N/A (missing prices)")
-            st.metric("Initial Fuels + Bio Fuels + EU ETS (No Penalty)", f"{scenario3:,.2f} Eur" if scenario3 is not None else "N/A (missing prices)")
-            st.metric("Fuel Replacement + EU ETS (No Penalty)", f"{scenario4:,.2f} Eur" if scenario4 is not None else "N/A (missing prices)")
-        else:
-            scenario1 = conservative_total if total_cost > 0 and penalty > 0 else None
-            scenario2 = total_with_pooling if total_cost > 0 and pooling_price_usd_per_tonne > 0 else None
-            scenario3 = total_cost + added_biofuel_cost if total_cost and added_biofuel_cost > 0 else None
-            scenario4 = total_substitution_cost if substitution_price_usd > 0 else None
-            st.metric("Initial Fuels + Penalty", f"{scenario1:,.2f} Eur" if scenario1 is not None else "N/A (missing prices)")
-            st.metric("Initial Fuels + Pooling (No Penalty)", f"{scenario2:,.2f} Eur" if scenario2 is not None else "N/A (missing prices)")
-            st.metric("Initial Fuels + Bio Fuels (No Penalty)", f"{scenario3:,.2f} Eur" if scenario3 is not None else "N/A (missing prices)")
-            st.metric("Fuel Replacement (No Penalty)", f"{scenario4:,.2f} Eur" if scenario4 is not None else "N/A (missing prices)")
+    df_rows = effective_results["rows"]
+    if df_rows:
+        user_entered_prices = any(r.get("Price per Tonne (USD)", 0) > 0 for r in df_rows)
+        df_display = pd.DataFrame(df_rows)
+        cols = ["Fuel", "Quantity (t)"]
+        if user_entered_prices:
+            cols += ["Price per Tonne (USD)", "Cost (Eur)"]
+        cols += ["Emissions (gCO2eq)", "Energy (MJ)", "GHG Intensity (gCO2eq/MJ)"]
+        df_display = df_display[cols]
+        fmt = {
+            "Quantity (t)": "{:,.0f}",
+            "Emissions (gCO2eq)": "{:,.0f}",
+            "Energy (MJ)": "{:,.0f}",
+            "GHG Intensity (gCO2eq/MJ)": "{:,.2f}"}
+        if user_entered_prices:
+            fmt["Price per Tonne (USD)"] = "{:,.2f}"
+            fmt["Cost (Eur)"] = "{:,.2f}"
+        st.dataframe(df_display.style.format(fmt))
+        if user_entered_prices:
+            total_cost = sum(r.get("Cost (Eur)", 0) for r in df_rows)
+            st.metric("Total Fuel Cost (Eur)", f"{total_cost:,.2f}")
+    
+        # === SUMMARY METRICS ===
+        st.subheader("Summary")
+        st.metric("GHG Intensity (gCO2eq/MJ)", f"{effective_results['ghg_intensity']:.2f}")
+        st.metric("Total Emissions (tCO2eq)", f"{effective_results['emissions']/1e6:,.2f}")
+        if eua_price > 0.0:
+            ets_cost = (effective_results['emissions']/1e6) * eua_price
+            st.metric("EU ETS Cost (Eur)", f"{ets_cost:,.2f}")
+        st.metric("Compliance Balance (tCO2eq)", f"{effective_results['compliance_balance']:,.2f}")
+        st.metric("Estimated Penalty (Eur)", f"{effective_results['penalty']:,.2f}")
     else:
-        df_mit = pd.DataFrame(mitigation_rows)
-        st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
+        st.info("No fuel data provided yet.")
 
 else:
     if df_rows:
