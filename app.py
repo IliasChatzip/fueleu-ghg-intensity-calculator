@@ -185,7 +185,7 @@ def compute_results(overrides: dict = None):
     rows = []
     for fuel in FUELS:
         qty = fuel_inputs.get(fuel["name"], 0.0)
-        if qty > 0:
+        if qty <= 0:
             continue
         o = parameter_overrides.get(fuel["name"], {})
         lcv     = o.get("lcv",     fuel["lcv"])
