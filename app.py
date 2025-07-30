@@ -342,6 +342,7 @@ if rows:
         display_fuel_details(fuel_inputs, FUELS, parameter_overrides, enable_tweaks=show_tweaks)
 else:
     st.info("No fuel data provided yet.")
+
 st.subheader("Summary")
 st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}")
 balance_label = "Surplus" if compliance_balance >= 0 else "Deficit"
