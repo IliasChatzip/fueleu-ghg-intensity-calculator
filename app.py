@@ -306,6 +306,7 @@ def display_fuel_details(selected_inputs: dict, fuels_db: list, overrides: dict 
         "CH4 Slip (g/MJ)": "{:.1f}",}
     st.subheader("LCV & Emission Factors")
     st.dataframe(df_details.style.format(fmt))
+parameter_overrides = {}
 col1, col2 = st.columns([7,2])
 with col1:
     st.subheader("Fuel Breakdown")
@@ -314,25 +315,45 @@ with col2:
 show_tweaks = False
 if show_details:
     show_tweaks = st.checkbox("⚙️ Tweak Parameters", key="show_tweaks_inline", help="Adjust the values interactively and watch your results update immediately")
-if rows:
-    df_raw = pd.DataFrame(rows).sort_values("Emissions (gCO2eq)", ascending=False).reset_index(drop=True)
-    user_entered_prices = any(r.get("Price per Tonne (USD)", 0) > 0 for r in rows)
-    cols = ["Fuel", "Quantity (t)"]
+rows_overridden = []
+    for r in rows:
+        name = r["Fuel"]
+        qty = r["Quantity (t)"]
+        price_usd = r.get("Price per Tonne (USD)", 0.0)
+        o = parameter_overrides.get(name, {})
+        fuel_props = next(f for f in FUELS if f["name"] == name)
+        lcv = o.get("lcv", fuel_props["lcv"])
+        wtt = o.get("wtt", fuel_props["wtt"])
+        ttw_co2 = o.get("ttw_co2", fuel_props["ttw_co2"])
+        ttw_ch4 = o.get("ttw_ch4", fuel_props["ttw_ch4"])
+        ttw_n2o = o.get("ttw_n2O", fuel_props["ttw_n2O"])
+        mass_g = qty * 1e6
+        energy = mass_g * lcv
+        ttw_total = ttw_co2*mass_g + ttw_ch4*mass_g*gwp["CH4"] + ttw_n2o*mass_g*gwp["N2O"]
+        slip = fuel_props.get("ch4_slip",0)*energy*gwp["CH4"] if "ch4_slip" in fuel_props else 0
+        emissions = ttw_total + wtt * energy + slip
+        cost_eur = qty * price_usd * exchange_rate
+        row_out = {"Fuel": name, "Quantity (t)": qty,
+                   "Emissions (gCO2eq)": emissions,
+                   "Energy (MJ)": energy,
+                   "GHG Intensity (gCO2eq/MJ)": emissions/energy if energy else 0}
+        if user_entered_prices:
+            row_out.update({"Price per Tonne (USD)": price_usd, "Cost (Eur)": cost_eur})
+        rows_overridden.append(row_out)
+    cols = ["Fuel","Quantity (t)"]
+    if user_entered_prices: cols += ["Price per Tonne (USD)","Cost (Eur)"]
+    cols += ["Emissions (gCO2eq)","Energy (MJ)","GHG Intensity (gCO2eq/MJ)"]
+    df_display = pd.DataFrame(rows_overridden)[cols]
+    fmt = {"Quantity (t)": "{:,.0f}",
+           "Emissions (gCO2eq)": "{:,.0f}",
+           "Energy (MJ)": "{:,.0f}",
+           "GHG Intensity (gCO2eq/MJ)": "{:,.2f}"}
     if user_entered_prices:
-        cols += ["Price per Tonne (USD)", "Cost (Eur)"]
-    cols += ["Emissions (gCO2eq)", "Energy (MJ)", "GHG Intensity (gCO2eq/MJ)"]
-    df_display = df_raw[cols]
-    fmt = {
-        "Quantity (t)": "{:,.0f}",
-        "Emissions (gCO2eq)": "{:,.0f}",
-        "Energy (MJ)": "{:,.0f}",
-        "GHG Intensity (gCO2eq/MJ)": "{:,.2f}",}
-    if user_entered_prices:
-        fmt["Price per Tonne (USD)"] = "{:,.2f}"
-        fmt["Cost (Eur)"] = "{:,.2f}"
+        fmt["Price per Tonne (USD)"]="{:,.2f}";
+        fmt["Cost (Eur)"]="{:,.2f}";
     st.dataframe(df_display.style.format(fmt))
     if user_entered_prices:
-        total_cost = sum(r.get("Cost (Eur)", 0) for r in rows)
+        total_cost = sum(r.get("Cost (Eur)",0) for r in rows_overridden)
         st.metric("Total Fuel Cost (Eur)", f"{total_cost:,.2f}")
     if show_details:
         display_fuel_details(fuel_inputs, FUELS, parameter_overrides, enable_tweaks=show_tweaks)
