@@ -306,6 +306,11 @@ with col2:
 show_tweaks = False
 if show_details:
     show_tweaks = st.checkbox("⚙️ Tweak Parameters", key="show_tweaks_inline", help="Adjust the values interactively and watch your results update immediately")
+
+effective_results = base_results
+if show_tweaks and parameter_overrides:
+    effective_results = compute_results(overrides=parameter_overrides)
+
 df_rows = effective_results["rows"]
 if df_rows:
     user_entered_prices = any(r.get("Price per Tonne (USD)", 0) > 0 for r in df_rows)
