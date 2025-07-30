@@ -184,20 +184,20 @@ rows = []
 for fuel in FUELS:
     qty = fuel_inputs.get(fuel["name"], 0.0)
     if qty > 0:
+        o = parameter_overrides.get(fuel["name"], {})
+        lcv     = o.get("lcv",     fuel["lcv"])
+        wtt     = o.get("wtt",     fuel["wtt"])
+        ttw_co2 = o.get("ttw_co2", fuel["ttw_co2"])
+        ttw_ch4 = o.get("ttw_ch4", fuel["ttw_ch4"])
+        ttw_n2o = o.get("ttw_n2O", fuel["ttw_n2O"])
         mass_g = qty * 1_000_000
-        lcv = fuel["lcv"]
         energy = mass_g * lcv
-        if fuel["rfnbo"] and year <= 2033:
-            energy *= REWARD_FACTOR_RFNBO_MULTIPLIER   
-        co2_total = fuel["ttw_co2"] * mass_g * (1 - ops / 100) * wind
-        ch4_total = fuel["ttw_ch4"] * mass_g * gwp["CH4"]
-        n2o_total = fuel["ttw_n2O"] * mass_g * gwp["N2O"]
-        slip_total = 0.0
-        if "LNG" in fuel["name"]:
-            slip_g_per_mj = fuel.get("ch4_slip", 0.0)
-            slip_total = slip_g_per_mj * energy * gwp["CH4"]
-        ttw_total = co2_total + ch4_total + n2o_total + slip_total
-        wtt_total = energy * fuel["wtt"]
+        co2_em = ttw_co2 * mass_g
+        ch4_em = ttw_ch4 * mass_g * gwp["CH4"]
+        n2o_em = ttw_n2o * mass_g * gwp["N2O"]
+        slip   = fuel.get("ch4_slip", 0) * energy * gwp["CH4"]
+        ttw_total = co2_em + ch4_em + n2o_em + slip
+        wtt_total = wtt * energy
         total_emissions = ttw_total + wtt_total      
         total_energy += energy
         emissions += total_emissions
@@ -225,7 +225,6 @@ else:
 added_biofuel_cost = 0.0
 substitution_cost = None
 total_substitution_cost = None
-# Safeguard for mitigation_rows
 mitigation_rows = []
 
 # === Reset Handler ===
