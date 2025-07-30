@@ -358,6 +358,13 @@ if df_rows:
 else:
     st.info("No fuel data provided yet.")
 
+penalty = effective_results["penalty"]
+compliance_balance = effective_results["compliance_balance"]
+emissions_tonnes = effective_results["emissions"] / 1e6
+ets_cost_initial = emissions_tonnes * eua_price
+total_energy = effective_results["total_energy"]
+ghg_intensity = effective_results["ghg_intensity"]
+
 show_pooling_option = False
 pooling_price_usd_per_tonne = 0.0
 pooling_cost_usd = 0.0
@@ -365,7 +372,7 @@ pooling_cost_eur = 0.0
 total_with_pooling = 0.0
 deficit = compliance_balance
 
-if compliance_balance < 0:
+if deficit < 0:
     st.subheader("Mitigation Strategies")
         
     # === POOLING OPTION ===
