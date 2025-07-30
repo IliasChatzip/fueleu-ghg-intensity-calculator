@@ -181,6 +181,7 @@ wind = st.sidebar.selectbox("Wind Reward Factor",
 total_energy = 0.0
 emissions = 0.0
 rows = []
+parameter_overrides = globals().get('parameter_overrides', {})
 for fuel in FUELS:
     qty = fuel_inputs.get(fuel["name"], 0.0)
     if qty > 0:
@@ -286,7 +287,6 @@ def display_fuel_details(selected_inputs: dict, fuels_db: list, overrides: dict 
         "CH4 Slip (g/MJ)": "{:.1f}",}
     st.subheader("LCV & Emission Factors")
     st.dataframe(df_details.style.format(fmt))
-parameter_overrides = {}
 col1, col2 = st.columns([7,2])
 with col1:
     st.subheader("Fuel Breakdown")
