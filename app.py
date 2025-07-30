@@ -589,7 +589,7 @@ if deficit < 0:
         st.dataframe(df_mit.style.format({"Required Amount (t)": "{:,.0f}", "Price (USD/t)": "{:,.2f}", "Estimated Cost (Eur)": "{:,.2f}"}))
 
 else:
-    if rows:
+    if df_rows:
         st.info("✅ Compliance already achieved! No mitigation strategy required.")
                 
 # === COMPLIANCE CHART ===
