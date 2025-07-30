@@ -340,8 +340,8 @@ if df_rows:
     if eua_price > 0.0:
         ets_cost = (effective_results['emissions']/1e6) * eua_price
         st.metric("EU ETS Cost (Eur)", f"{ets_cost:,.2f}")
-    st.metric("Compliance Balance (tCO2eq)", f"{effective_results['compliance_balance']:.2f}")
-    st.metric("Estimated Penalty (Eur)", f"{effective_results['penalty']:.2f}")
+    st.metric("Compliance Balance (tCO2eq)", f"{effective_results['compliance_balance']:,.2f}")
+    st.metric("Estimated Penalty (Eur)", f"{effective_results['penalty']:,.2f}")
     
     # === TOTAL COST SCENARIOS ===
     if user_entered_prices and eua_price > 0 and effective_results['penalty'] > 0:
