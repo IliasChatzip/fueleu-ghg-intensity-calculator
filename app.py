@@ -266,14 +266,36 @@ def display_fuel_details(selected_inputs: dict, fuels_db: list):
     detail_rows = []
     for fuel in fuels_db:
         if fuel["name"] in selected:
-            detail_rows.append({
-                "Fuel": fuel["name"],
-                "LCV (MJ/g)": fuel["lcv"],
-                "WtT Factor (gCO2eq/MJ)": fuel["wtt"],
-                "TtW CO2 (g/g)": fuel["ttw_co2"],
-                "TtW CH4 (g/g)": fuel["ttw_ch4"],
-                "TtW N2O (g/g)": fuel["ttw_n2O"],
-                **({"CH4 Slip (g/MJ)": fuel.get("ch4_slip")} if "ch4_slip" in fuel else {})})
+            name = fuel["name"]
+            o = overrides.get(name, {}) if overrides else {}
+            lcv = o.get("lcv", fuel["lcv"])
+            wtt = o.get("wtt", fuel["wtt"])
+            ttw_co2 = o.get("ttw_co2", fuel["ttw_co2"])
+            ttw_ch4 = o.get("ttw_ch4", fuel["ttw_ch4"])
+            ttw_n2o = o.get("ttw_n2O", fuel["ttw_n2O"])
+            if enable_tweaks:
+                st.markdown(f"**{name} Parameters**")
+                col_lcv, col_wtt, col_co2, col_ch4, col_n2o = st.columns(5)
+                with col_lcv:
+                    lcv = st.number_input(f"LCV (MJ/g)", value=lcv, step=0.0001, key=f"tweak_lcv_{name}")
+                with col_wtt:
+                    wtt = st.number_input(f"WtT (gCO₂e/MJ)", value=wtt, step=0.01, key=f"tweak_wtt_{name}")
+                with col_co2:
+                    ttw_co2 = st.number_input(f"TtW CO₂ (g/g)", value=ttw_co2, step=0.001, key=f"tweak_co2_{name}")
+                with col_ch4:
+                    ttw_ch4 = st.number_input(f"TtW CH₄ (g/g)", value=ttw_ch4, step=0.00001, key=f"tweak_ch4_{name}")
+                with col_n2o:
+                    ttw_n2o = st.number_input(f"TtW N₂O (g/g)", value=ttw_n2o, step=0.00001, key=f"tweak_n2o_{name}")
+                overrides[name] = {"lcv": lcv, "wtt": wtt, "ttw_co2": ttw_co2, "ttw_ch4": ttw_ch4, "ttw_n2O": ttw_n2o}
+            row = {"Fuel": name,
+                   "LCV (MJ/g)": lcv,
+                   "WtT Factor (gCO2eq/MJ)": wtt,
+                   "TtW CO2 (g/g)": ttw_co2,
+                   "TtW CH4 (g/g)": ttw_ch4,
+                   "TtW N2O (g/g)": ttw_n2o}
+            if "ch4_slip" in fuel:
+                row["CH4 Slip (g/MJ)"] = fuel.get("ch4_slip")
+            detail_rows.append(row)
     df_details = pd.DataFrame(detail_rows)
     fmt = {
         "LCV (MJ/g)": "{:.4f}",
@@ -288,11 +310,10 @@ col1, col2 = st.columns([7,2])
 with col1:
     st.subheader("Fuel Breakdown")
 with col2:
-    show_details = st.checkbox(
-      "🔍 Fuel Details",
-        value=False,
-        key="show_details_inline",
-        help="Toggle LCV & emission factors for the selected fuels")
+    show_details = st.checkbox("🔍 Fuel Details", value=False, key="show_details_inline", help="Toggle LCV & emission factors for the selected fuels")
+show_tweaks = False
+if show_details:
+    show_tweaks = st.checkbox("⚙️ Tweak Parameters", key="show_tweaks_inline", help="Adjust the values interactively and watch your results update immediately")
 if rows:
     df_raw = pd.DataFrame(rows).sort_values("Emissions (gCO2eq)", ascending=False).reset_index(drop=True)
     user_entered_prices = any(r.get("Price per Tonne (USD)", 0) > 0 for r in rows)
@@ -314,7 +335,7 @@ if rows:
         total_cost = sum(r.get("Cost (Eur)", 0) for r in rows)
         st.metric("Total Fuel Cost (Eur)", f"{total_cost:,.2f}")
     if show_details:
-        display_fuel_details(fuel_inputs, FUELS)
+        display_fuel_details(fuel_inputs, FUELS, parameter_overrides, enable_tweaks=show_tweaks)
 else:
     st.info("No fuel data provided yet.")
 
