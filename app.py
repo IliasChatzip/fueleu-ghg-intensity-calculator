@@ -258,7 +258,7 @@ if st.session_state.get("trigger_reset", False):
 
 # === OUTPUT ===
 total_cost = 0.0
-def display_fuel_details(selected_inputs: dict, fuels_db: list):
+def display_fuel_details(selected_inputs: dict, fuels_db: list, overrides: dict = None, enable_tweaks: bool = False):
     selected = [name for name, qty in selected_inputs.items() if qty > 0]
     if not selected:
         st.info("No fuels selected yet to show details.")
