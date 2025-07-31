@@ -273,7 +273,8 @@ def display_fuel_details(selected_inputs: dict, fuels_db: list):
         "CH4 Slip (g/MJ)": "{:.1f}",}
     st.subheader("LCV & Emission Factors")
     st.dataframe(df_details.style.format(fmt))
-    
+
+if rows:
     col1, col2 = st.columns([7, 2])
     with col1:
         st.subheader("Fuel Breakdown")
@@ -283,8 +284,6 @@ def display_fuel_details(selected_inputs: dict, fuels_db: list):
             value=False,
             key="show_details_inline",
             help="Toggle LCV & emission factors for the selected fuels")
-
-if rows:
     df_raw = pd.DataFrame(rows).sort_values("Emissions (gCO2eq)", ascending=False).reset_index(drop=True)
     user_entered_prices = any(r.get("Price per Tonne (USD)", 0) > 0 for r in rows)
     cols = ["Fuel", "Quantity (t)"]
