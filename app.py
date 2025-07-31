@@ -331,11 +331,11 @@ elif rows:
             conservative_total = total_cost
             st.metric("Total Cost of Selected Fuels (Eur)", f"{conservative_total:,.2f}")
             
-    show_pooling_option = False
-    pooling_price_usd_per_tonne = 0.0
-    pooling_cost_usd = 0.0
-    pooling_cost_eur = 0.0
-    total_with_pooling = 0.0
+show_pooling_option = False
+pooling_price_usd_per_tonne = 0.0
+pooling_cost_usd = 0.0
+pooling_cost_eur = 0.0
+total_with_pooling = 0.0
     
     if compliance_balance < 0:
         st.subheader("Mitigation Strategies")
