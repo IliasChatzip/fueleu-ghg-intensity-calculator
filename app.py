@@ -551,10 +551,10 @@ if compliance_balance < 0:
             st.metric("Fuel Replacement + EU ETS (No Penalty)", f"{total_substitution_cost:,.2f}")
         elif rows and substitution_price_usd > 0:
             st.metric("Fuel Replacement (No Penalty)", f"{total_substitution_cost:,.2f}")
-    else:
-       st.info("✅ Compliance already achieved! No mitigation strategy required.")
-        
-                
+else:
+   st.info("✅ Compliance already achieved! No mitigation strategy required.")
+
+
 # === COMPLIANCE CHART ===
 years = sorted(REDUCTIONS.keys())
 targets = [BASE_TARGET * (1 - REDUCTIONS[y]) for y in years]
