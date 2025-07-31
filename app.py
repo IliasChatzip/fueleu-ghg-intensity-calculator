@@ -251,13 +251,13 @@ mitigation_rows = []
 # === OUTPUT ===
 total_cost = 0.0
 def display_fuel_details(selected_inputs: dict, fuels_db: list, overrides: dict = None, enable_tweaks: bool = False):
-    selected = [name for name, qty in selected_inputs.items() if qty > 0]
+    selected_fuels = [name for name, qty in selected_inputs.items() if qty > 0]
     if not selected:
         st.info("No fuels selected yet to show details.")
         return
     detail_rows = []
     for fuel in fuels_db:
-        if fuel["name"] in selected:
+        if fuel["name"] in selected_fuels:
             name = fuel["name"]
             o = overrides.get(name, {}) if overrides else {}
             lcv = o.get("lcv", fuel["lcv"])
@@ -305,7 +305,7 @@ with col1:
 with col2:
         show_details = st.checkbox("🔍 Fuel Details", value=False, key="show_details_inline", help="Toggle LCV & emission factors for the selected fuels") if selected_fuels else False
         if show_details:
-            show_tweaks = st.checkbox("⚙️ Tweak Parameters", key="show_tweaks_inline", help="Adjust the values interactively and watch the results update immediately")
+            show_tweaks = st.checkbox("⚙️ Tweak Parameters", value=False, key="show_tweaks_inline", help="Adjust the values interactively and watch the results update immediately")
         else: show_tweaks = False
 
 effective_results = base_results
