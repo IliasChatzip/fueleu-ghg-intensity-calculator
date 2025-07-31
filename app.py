@@ -306,7 +306,7 @@ show_details = False
 show_tweaks = False
 with col2:
     show_details = st.checkbox("🔍 Fuel Details", value=False, key="show_details_inline", help="Toggle LCV & emission factors for the selected fuels") if selected else False
-    show_tweaks = st.checkbox("⚙️ Tweak Parameters", key="show_tweaks_inline", help="Adjust the values interactively and watch the results update immediately") if show_details else False
+show_tweaks = st.checkbox("⚙️ Tweak Parameters", key="show_tweaks_inline", help="Adjust the values interactively and watch the results update immediately") if show_details else False
 
 effective_results = base_results
 if show_tweaks :
