@@ -300,6 +300,9 @@ if rows:
         fmt["Price per Tonne (USD)"] = "{:,.2f}"
         fmt["Cost (Eur)"] = "{:,.2f}"
     st.dataframe(df_display.style.format(fmt))
+    
+    if show_details:
+        display_fuel_details(fuel_inputs, FUELS)
 
     total_cost = sum(row["Cost (Eur)"] for row in rows)
     if user_entered_prices:
@@ -328,8 +331,6 @@ if rows:
     elif rows and user_entered_prices > 0:
         conservative_total = total_cost
         st.metric("Total Cost of Selected Fuels (Eur)", f"{conservative_total:,.2f}")
-    if show_details:
-        display_fuel_details(fuel_inputs, FUELS)
         
 show_pooling_option = False
 pooling_price_usd_per_tonne = 0.0
