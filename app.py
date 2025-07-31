@@ -597,7 +597,7 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt=f"Penalty: {penalty:,.0f} Eur", ln=True)
         pdf.ln(10)
         # Fuel Breakdown
-        pdf.set_font("Arial", size=10)
+        pdf.set_font("Arial", style="U", size=10)
         pdf.cell(200, 10, txt="Fuel Breakdown:", ln=True)
         user_entered_prices = any(fuel_price_inputs.get(f["name"], 0.0) > 0.0 for f in FUELS)
         if user_entered_prices:
@@ -612,9 +612,9 @@ if st.button("Export to PDF"):
             # Total Cost
             pdf.ln(5)
             pdf.set_font("Arial", size=8)
-            pdf.cell(200, 10, txt=f"Conversion Rate Used: 1 USD = {exchange_rate:.2f} Eur", ln=True)
+            pdf.cell(200, 10, txt=f"Conversion Rate Used: 1 USD = {exchange_rate:.6f} Eur", ln=True)
             pdf.set_font("Arial", "B", size=11)
-            pdf.cell(200, 10, txt=f"Total Initial Fuel Cost: {conservative_total:,.2f} Eur", ln=True)
+            pdf.cell(200, 10, txt=f"Total Cost: {conservative_total:,.2f} Eur", ln=True)
         else:
             for row in rows:
                 fuel_name = row['Fuel']
@@ -698,7 +698,7 @@ if st.button("Export to PDF"):
                     pdf.cell(200, 10, txt=f"- Fuel Replacement, no Penalty: {total_substitution_cost:,.2f} Eur", ln=True)
         else:
             pdf.set_font("Arial", style="B", size=11)
-            pdf.cell(200, 10, txt=f"Compliance already achieved!!!")
+            pdf.cell(200, 10, txt=f"Compliance already achieved!")
 
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
             pdf.output(tmp_pdf.name)
