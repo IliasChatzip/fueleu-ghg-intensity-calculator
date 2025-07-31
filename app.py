@@ -272,7 +272,8 @@ def display_fuel_details(selected_inputs: dict, fuels_db: list):
     st.dataframe(df_details.style.format(fmt))
 
 if not rows:
-    if rows:
+    st.info("No fuel data provided yet.")
+    else:
         col1, col2 = st.columns([7, 2])
         with col1:
             st.subheader("Fuel Breakdown")
@@ -554,9 +555,6 @@ if not rows:
     else:
         st.info("✅ Compliance already achieved! No mitigation strategy required.")
         
-else:
-    st.info("No fuel data provided yet.")
-
                 
 # === COMPLIANCE CHART ===
 years = sorted(REDUCTIONS.keys())
