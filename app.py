@@ -273,7 +273,7 @@ def display_fuel_details(selected_inputs: dict, fuels_db: list):
 
 if not rows:
     st.info("No fuel data provided yet.")
-    else:
+elif rows:
         col1, col2 = st.columns([7, 2])
         with col1:
             st.subheader("Fuel Breakdown")
