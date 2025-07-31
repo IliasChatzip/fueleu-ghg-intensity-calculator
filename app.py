@@ -305,6 +305,20 @@ if rows:
     total_cost = sum(row["Cost (Eur)"] for row in rows)
     if user_entered_prices:
         st.metric("Total Fuel Cost (Eur)", f"{total_cost:,.2f}")
+        
+    # === TOTAL COST SCENARIOS ===
+    if rows and user_entered_prices and penalty and eua_price > 0:
+        conservative_total = total_cost + penalty + ets_cost
+        st.metric("Total Cost + Penalty + EU ETS (Eur)", f"{conservative_total:,.2f}")
+    elif rows and user_entered_prices and eua_price > 0:
+        conservative_total = total_cost + ets_cost
+        st.metric("Total Cost + EU ETS (Eur)", f"{conservative_total:,.2f}")
+    elif rows and user_entered_prices and penalty > 0:
+        conservative_total = total_cost + penalty
+        st.metric("Total Cost + Penalty (Eur)", f"{conservative_total:,.2f}")
+    else:
+        conservative_total = total_cost
+        st.metric("Total Cost of Selected Fuels (Eur)", f"{conservative_total:,.2f}")     
 
     # === SUMMARY METRICS ===
     st.subheader("Summary")
@@ -515,19 +529,6 @@ if compliance_balance < 0:
 else:
     st.info("✅ Compliance already achieved! No mitigation strategy required.")
 
-# === TOTAL COST SCENARIOS ===
-if rows and user_entered_prices and penalty and eua_price > 0:
-    conservative_total = total_cost + penalty + ets_cost
-    st.metric("Total Cost + Penalty + EU ETS (Eur)", f"{conservative_total:,.2f}")
-elif rows and user_entered_prices and eua_price > 0:
-    conservative_total = total_cost + ets_cost
-    st.metric("Total Cost + EU ETS (Eur)", f"{conservative_total:,.2f}")
-elif rows and user_entered_prices and penalty > 0:
-    conservative_total = total_cost + penalty
-    st.metric("Total Cost + Penalty (Eur)", f"{conservative_total:,.2f}")
-else:
-    conservative_total = total_cost
-    st.metric("Total Cost of Selected Fuels (Eur)", f"{conservative_total:,.2f}")     
                 
 # === COMPLIANCE CHART ===
 years = sorted(REDUCTIONS.keys())
