@@ -306,6 +306,17 @@ if rows:
     if user_entered_prices:
         st.metric("Total Fuel Cost (Eur)", f"{total_cost:,.2f}")
         
+
+    # === SUMMARY METRICS ===
+    st.subheader("Summary")
+    st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}")
+    st.metric("Total Emissions (tCO2eq)", f"{emissions_tonnes:,.2f}")
+    if eua_price > 0.0:
+        ets_cost = emissions_tonnes * eua_price
+        st.metric("EU ETS Cost (Eur)", f"{ets_cost:,.2f}")
+    st.metric("Compliance Balance (tCO2eq)", f"{compliance_balance:,.2f}")
+    st.metric("Estimated Penalty (Eur)", f"{penalty:,.2f}")
+
     # === TOTAL COST SCENARIOS ===
     if rows and user_entered_prices and penalty and eua_price > 0:
         conservative_total = total_cost + penalty + ets_cost
@@ -318,18 +329,8 @@ if rows:
         st.metric("Total Cost + Penalty (Eur)", f"{conservative_total:,.2f}")
     elif rows and user_entered_prices > 0:
         conservative_total = total_cost
-        st.metric("Total Cost of Selected Fuels (Eur)", f"{conservative_total:,.2f}")     
-
-    # === SUMMARY METRICS ===
-    st.subheader("Summary")
-    st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}")
-    st.metric("Total Emissions (tCO2eq)", f"{emissions_tonnes:,.2f}")
-    if eua_price > 0.0:
-        ets_cost = emissions_tonnes * eua_price
-        st.metric("EU ETS Cost (Eur)", f"{ets_cost:,.2f}")
-    st.metric("Compliance Balance (tCO2eq)", f"{compliance_balance:,.2f}")
-    st.metric("Estimated Penalty (Eur)", f"{penalty:,.2f}")
-
+        st.metric("Total Cost of Selected Fuels (Eur)", f"{conservative_total:,.2f}")
+        
 show_pooling_option = False
 pooling_price_usd_per_tonne = 0.0
 pooling_cost_usd = 0.0
