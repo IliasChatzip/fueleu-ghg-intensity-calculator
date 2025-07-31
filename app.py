@@ -592,7 +592,8 @@ if st.button("Export to PDF"):
         pdf.cell(200, 10, txt=f"EU Target for {year}: {target_intensity(year):.2f} gCO2eq/MJ", ln=True)
         pdf.cell(200, 10, txt=f"GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ", ln=True)
         pdf.cell(200, 10, txt=f"Total Emissions: {emissions_tonnes:,.0f} tCO2eq", ln=True)
-        pdf.cell(200, 10, txt=f"EU ETS Cost: {ets_cost_initial:,.0f} Eur", ln=True)
+        if eua_price:
+            pdf.cell(200, 10, txt=f"EU ETS Cost: {ets_cost_initial:,.0f} Eur", ln=True)
         pdf.cell(200, 10, txt=f"Compliance Balance: {compliance_balance:,.0f} tCO2eq", ln=True)
         pdf.cell(200, 10, txt=f"Penalty: {penalty:,.0f} Eur", ln=True)
         pdf.ln(10)
