@@ -176,6 +176,15 @@ wind = st.sidebar.selectbox("Wind Reward Factor",
     [1.00, 0.99, 0.97, 0.95],
     index=0,
     help="This is a reward factor wind-assisted propulsion if it is installed onboard. Reference can be made to the Regulation (EU) 2023/1805 of The European Parliament and of The Counsil. In case of no wind-assisted propulsion onboard, Wind Reward Factor of 1 can be selected (lower = more assistance).")
+
+# === Reset Handler ===
+if st.session_state.get("trigger_reset", False):
+    exclude_keys = {"exchange_rate"}
+    for key in list(st.session_state.keys()):
+        if key not in exclude_keys and key != "trigger_reset":
+            del st.session_state[key]
+    st.session_state["trigger_reset"] = False
+    st.experimental_rerun()
     
 # === CALCULATIONS ===
 parameter_overrides = globals().get('parameter_overrides', {})
@@ -238,15 +247,6 @@ added_biofuel_cost = 0.0
 substitution_cost = None
 total_substitution_cost = None
 mitigation_rows = []
-
-# === Reset Handler ===
-if st.session_state.get("trigger_reset", False):
-    exclude_keys = {"exchange_rate"}
-    for key in list(st.session_state.keys()):
-        if key not in exclude_keys and key != "trigger_reset":
-            del st.session_state[key]
-    st.session_state["trigger_reset"] = False
-    st.experimental_rerun()
 
 # === OUTPUT ===
 total_cost = 0.0
@@ -312,7 +312,6 @@ def display_fuel_details(selected_inputs: dict, fuels_db: list, overrides: dict 
 effective_results = base_results
 if show_tweaks :
     effective_results = compute_results(overrides=parameter_overrides)
-import pandas as pd
 df_rows = effective_results["rows"]
 if df_rows:
     # Check if any prices were entered
