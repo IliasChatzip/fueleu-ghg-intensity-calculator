@@ -303,7 +303,7 @@ col1, col2 = st.columns([7,2])
 with col1:
     st.subheader("Fuel Breakdown")
 with col2:
-    if qty > 0:
+    if selected_fuels:
         show_details = st.checkbox("🔍 Fuel Details", value=False, key="show_details_inline", help="Toggle LCV & emission factors for the selected fuels")
         if show_details:
             show_tweaks = st.checkbox("⚙️ Tweak Parameters", key="show_tweaks_inline", help="Adjust the values interactively and watch the results update immediately")
