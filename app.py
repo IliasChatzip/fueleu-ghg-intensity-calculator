@@ -305,12 +305,6 @@ if rows:
     total_cost = sum(row["Cost (Eur)"] for row in rows)
     if user_entered_prices:
         st.metric("Total Fuel Cost (Eur)", f"{total_cost:,.2f}")
-else:
-    st.info("No fuel data provided yet.")
-    user_entered_prices = False
-
-if show_details:
-    display_fuel_details(fuel_inputs, FUELS)
 
     # === SUMMARY METRICS ===
     st.subheader("Summary")
