@@ -271,9 +271,7 @@ def display_fuel_details(selected_inputs: dict, fuels_db: list):
     st.subheader("LCV & Emission Factors")
     st.dataframe(df_details.style.format(fmt))
 
-if not rows:
-    st.info("No fuel data provided yet.")
-elif rows:
+if rows:
     col1, col2 = st.columns([7, 2])
     with col1:
         st.subheader("Fuel Breakdown")
@@ -331,12 +329,12 @@ elif rows:
         conservative_total = total_cost
         st.metric("Total Cost of Selected Fuels (Eur)", f"{conservative_total:,.2f}")
             
-show_pooling_option = False
-pooling_price_usd_per_tonne = 0.0
-pooling_cost_usd = 0.0
-pooling_cost_eur = 0.0
-total_with_pooling = 0.0
-    
+    show_pooling_option = False
+    pooling_price_usd_per_tonne = 0.0
+    pooling_cost_usd = 0.0
+    pooling_cost_eur = 0.0
+    total_with_pooling = 0.0
+        
     if compliance_balance < 0:
         st.subheader("Mitigation Strategies")
             
@@ -553,7 +551,8 @@ total_with_pooling = 0.0
                 st.metric("Fuel Replacement (No Penalty)", f"{total_substitution_cost:,.2f}")
     else:
        st.info("✅ Compliance already achieved! No mitigation strategy required.")
-
+else:
+    st.info("No fuel data provided yet.")
 
 # === COMPLIANCE CHART ===
 years = sorted(REDUCTIONS.keys())
