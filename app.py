@@ -283,7 +283,7 @@ if rows:
             "🔍 Fuel Details",
             value=False,
             key="show_details_inline",
-            help="Toggle LCV & emission factors for the selected fuels")
+            help="View LCV & emission factors for the selected fuels")
     df_raw = pd.DataFrame(rows).sort_values("Emissions (gCO2eq)", ascending=False).reset_index(drop=True)
     user_entered_prices = any(r.get("Price per Tonne (USD)", 0) > 0 for r in rows)
     cols = ["Fuel", "Quantity (t)"]
