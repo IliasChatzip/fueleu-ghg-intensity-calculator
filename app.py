@@ -527,27 +527,28 @@ if compliance_balance < 0:
                         st.markdown(f"**EU ETS Cost**: {substitution_ets_cost:,.2f} EUR")
 
     # === COST-BENEFIT ANALYSIS ===
-    st.subheader("Cost-Benefit Analysis")
-    if rows and user_entered_prices and eua_price and penalty > 0:
-        st.metric("Initial fuels + Penalty + EU ETS", f"{total_cost + penalty + ets_cost:,.2f}")
-    elif rows and user_entered_prices and eua_price > 0:
-        st.metric("Initial fuels + EU ETS", f"{total_cost + ets_cost:,.2f}")
-    elif rows and user_entered_prices and penalty > 0:
-        st.metric("Initial fuels + Penalty", f"{total_cost + penalty:,.2f}")
-    elif rows and user_entered_prices > 0:
-        st.metric("Initial fuels", f"{total_cost:,.2f}")
-    if rows and pooling_price_usd_per_tonne and eua_price > 0:
-        st.metric("Initial fuels + Pooling + EU ETS (No Penalty)", f"{total_cost + pooling_cost_eur + ets_cost:,.2f}")
-    elif rows and pooling_price_usd_per_tonne > 0:
-        st.metric("Initial fuels + Pooling (No Penalty)", f"{total_cost + pooling_cost_eur:,.2f}")
-    if rows and mitigation_price_usd and eua_price > 0:
-        st.metric("Initial fuels + Bio Fuels + EU ETS (No Penalty)", f"{total_cost + added_biofuel_cost + new_blend_ets_cost:,.2f}")
-    elif rows and mitigation_price_usd > 0:
-        st.metric("Initial fuels + Bio Fuels (No Penalty)", f"{total_cost + added_biofuel_cost:,.2f}")
-    if rows and substitution_price_usd and eua_price > 0:
-        st.metric("Fuel Replacement + EU ETS (No Penalty)", f"{total_substitution_cost:,.2f}")
-    elif rows and substitution_price_usd > 0:
-        st.metric("Fuel Replacement (No Penalty)", f"{total_substitution_cost:,.2f}")
+    if user_entered_prices:
+        st.subheader("Cost-Benefit Analysis")
+        if rows and user_entered_prices and eua_price and penalty > 0:
+            st.metric("Initial fuels + Penalty + EU ETS", f"{total_cost + penalty + ets_cost:,.2f}")
+        elif rows and user_entered_prices and eua_price > 0:
+            st.metric("Initial fuels + EU ETS", f"{total_cost + ets_cost:,.2f}")
+        elif rows and user_entered_prices and penalty > 0:
+            st.metric("Initial fuels + Penalty", f"{total_cost + penalty:,.2f}")
+        elif rows and user_entered_prices > 0:
+            st.metric("Initial fuels", f"{total_cost:,.2f}")
+        if rows and pooling_price_usd_per_tonne and eua_price > 0:
+            st.metric("Initial fuels + Pooling + EU ETS (No Penalty)", f"{total_cost + pooling_cost_eur + ets_cost:,.2f}")
+        elif rows and pooling_price_usd_per_tonne > 0:
+            st.metric("Initial fuels + Pooling (No Penalty)", f"{total_cost + pooling_cost_eur:,.2f}")
+        if rows and mitigation_price_usd and eua_price > 0:
+            st.metric("Initial fuels + Bio Fuels + EU ETS (No Penalty)", f"{total_cost + added_biofuel_cost + new_blend_ets_cost:,.2f}")
+        elif rows and mitigation_price_usd > 0:
+            st.metric("Initial fuels + Bio Fuels (No Penalty)", f"{total_cost + added_biofuel_cost:,.2f}")
+        if rows and substitution_price_usd and eua_price > 0:
+            st.metric("Fuel Replacement + EU ETS (No Penalty)", f"{total_substitution_cost:,.2f}")
+        elif rows and substitution_price_usd > 0:
+            st.metric("Fuel Replacement (No Penalty)", f"{total_substitution_cost:,.2f}")
 
 else:
     st.info("✅ Compliance already achieved! No mitigation strategy required.")
