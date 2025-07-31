@@ -600,20 +600,20 @@ if st.button("Export to PDF"):
         pdf.set_font("Arial", size=10)
         pdf.cell(200, 10, txt="Fuel Breakdown:", ln=True)
         if user_entered_prices = any(fuel_price_inputs.get(f["name"], 0.0) > 0.0 for f in FUELS)
-        for row in rows:
-            fuel_name = row['Fuel']
-            qty = row['Quantity (t)']
-            price_usd = fuel_price_inputs.get(fuel_name, 0.0)
-            cost = qty * price_usd * exchange_rate
-            ghg_intensity = row['GHG Intensity (gCO2eq/MJ)']
-            line = f"{fuel_name}: {qty:,.0f} t @ {price_usd:,.2f} USD/t | {cost:,.2f} Eur | GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ"
-            pdf.cell(200, 10, txt=line, ln=True)
-        # Total Cost
-        pdf.ln(5)
-        pdf.set_font("Arial", size=8)
-        pdf.cell(200, 10, txt=f"Conversion Rate Used: 1 USD = {exchange_rate:.2f} Eur", ln=True)
-        pdf.set_font("Arial", "B", size=11)
-        pdf.cell(200, 10, txt=f"Total Initial Fuel Cost: {conservative_total:,.2f} Eur", ln=True)
+            for row in rows:
+                fuel_name = row['Fuel']
+                qty = row['Quantity (t)']
+                price_usd = fuel_price_inputs.get(fuel_name, 0.0)
+                cost = qty * price_usd * exchange_rate
+                ghg_intensity = row['GHG Intensity (gCO2eq/MJ)']
+                line = f"{fuel_name}: {qty:,.0f} t @ {price_usd:,.2f} USD/t | {cost:,.2f} Eur | GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ"
+                pdf.cell(200, 10, txt=line, ln=True)
+            # Total Cost
+            pdf.ln(5)
+            pdf.set_font("Arial", size=8)
+            pdf.cell(200, 10, txt=f"Conversion Rate Used: 1 USD = {exchange_rate:.2f} Eur", ln=True)
+            pdf.set_font("Arial", "B", size=11)
+            pdf.cell(200, 10, txt=f"Total Initial Fuel Cost: {conservative_total:,.2f} Eur", ln=True)
         else:
             for row in rows:
             fuel_name = row['Fuel']
