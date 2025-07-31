@@ -316,7 +316,7 @@ if rows:
     elif rows and user_entered_prices and penalty > 0:
         conservative_total = total_cost + penalty
         st.metric("Total Cost + Penalty (Eur)", f"{conservative_total:,.2f}")
-    else:
+    elif rows and user_entered_prices > 0:
         conservative_total = total_cost
         st.metric("Total Cost of Selected Fuels (Eur)", f"{conservative_total:,.2f}")     
 
