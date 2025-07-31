@@ -176,6 +176,60 @@ wind = st.sidebar.selectbox("Wind Reward Factor",
     [1.00, 0.99, 0.97, 0.95],
     index=0,
     help="This is a reward factor wind-assisted propulsion if it is installed onboard. Reference can be made to the Regulation (EU) 2023/1805 of The European Parliament and of The Counsil. In case of no wind-assisted propulsion onboard, Wind Reward Factor of 1 can be selected (lower = more assistance).")
+    
+# === CALCULATIONS ===
+total_energy = 0.0
+emissions = 0.0
+rows = []
+
+for fuel in FUELS:
+    qty = fuel_inputs.get(fuel["name"], 0.0)
+    if qty > 0:
+        mass_g = qty * 1_000_000
+        lcv = fuel["lcv"]
+        energy = mass_g * lcv
+        if fuel["rfnbo"] and year <= 2033:
+            energy *= REWARD_FACTOR_RFNBO_MULTIPLIER
+
+        co2_total = fuel["ttw_co2"] * mass_g * (1 - ops / 100) * wind
+        ch4_total = fuel["ttw_ch4"] * mass_g * gwp["CH4"]
+        n2o_total = fuel["ttw_n2O"] * mass_g * gwp["N2O"]
+        slip_total = 0.0
+        if "LNG" in fuel["name"]:
+            slip_g_per_mj = fuel.get("ch4_slip", 0.0)
+            slip_total = slip_g_per_mj * energy * gwp["CH4"]
+        ttw_total = co2_total + ch4_total + n2o_total + slip_total
+        wtt_total = energy * fuel["wtt"]
+        total_emissions = ttw_total + wtt_total
+
+        total_energy += energy
+        emissions += total_emissions
+
+        ghg_intensity_mj = total_emissions / energy if energy else 0
+
+        price_usd = fuel_price_inputs.get(fuel["name"], 0.0)
+        price_eur = price_usd * exchange_rate
+        cost = qty * price_eur
+
+        rows.append({
+            "Fuel": fuel["name"],
+            "Quantity (t)": qty,
+            "Price per Tonne (USD)": price_usd,
+            "Cost (Eur)": cost,
+            "Emissions (gCO2eq)": total_emissions,
+            "Energy (MJ)": energy,
+            "GHG Intensity (gCO2eq/MJ)": ghg_intensity_mj,})
+
+emissions_tonnes = emissions / 1_000_000
+ets_cost_initial = emissions_tonnes * eua_price
+ghg_intensity = emissions / total_energy if total_energy else 0.0
+st.session_state["computed_ghg"] = ghg_intensity
+compliance_balance = total_energy * (target_intensity(year) - ghg_intensity) / 1_000_000
+
+if compliance_balance >= 0:
+    penalty = 0
+else:
+    penalty = (abs(compliance_balance) / (ghg_intensity * VLSFO_ENERGY_CONTENT)) * PENALTY_RATE * 1_000_000
 
 # === Reset Handler ===
 if st.session_state.get("trigger_reset", False):
@@ -186,63 +240,6 @@ if st.session_state.get("trigger_reset", False):
     st.session_state["trigger_reset"] = False
     st.experimental_rerun()
     
-# === CALCULATIONS ===
-parameter_overrides = globals().get('parameter_overrides', {})
-def compute_results(overrides: dict = None):
-    total_energy = 0.0
-    emissions = 0.0
-    rows = []
-    for fuel in FUELS:
-        qty = fuel_inputs.get(fuel["name"], 0.0)
-        if qty <= 0:
-            continue
-        o = parameter_overrides.get(fuel["name"], {})
-        lcv     = o.get("lcv",     fuel["lcv"])
-        wtt     = o.get("wtt",     fuel["wtt"])
-        ttw_co2 = o.get("ttw_co2", fuel["ttw_co2"])
-        ttw_ch4 = o.get("ttw_ch4", fuel["ttw_ch4"])
-        ttw_n2o = o.get("ttw_n2O", fuel["ttw_n2O"])
-        mass_g = qty * 1_000_000
-        energy = mass_g * lcv
-        co2_em = ttw_co2 * mass_g
-        ch4_em = ttw_ch4 * mass_g * gwp["CH4"]
-        n2o_em = ttw_n2o * mass_g * gwp["N2O"]
-        slip   = fuel.get("ch4_slip", 0) * energy * gwp["CH4"]
-        ttw_total = co2_em + ch4_em + n2o_em + slip
-        wtt_total = wtt * energy
-        total_emissions = ttw_total + wtt_total      
-        total_energy += energy
-        emissions += total_emissions
-        ghg_intensity_mj = total_emissions / energy if energy else 0
-        price_usd = fuel_price_inputs.get(fuel["name"], 0.0)
-        price_eur = price_usd * exchange_rate
-        cost = qty * price_eur
-        rows.append({
-            "Fuel": fuel["name"],
-            "Quantity (t)": qty,
-            "Price per Tonne (USD)": price_usd,
-            "Cost (Eur)": cost,
-            "Emissions (gCO2eq)": total_emissions,
-            "Energy (MJ)": energy,
-            "GHG Intensity (gCO2eq/MJ)": ghg_intensity_mj,})
-    emissions_tonnes = emissions / 1_000_000
-    ets_cost_initial = emissions_tonnes * eua_price
-    ghg_intensity = emissions / total_energy if total_energy else 0.0
-    st.session_state["computed_ghg"] = ghg_intensity
-    compliance_balance = total_energy * (target_intensity(year) - ghg_intensity) / 1_000_000       
-    if compliance_balance >= 0:
-         penalty = 0
-    else:
-         penalty = (abs(compliance_balance) / (ghg_intensity * VLSFO_ENERGY_CONTENT)) * PENALTY_RATE * 1_000_000
-    return {
-        "rows": rows,
-        "total_energy": total_energy,
-        "emissions": emissions,
-        "ghg_intensity": ghg_intensity,
-        "compliance_balance": compliance_balance,
-        "penalty": penalty}
-base_results = compute_results(overrides={})
-
 added_biofuel_cost = 0.0
 substitution_cost = None
 total_substitution_cost = None
@@ -250,44 +247,22 @@ mitigation_rows = []
 
 # === OUTPUT ===
 total_cost = 0.0
-def display_fuel_details(selected_inputs: dict, fuels_db: list, overrides: dict = None, enable_tweaks: bool = False):
-    selected_fuels = [name for name, qty in selected_inputs.items() if qty > 0]
+def display_fuel_details(selected_inputs: dict, fuels_db: list):
+    selected = [name for name, qty in selected_inputs.items() if qty > 0]
     if not selected:
         st.info("No fuels selected yet to show details.")
         return
     detail_rows = []
     for fuel in fuels_db:
-        if fuel["name"] in selected_fuels:
-            name = fuel["name"]
-            o = overrides.get(name, {}) if overrides else {}
-            lcv = o.get("lcv", fuel["lcv"])
-            wtt = o.get("wtt", fuel["wtt"])
-            ttw_co2 = o.get("ttw_co2", fuel["ttw_co2"])
-            ttw_ch4 = o.get("ttw_ch4", fuel["ttw_ch4"])
-            ttw_n2o = o.get("ttw_n2O", fuel["ttw_n2O"])
-            if enable_tweaks:
-                st.markdown(f"**{name} Parameters**")
-                col_lcv, col_wtt, col_co2, col_ch4, col_n2o = st.columns(5)
-                with col_lcv:
-                    lcv = st.number_input(f"LCV (MJ/g)", value=lcv, step=0.0001, format="%.4f", key=f"tweak_lcv_{name}")
-                with col_wtt:
-                    wtt = st.number_input(f"WtT (gCO₂e/MJ)", value=wtt, step=0.01, format="%.2f", key=f"tweak_wtt_{name}")
-                with col_co2:
-                    ttw_co2 = st.number_input(f"TtW CO₂ (g/g)", value=ttw_co2, step=0.001, format="%.3f", key=f"tweak_co2_{name}")
-                with col_ch4:
-                    ttw_ch4 = st.number_input(f"TtW CH₄ (g/g)", value=ttw_ch4, step=0.00001, format="%.5f", key=f"tweak_ch4_{name}")
-                with col_n2o:
-                    ttw_n2o = st.number_input(f"TtW N₂O (g/g)", value=ttw_n2o, step=0.00001, format="%.5f", key=f"tweak_n2o_{name}")
-                overrides[name] = {"lcv": lcv, "wtt": wtt, "ttw_co2": ttw_co2, "ttw_ch4": ttw_ch4, "ttw_n2O": ttw_n2o}
-            row = {"Fuel": name,
-                   "LCV (MJ/g)": lcv,
-                   "WtT Factor (gCO2eq/MJ)": wtt,
-                   "TtW CO2 (g/g)": ttw_co2,
-                   "TtW CH4 (g/g)": ttw_ch4,
-                   "TtW N2O (g/g)": ttw_n2o}
-            if "ch4_slip" in fuel:
-                row["CH4 Slip (g/MJ)"] = fuel.get("ch4_slip")
-            detail_rows.append(row)
+        if fuel["name"] in selected:
+            detail_rows.append({
+                "Fuel": fuel["name"],
+                "LCV (MJ/g)": fuel["lcv"],
+                "WtT Factor (gCO2eq/MJ)": fuel["wtt"],
+                "TtW CO2 (g/g)": fuel["ttw_co2"],
+                "TtW CH4 (g/g)": fuel["ttw_ch4"],
+                "TtW N2O (g/g)": fuel["ttw_n2O"],
+                **({"CH4 Slip (g/MJ)": fuel.get("ch4_slip")} if "ch4_slip" in fuel else {})})
     df_details = pd.DataFrame(detail_rows)
     fmt = {
         "LCV (MJ/g)": "{:.4f}",
@@ -299,90 +274,68 @@ def display_fuel_details(selected_inputs: dict, fuels_db: list, overrides: dict 
     st.subheader("LCV & Emission Factors")
     st.dataframe(df_details.style.format(fmt))
     
-col1, col2 = st.columns([7,2])
-with col1:
-    st.subheader("Fuel Breakdown")
-with col2:
-        show_details = st.checkbox("🔍 Fuel Details", value=False, key="show_details_inline", help="Toggle LCV & emission factors for the selected fuels") if selected_fuels else False
-        if show_details:
-            show_tweaks = st.checkbox("⚙️ Tweak Parameters", value=False, key="show_tweaks_inline", help="Adjust the values interactively and watch the results update immediately")
-        else: show_tweaks = False
+    col1, col2 = st.columns([7, 2])
+    with col1:
+        st.subheader("Fuel Breakdown")
+    with col2:
+        show_details = st.checkbox(
+            "🔍 Fuel Details",
+            value=False,
+            key="show_details_inline",
+            help="Toggle LCV & emission factors for the selected fuels")
 
-effective_results = base_results
-if show_tweaks :
-    effective_results = compute_results(overrides=parameter_overrides)
-df_rows = effective_results["rows"]
-if df_rows:
-    user_entered_prices = any(r.get("Price per Tonne (USD)", 0) > 0 for r in df_rows)
-    df_display = pd.DataFrame(df_rows)
+if rows:
+    df_raw = pd.DataFrame(rows).sort_values("Emissions (gCO2eq)", ascending=False).reset_index(drop=True)
+    user_entered_prices = any(r.get("Price per Tonne (USD)", 0) > 0 for r in rows)
     cols = ["Fuel", "Quantity (t)"]
     if user_entered_prices:
         cols += ["Price per Tonne (USD)", "Cost (Eur)"]
     cols += ["Emissions (gCO2eq)", "Energy (MJ)", "GHG Intensity (gCO2eq/MJ)"]
-    df_display = df_display[cols]
+    df_display = df_raw[cols]
     fmt = {
         "Quantity (t)": "{:,.0f}",
         "Emissions (gCO2eq)": "{:,.0f}",
         "Energy (MJ)": "{:,.0f}",
-        "GHG Intensity (gCO2eq/MJ)": "{:,.2f}"}
+        "GHG Intensity (gCO2eq/MJ)": "{:,.2f}",}
     if user_entered_prices:
         fmt["Price per Tonne (USD)"] = "{:,.2f}"
         fmt["Cost (Eur)"] = "{:,.2f}"
     st.dataframe(df_display.style.format(fmt))
+
+    total_cost = sum(row["Cost (Eur)"] for row in rows)
     if user_entered_prices:
-        total_cost = sum(r.get("Cost (Eur)", 0) for r in df_rows)
         st.metric("Total Fuel Cost (Eur)", f"{total_cost:,.2f}")
+else:
+    st.info("No fuel data provided yet.")
+    user_entered_prices = False
+
+if show_details:
+    display_fuel_details(fuel_inputs, FUELS)
 
     # === SUMMARY METRICS ===
     st.subheader("Summary")
-    st.metric("GHG Intensity (gCO2eq/MJ)", f"{effective_results['ghg_intensity']:.2f}")
-    st.metric("Total Emissions (tCO2eq)", f"{effective_results['emissions']/1e6:,.2f}")
+    st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}")
+    st.metric("Total Emissions (tCO2eq)", f"{emissions_tonnes:,.2f}")
     if eua_price > 0.0:
-        ets_cost = (effective_results['emissions']/1e6) * eua_price
+        ets_cost = emissions_tonnes * eua_price
         st.metric("EU ETS Cost (Eur)", f"{ets_cost:,.2f}")
-    st.metric("Compliance Balance (tCO2eq)", f"{effective_results['compliance_balance']:.2f}")
-    st.metric("Estimated Penalty (Eur)", f"{effective_results['penalty']:.2f}")
-
-    # === CONDENSED TOTAL COST SCENARIOS ===
-    if user_entered_prices and eua_price>0 and effective_results['penalty']>0:
-        total_with_penalty_ets = total_cost + effective_results['penalty'] + ets_cost
-        st.metric("Total Cost + Penalty + EU ETS (Eur)", f"{total_with_penalty_ets:,.2f}")
-    elif user_entered_prices and eua_price>0:
-        total_with_ets = total_cost + ets_cost
-        st.metric("Total Cost + EU ETS (Eur)", f"{total_with_ets:,.2f}")
-    elif user_entered_prices and effective_results['penalty']>0:
-        total_with_penalty = total_cost + effective_results['penalty']
-        st.metric("Total Cost + Penalty (Eur)", f"{total_with_penalty:,.2f}")
-    if show_details:
-        display_fuel_details(fuel_inputs, FUELS, parameter_overrides, show_tweaks)
-else:
-    st.info("No fuel data provided yet.")
-
-penalty = effective_results["penalty"]
-compliance_balance = effective_results["compliance_balance"]
-emissions = effective_results["emissions"]
-emissions_tonnes = effective_results["emissions"] / 1e6
-ets_cost_initial = emissions_tonnes * eua_price
-total_energy = effective_results["total_energy"]
-ghg_intensity = effective_results["ghg_intensity"]
-
+    st.metric("Compliance Balance (tCO2eq)", f"{compliance_balance:,.2f}")
+    st.metric("Estimated Penalty (Eur)", f"{penalty:,.2f}")
 
 show_pooling_option = False
 pooling_price_usd_per_tonne = 0.0
 pooling_cost_usd = 0.0
 pooling_cost_eur = 0.0
 total_with_pooling = 0.0
-deficit = compliance_balance
 
-if deficit < 0:
+if compliance_balance < 0:
     st.subheader("Mitigation Strategies")
         
     # === POOLING OPTION ===
-    with st.expander("**Pooling**", expanded=False):    
-        if deficit < 0:
+    with st.expander("**Pooling**", expanded=False):
             show_pooling_option = True
             st.subheader("Pooling Option")
-            st.info(f"CO2 Deficit: {deficit:,.0f} tCO2eq. You may offset this via pooling if you have access to external credits.")
+            st.info(f"CO2 Deficit: {compliance_balance:,.0f} tCO2eq. You may offset this via pooling if you have access to external credits.")
         
             pooling_price_usd_per_tonne = st.number_input(
                 "Enter Pooling Price (USD/tCO2eq)",
@@ -390,7 +343,7 @@ if deficit < 0:
                 help="The cost per tCO2eq to buy compliance credits from the pool. If 0, pooling will not be applied.")
         
             if pooling_price_usd_per_tonne > 0 and eua_price > 0.0:
-               pooling_cost_usd = pooling_price_usd_per_tonne * abs(deficit)
+               pooling_cost_usd = pooling_price_usd_per_tonne * abs(compliance_balance)
                pooling_cost_eur = pooling_cost_usd * exchange_rate
             if eua_price > 0:
                total_with_pooling = total_cost + pooling_cost_eur + ets_cost_initial
@@ -408,12 +361,12 @@ if deficit < 0:
             dec_emissions = Decimal(str(emissions))
             dec_energy = Decimal(str(total_energy))
             target = Decimal(str(target_intensity(year)))
-            mitigation_rows = []
             for fuel in FUELS:
                 co2_mj = Decimal(str(fuel["ttw_co2"])) * Decimal(str(1 - ops / 100)) * Decimal(str(wind))
                 ch4_mj = Decimal(str(fuel["ttw_ch4"])) * Decimal(str(gwp["CH4"]))
                 n2o_mj = Decimal(str(fuel["ttw_n2O"])) * Decimal(str(gwp["N2O"]))
-                total_ghg_mj = Decimal(str(fuel["wtt"])) + co2_mj + ch4_mj + n2o_mj        
+                total_ghg_mj = Decimal(str(fuel["wtt"])) + co2_mj + ch4_mj + n2o_mj      
+                
                 if total_ghg_mj >= dec_ghg:
                     continue       
                 low = Decimal("0.0")
@@ -564,10 +517,23 @@ if deficit < 0:
                     if additional_substitution_cost is not None:
                         st.markdown(f"**Additional fuel cost**: {additional_substitution_cost:,.2f} EUR")
                     if substitution_total_emissions is not None and eua_price > 0 and substitution_price_usd > 0:
-                        st.markdown(f"**EU ETS Cost**: {substitution_ets_cost:,.2f} EUR")
+                        st.markdown(f"**EU ETS Cost**: {substitution_ets_cost:,.2f} EUR")           
 else:
-    if df_rows:
-        st.info("✅ Compliance already achieved! No mitigation strategy required.")
+    st.info("✅ Compliance already achieved! No mitigation strategy required.")
+
+# === TOTAL COST SCENARIOS ===
+if rows and user_entered_prices and penalty and eua_price > 0:
+    conservative_total = total_cost + penalty + ets_cost
+    st.metric("Total Cost + Penalty + EU ETS (Eur)", f"{conservative_total:,.2f}")
+elif rows and user_entered_prices and eua_price > 0:
+    conservative_total = total_cost + ets_cost
+    st.metric("Total Cost + EU ETS (Eur)", f"{conservative_total:,.2f}")
+elif rows and user_entered_prices and penalty > 0:
+    conservative_total = total_cost + penalty
+    st.metric("Total Cost + Penalty (Eur)", f"{conservative_total:,.2f}")
+else:
+    conservative_total = total_cost
+    st.metric("Total Cost of Selected Fuels (Eur)", f"{conservative_total:,.2f}")     
                 
 # === COMPLIANCE CHART ===
 years = sorted(REDUCTIONS.keys())
@@ -636,7 +602,7 @@ if st.button("Export to PDF"):
             pdf.set_font("Arial", style="BU", size=10)
             pdf.cell(200, 10, txt="Pooling Cost", ln=True)       
             pdf.set_font("Arial", style="" ,size=10)
-            pooling_line = (f"CO2 Deficit Offset: {abs(deficit):,.0f} tCO2eq @ "
+            pooling_line = (f"CO2 Deficit Offset: {abs(compliance_balance):,.0f} tCO2eq @ "
                     f"{pooling_price_usd_per_tonne:,.2f} USD/t | "
                     f"{pooling_cost_eur:,.2f} Eur")
             pdf.cell(200, 10, txt=pooling_line, ln=True)
