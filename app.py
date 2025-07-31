@@ -130,7 +130,7 @@ st.sidebar.subheader("Fuel Inputs")
 fuel_inputs = {}
 fuel_price_inputs = {}
 initial_fuels = [f["name"] for f in FUELS if not f["rfnbo"] and "Bio" not in f["name"] and "Biodiesel" not in f["name"] and "E-" not in f["name"] and "Vegetable" not in f["name"]]
-mitigation_fuels = [f["name"] for f in FUELS if "Bio" in f["name"] or "Biodiesel" in f["name"] or "Vegetable" in f["name"] or f["rfnbo"] or "E-" in f["name"]]
+alternative_fuels = [f["name"] for f in FUELS if "Bio" in f["name"] or "Biodiesel" in f["name"] or "Vegetable" in f["name"] or f["rfnbo"] or "E-" in f["name"]]
 categories = {
     "Fossil ": [f for f in FUELS if not f['rfnbo'] and "Bio" not in f['name'] and "Biodiesel" not in f['name'] and "E-" not in f['name'] and "Green" not in f['name'] and "Vegetable" not in f['name']],
     "Bio": [f for f in FUELS if "Bio" in f['name'] or "Biodiesel" in f['name'] or "Vegetable" in f['name']],
@@ -249,9 +249,6 @@ mitigation_rows = []
 total_cost = 0.0
 def display_fuel_details(selected_inputs: dict, fuels_db: list):
     selected = [name for name, qty in selected_inputs.items() if qty > 0]
-    if not selected:
-        st.info("No fuels selected yet to show details.")
-        return
     detail_rows = []
     for fuel in fuels_db:
         if fuel["name"] in selected:
@@ -444,9 +441,9 @@ if compliance_balance < 0:
         if penalty > 0:
             st.subheader("Replacement Options (Compliance via Fuel Replacement)")
             default_substitute_fuel = "Biodiesel (UCO,B24)"
-            default_substitute_index = mitigation_fuels.index(default_substitute_fuel) if default_substitute_fuel in mitigation_fuels else 0
+            default_substitute_index = alternative_fuels.index(default_substitute_fuel) if default_substitute_fuel in alternative_fuels else 0
             initial_fuel = st.selectbox("Select Fuel to Replace", initial_fuels, key="sub_initial")
-            substitute_fuel = st.selectbox("Select Bio Fuel to Use", mitigation_fuels, index=default_substitute_index, key="sub_mitigation")      
+            substitute_fuel = st.selectbox("Select Bio Fuel to Use", alternative_fuels, index=default_substitute_index, key="sub_mitigation")      
             qty_initial = fuel_inputs.get(initial_fuel, 0.0)
             price_initial = fuel_price_inputs.get(initial_fuel, 0.0) * exchange_rate
             substitution_price_usd = st.number_input(
