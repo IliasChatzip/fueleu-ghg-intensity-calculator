@@ -298,6 +298,7 @@ def display_fuel_details(selected_inputs: dict, fuels_db: list, overrides: dict 
         "CH4 Slip (g/MJ)": "{:.1f}",}
     st.subheader("LCV & Emission Factors")
     st.dataframe(df_details.style.format(fmt))
+selected_fuels = [name for name, qty in fuel_inputs.items() if qty > 0]
 col1, col2 = st.columns([7,2])
 with col1:
     st.subheader("Fuel Breakdown")
