@@ -271,9 +271,9 @@ def display_fuel_details(selected_inputs: dict, fuels_db: list):
     st.subheader("LCV & Emission Factors")
     st.dataframe(df_details.style.format(fmt))
 
-if not rows:
+if not fuel_inputs:
     st.info("No fuel data provided yet.")
-elif rows:
+elif fuel_inputs:
     col1, col2 = st.columns([7, 2])
     with col1:
         st.subheader("Fuel Breakdown")
