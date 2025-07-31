@@ -310,7 +310,7 @@ def display_fuel_details(selected_inputs: dict, fuels_db: list, overrides: dict 
                 show_tweaks = st.checkbox("⚙️ Tweak Parameters", key="show_tweaks_inline", help="Adjust the values interactively and watch your results update immediately")
 
 effective_results = base_results
-if show_tweaks and parameter_overrides:
+if show_tweaks :
     effective_results = compute_results(overrides=parameter_overrides)
 import pandas as pd
 df_rows = effective_results["rows"]
