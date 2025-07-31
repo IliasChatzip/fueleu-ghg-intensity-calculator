@@ -298,25 +298,22 @@ def display_fuel_details(selected_inputs: dict, fuels_db: list, overrides: dict 
         "CH4 Slip (g/MJ)": "{:.1f}",}
     st.subheader("LCV & Emission Factors")
     st.dataframe(df_details.style.format(fmt))
-    col1, col2 = st.columns([7,2])
-    with col1:
-        st.subheader("Fuel Breakdown")
-    show_details = False
-    show_tweaks = False
-    with col2:
-        if selected:
-            show_details = st.checkbox("🔍 Fuel Details", value=False, key="show_details_inline", help="Toggle LCV & emission factors for the selected fuels")
-            if show_details:
-                show_tweaks = st.checkbox("⚙️ Tweak Parameters", key="show_tweaks_inline", help="Adjust the values interactively and watch the results update immediately")
+    
+col1, col2 = st.columns([7,2])
+with col1:
+    st.subheader("Fuel Breakdown")
+show_details = False
+show_tweaks = False
+with col2:
+    show_details = st.checkbox("🔍 Fuel Details", value=False, key="show_details_inline", help="Toggle LCV & emission factors for the selected fuels") if selected else False
+        show_tweaks = st.checkbox("⚙️ Tweak Parameters", key="show_tweaks_inline", help="Adjust the values interactively and watch the results update immediately") if show_details else False
 
 effective_results = base_results
 if show_tweaks :
     effective_results = compute_results(overrides=parameter_overrides)
 df_rows = effective_results["rows"]
 if df_rows:
-    # Check if any prices were entered
     user_entered_prices = any(r.get("Price per Tonne (USD)", 0) > 0 for r in df_rows)
-    # Convert to DataFrame
     df_display = pd.DataFrame(df_rows)
     cols = ["Fuel", "Quantity (t)"]
     if user_entered_prices:
@@ -357,7 +354,7 @@ if df_rows:
         total_with_penalty = total_cost + effective_results['penalty']
         st.metric("Total Cost + Penalty (Eur)", f"{total_with_penalty:,.2f}")
     if show_details:
-        display_fuel_details(fuel_inputs, FUELS, parameter_overrides, enable_tweaks=show_tweaks)
+        display_fuel_details(fuel_inputs, FUELS, parameter_overrides, show_tweaks)
 else:
     st.info("No fuel data provided yet.")
 
