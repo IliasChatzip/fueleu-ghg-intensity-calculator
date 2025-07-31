@@ -617,11 +617,11 @@ if st.button("Export to PDF"):
             pdf.cell(200, 10, txt=f"Total Initial Fuel Cost: {conservative_total:,.2f} Eur", ln=True)
         else:
             for row in rows:
-            fuel_name = row['Fuel']
-            qty = row['Quantity (t)']
-            ghg_intensity = row['GHG Intensity (gCO2eq/MJ)']
-            line = f"{fuel_name}: {qty:,.0f} t | GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ"
-            pdf.cell(200, 10, txt=line, ln=True)
+                fuel_name = row['Fuel']
+                qty = row['Quantity (t)']
+                ghg_intensity = row['GHG Intensity (gCO2eq/MJ)']
+                line = f"{fuel_name}: {qty:,.0f} t | GHG Intensity: {ghg_intensity:.2f} gCO2eq/MJ"
+                pdf.cell(200, 10, txt=line, ln=True)
             
         if compliance_balance < 0:
             # Pooling Option
