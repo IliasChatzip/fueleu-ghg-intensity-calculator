@@ -301,16 +301,16 @@ def display_fuel_details(selected_inputs: dict, fuels_db: list, overrides: dict 
     col1, col2 = st.columns([7,2])
     with col1:
         st.subheader("Fuel Breakdown")
-    display_details = False
-    enable_tweaks = False
+    show_details = False
+    show_tweaks = False
     with col2:
         if selected:
-            display_details = st.checkbox("🔍 Fuel Details", value=False, key="show_details_inline", help="Toggle LCV & emission factors for the selected fuels")
+            show_details = st.checkbox("🔍 Fuel Details", value=False, key="show_details_inline", help="Toggle LCV & emission factors for the selected fuels")
             if show_details:
-                enable_tweaks = st.checkbox("⚙️ Tweak Parameters", key="show_tweaks_inline", help="Adjust the values interactively and watch the results update immediately")
+                show_tweaks = st.checkbox("⚙️ Tweak Parameters", key="show_tweaks_inline", help="Adjust the values interactively and watch the results update immediately")
 
 effective_results = base_results
-if enable_tweaks :
+if show_tweaks :
     effective_results = compute_results(overrides=parameter_overrides)
 df_rows = effective_results["rows"]
 if df_rows:
