@@ -521,10 +521,10 @@ if rows:
                         st.success(f"To comply with the FuelEU target of {target:.2f} gCO2eq/MJ, you need to replace at least **{best_x*100:.2f}%** of {initial_fuel} with {substitute_fuel}.")
                         st.markdown(f"**Replaced {initial_fuel} mass**: {replaced_mass:,.1f} tonnes")
                         st.markdown(f"**Added {substitute_fuel} mass**: {replaced_mass:,.1f} tonnes")
-                        if additional_substitution_cost is not None:
-                            st.markdown(f"**Additional fuel cost**: {additional_substitution_cost:,.2f} EUR")
-                        if substitution_total_emissions is not None and eua_price and substitution_price_usd > 0:
-                            st.markdown(f"**EU ETS Cost**: {substitution_ets_cost:,.2f} EUR")
+                    if additional_substitution_cost is not None:
+                        st.markdown(f"**Additional fuel cost**: {additional_substitution_cost:,.2f} EUR")
+                    if substitution_total_emissions is not None and eua_price and substitution_price_usd > 0:
+                        st.markdown(f"**EU ETS Cost**: {substitution_ets_cost:,.2f} EUR")
     
         # === COST-BENEFIT ANALYSIS ===
         if user_entered_prices:
