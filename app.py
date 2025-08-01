@@ -546,7 +546,7 @@ if rows:
             elif rows and mitigation_price_usd > 0:
                 st.metric("Initial fuels + Bio Fuels (No Penalty)", f"{total_cost + added_biofuel_cost:,.2f}")
             if rows and substitution_price_usd and eua_price > 0:
-                st.metric("Fuel Replacement + EU ETS (No Penalty)", f"{total_substitution_cost:,.2f}")
+                st.metric("Fuel Replacement + EU ETS (No Penalty)", f"{total_substitution_cost + substitution_ets_cost:,.2f}")
             elif rows and substitution_price_usd > 0:
                 st.metric("Fuel Replacement (No Penalty)", f"{total_substitution_cost:,.2f}")
     else:
