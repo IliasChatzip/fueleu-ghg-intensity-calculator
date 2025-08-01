@@ -523,7 +523,7 @@ if rows:
                         st.markdown(f"**Added {substitute_fuel} mass**: {replaced_mass:,.1f} tonnes")
                         if additional_substitution_cost is not None:
                             st.markdown(f"**Additional fuel cost**: {additional_substitution_cost:,.2f} EUR")
-                        if substitution_total_emissions is not None and eua_price > 0 and substitution_price_usd > 0:
+                        if substitution_total_emissions is not None and eua_price and substitution_price_usd > 0:
                             st.markdown(f"**EU ETS Cost**: {substitution_ets_cost:,.2f} EUR")
     
         # === COST-BENEFIT ANALYSIS ===
