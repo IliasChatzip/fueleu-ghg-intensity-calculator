@@ -427,7 +427,8 @@ if rows:
                         for row in mitigation_rows:
                             row["Price (USD/t)"] = mitigation_price_usd if row["Fuel"] == selected_fuel else 0.0
                             row["Estimated Cost (Eur)"] = row["Price (USD/t)"] * exchange_rate * row["Required Amount (t)"]
-                        added_biofuel_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)  
+                        added_biofuel_cost = sum(row.get("Estimated Cost (Eur)", 0) for row in mitigation_rows)
+                        st.markdown(f"**Bio Fuel Cost:** {added_biofuel_cost:,.2f} EUR")
                     else:
                         mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
                         df_mit = pd.DataFrame(mitigation_rows)
