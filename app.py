@@ -498,7 +498,7 @@ if rows:
                         replaced_mass = best_x * qty_initial
                         substitution_total_emissions  = total_emissions_blend
                         if substitution_total_emissions is not None and eua_price > 0.0:
-                        substitution_ets_cost = (substitution_total_emissions / 1_000_000) * eua_price
+                            substitution_ets_cost = (substitution_total_emissions / 1_000_000) * eua_price
                         else:
                             substitution_ets_cost = None
                         if price_initial and substitution_price_usd and eua_price > 0.0:
