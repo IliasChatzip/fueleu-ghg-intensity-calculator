@@ -496,12 +496,15 @@ if rows:
                         total_substitution_cost = None
                     else:
                         replaced_mass = best_x * qty_initial
-                        substitution_total_emissions  = total_emissions_blend     
+                        substitution_total_emissions  = total_emissions_blend
+                        if substitution_total_emissions = not None and eua_price > 0.0:
+                        substitution_ets_cost = (substitution_total_emissions / 1_000_000) * eua_price
+                        else:
+                            substitution_ets_cost = None
                         if price_initial and substitution_price_usd and eua_price > 0.0:
                             mitigation_fuel_cost = replaced_mass * substitution_price_eur
                             remaining_fuel_cost = (qty_initial - replaced_mass) * price_initial
                             additional_substitution_cost = (replaced_mass * (substitution_price_eur - price_initial))
-                            substitution_ets_cost = (substitution_total_emissions / 1_000_000) * eua_price
                             substitution_total_cost = mitigation_fuel_cost + remaining_fuel_cost + substitution_ets_cost
                             other_fuel_costs = sum(
                                 fuel_inputs.get(f["name"], 0.0) * fuel_price_inputs.get(f["name"], 0.0) * exchange_rate
