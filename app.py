@@ -496,25 +496,23 @@ if rows:
                         total_substitution_cost = None
                     else:
                         replaced_mass = best_x * qty_initial
-                        substitution_total_emissions  = total_emissions_blend
-                        if substitution_total_emissions is not None and eua_price > 0:
+                        substitution_total_emissions  = total_emissions_blend     
+                        if price_initial and substitution_price_usd and eua_price > 0.0:
+                            mitigation_fuel_cost = replaced_mass * substitution_price_eur
+                            remaining_fuel_cost = (qty_initial - replaced_mass) * price_initial
+                            additional_substitution_cost = (replaced_mass * (substitution_price_eur - price_initial))
                             substitution_ets_cost = (substitution_total_emissions / 1_000_000) * eua_price
-                            if price_initial and substitution_price_usd > 0.0:
-                                mitigation_fuel_cost = replaced_mass * substitution_price_eur
-                                remaining_fuel_cost = (qty_initial - replaced_mass) * price_initial
-                                additional_substitution_cost = (replaced_mass * (substitution_price_eur - price_initial))
-                                substitution_total_cost = mitigation_fuel_cost + remaining_fuel_cost + substitution_ets_cost
-                                other_fuel_costs = sum(
-                                    fuel_inputs.get(f["name"], 0.0) * fuel_price_inputs.get(f["name"], 0.0) * exchange_rate
-                                    for f in FUELS if f["name"] not in [initial_fuel])
-                                total_substitution_cost = substitution_total_cost + other_fuel_costs
-                            else:
-                                substitution_total_cost = mitigation_fuel_cost + remaining_fuel_cost
-                                other_fuel_costs = sum(
-                                    fuel_inputs.get(f["name"], 0.0) * fuel_price_inputs.get(f["name"], 0.0) * exchange_rate
-                                    for f in FUELS if f["name"] not in [initial_fuel])
-                                total._substitution_cost = substitution_total_cost + other_fuel_costs
-
+                            substitution_total_cost = mitigation_fuel_cost + remaining_fuel_cost + substitution_ets_cost
+                            other_fuel_costs = sum(
+                                fuel_inputs.get(f["name"], 0.0) * fuel_price_inputs.get(f["name"], 0.0) * exchange_rate
+                                for f in FUELS if f["name"] not in [initial_fuel])
+                            total_substitution_cost = substitution_total_cost + other_fuel_costs
+                        elif price_initial and substitution_price_usd > 0.0:
+                            substitution_total_cost = mitigation_fuel_cost + remaining_fuel_cost
+                            other_fuel_costs = sum(
+                                fuel_inputs.get(f["name"], 0.0) * fuel_price_inputs.get(f["name"], 0.0) * exchange_rate
+                                for f in FUELS if f["name"] not in [initial_fuel])
+                            total._substitution_cost = substitution_total_cost + other_fuel_costs
                         else:
                             substitution_ets_cost = None
                             substitution_total_cost = None
