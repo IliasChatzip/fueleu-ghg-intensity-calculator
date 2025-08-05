@@ -632,7 +632,7 @@ if st.button("Export to PDF"):
             
         if compliance_balance < 0:
             # Pooling Option
-            if show_pooling_option and pooling_price_usd_per_tonne > 0:
+            if total_cost and show_pooling_option and pooling_price_usd_per_tonne > 0:
                 pdf.ln(5)
                 pdf.set_font("Arial", style="BU", size=10)
                 pdf.cell(200, 10, txt="Pooling Cost", ln=True)       
