@@ -690,8 +690,8 @@ if st.button("Export to PDF"):
                         pdf.set_font("Arial", style="B", size=11)
                         pdf.cell(200, 10, txt=f"- Initial fuels + Pooling, no Penalty: {total_with_pooling:,.2f} Eur", ln=True)            
                 if added_biofuel_cost and eua_price > 0:
-                pdf.set_font("Arial", style="B", size=11)
-                pdf.cell(200, 10, txt=f"- Initial fuels + Bio fuels + EU ETS, no Penalty: {total_cost + added_biofuel_cost + new_blend_ets_cost:,.2f} Eur", ln=True)                        
+                    pdf.set_font("Arial", style="B", size=11)
+                    pdf.cell(200, 10, txt=f"- Initial fuels + Bio fuels + EU ETS, no Penalty: {total_cost + added_biofuel_cost + new_blend_ets_cost:,.2f} Eur", ln=True)                        
                 else:
                     if added_biofuel_cost > 0:
                         pdf.set_font("Arial", style="B", size=11)
