@@ -671,7 +671,7 @@ if st.button("Export to PDF"):
                 if eua_price > 0:
                     pdf.cell(200, 10, txt=f"EU ETS Cost: {substitution_ets_cost:,.0f} Eur", ln=True)
                     
-            if penalty and total_cost > 0: 
+            if total_cost > 0: 
                 pdf.ln(5)
                 pdf.set_font("Arial", "B", size=12)
                 pdf.cell(200, 10, txt="--- Cost-Benefit Analysis ---", ln=True)
@@ -690,8 +690,8 @@ if st.button("Export to PDF"):
                         pdf.set_font("Arial", style="B", size=11)
                         pdf.cell(200, 10, txt=f"- Initial fuels + Pooling, no Penalty: {total_with_pooling:,.2f} Eur", ln=True)            
                 if added_biofuel_cost and eua_price > 0:
-                    pdf.set_font("Arial", style="B", size=11)
-                    pdf.cell(200, 10, txt=f"- Initial fuels + Bio fuels + EU ETS, no Penalty: {total_cost + added_biofuel_cost + new_blend_ets_cost:,.2f} Eur", ln=True)                        
+                pdf.set_font("Arial", style="B", size=11)
+                pdf.cell(200, 10, txt=f"- Initial fuels + Bio fuels + EU ETS, no Penalty: {total_cost + added_biofuel_cost + new_blend_ets_cost:,.2f} Eur", ln=True)                        
                 else:
                     if added_biofuel_cost > 0:
                         pdf.set_font("Arial", style="B", size=11)
@@ -702,7 +702,7 @@ if st.button("Export to PDF"):
                 else:
                     if total_substitution_cost is not None:
                         pdf.set_font("Arial", style="B", size=11)
-                        pdf.cell(200, 10, txt=f"- Fuel Replacement, no Penalty: {total_substitution_cost:,.2f} Eur", ln=True)
+                                pdf.cell(200, 10, txt=f"- Fuel Replacement, no Penalty: {total_substitution_cost:,.2f} Eur", ln=True)               
         else:
             pdf.set_font("Arial", style="B", size=11)
             pdf.cell(200, 10, txt=f"- Compliance already achieved -")
