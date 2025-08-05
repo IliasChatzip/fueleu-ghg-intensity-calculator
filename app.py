@@ -702,7 +702,7 @@ if st.button("Export to PDF"):
                 else:
                     if total_substitution_cost is not None:
                         pdf.set_font("Arial", style="B", size=11)
-                                pdf.cell(200, 10, txt=f"- Fuel Replacement, no Penalty: {total_substitution_cost:,.2f} Eur", ln=True)               
+                        pdf.cell(200, 10, txt=f"- Fuel Replacement, no Penalty: {total_substitution_cost:,.2f} Eur", ln=True)               
         else:
             pdf.set_font("Arial", style="B", size=11)
             pdf.cell(200, 10, txt=f"- Compliance already achieved -")
