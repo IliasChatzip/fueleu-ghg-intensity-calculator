@@ -1,6 +1,6 @@
 # FuelEU Maritime GHG Intensity & Penalty Calculator
 
-This is a Streamlit app for calculating fuel GHG intensity and compliance penalties according to the FuelEU Maritime regulation.
+This is a Streamlit app for calculating fuel GHG intensity, and compliance balance and penalties according to the FuelEU Maritime regulation.
 
 ## Features
 
