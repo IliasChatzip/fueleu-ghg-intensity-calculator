@@ -452,7 +452,6 @@ if rows:
                 additional_substitution_cost = None
                 replaced_mass = None
                 if qty_initial > 0:
-                    st.markdown("Estimate compliance by replacing the smallest possible fraction of a high-emission fuel with a bio fuel, ensuring GHG intensity is just below the FuelEU target.")    
                     initial_props = next(f for f in FUELS if f["name"] == initial_fuel)
                     sub_props = next(f for f in FUELS if f["name"] == substitute_fuel)
                     co2_initial = initial_props["ttw_co2"] * (1 - ops / 100) * wind
