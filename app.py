@@ -342,7 +342,7 @@ if rows:
         with st.expander("**Pooling**", expanded=False):
                 show_pooling_option = True
                 st.subheader("Pooling Option")
-                st.info(f"CO2 Deficit: {compliance_balance:,.0f} tCO2eq. You may offset this via pooling if you have access to external credits.")
+                st.info(f"CO2 Deficit: {abs(compliance_balance):,.0f} tCO2eq. You may offset this via pooling if you have access to external credits.")
             
                 pooling_price_usd_per_tonne = st.number_input(
                     "Enter Pooling Price (USD/tCO2eq)",
