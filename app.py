@@ -361,7 +361,7 @@ if rows:
             getcontext().prec = 12
             user_entered_mitigation_price = False
             if penalty > 0:
-                st.info(" This strategy **increases total fuel consumption** by **supplementing** the initial fuels with mitigation fuels to help achieve compliance.")
+                st.info("This strategy **increases total fuel consumption** by **supplementing** the initial fuels with mitigation fuels to help achieve compliance.")
                 dec_ghg = Decimal(str(ghg_intensity))
                 dec_emissions = Decimal(str(emissions))
                 dec_energy = Decimal(str(total_energy))
