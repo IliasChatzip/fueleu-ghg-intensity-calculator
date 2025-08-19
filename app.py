@@ -341,7 +341,6 @@ if rows:
         # === POOLING OPTION ===
         with st.expander("**Pooling**", expanded=False):
                 show_pooling_option = True
-                st.subheader("Pooling Option")
                 st.info(f"CO2 Deficit: {abs(compliance_balance):,.0f} tCO2eq. You may offset this via pooling if you have access to external credits.")
             
                 pooling_price_usd_per_tonne = st.number_input(
@@ -358,11 +357,10 @@ if rows:
                     total_with_pooling = total_cost + pooling_cost_eur
                     
         # === BIO-FUELS OPTIONS ===
-        with st.expander("**Add Bio Fuel**", expanded=False):
+        with st.expander("**Add Bio/RFNBO Fuel**", expanded=False):
             getcontext().prec = 12
             user_entered_mitigation_price = False
             if penalty > 0:
-                st.subheader("Bio Fuel Options")
                 st.info(" This strategy **increases total fuel consumption** by **supplementing** the initial fuels with bio fuels to help achieve compliance.")
                 dec_ghg = Decimal(str(ghg_intensity))
                 dec_emissions = Decimal(str(emissions))
@@ -438,9 +436,9 @@ if rows:
                             "New Emissions (gCO2eq)": "{:,.0f}"}))
         
         # === SUBSTITUTION SCENARIO ===
-        with st.expander("**Replace high emission fuel with Bio Fuel**", expanded=False):
+        with st.expander("**Replace high emission fuel with Bio/RFNBO Fuel**", expanded=False):
             if penalty > 0:
-                st.subheader("Replacement Options (Compliance via Fuel Replacement)")
+                st.info("Replaces a fraction of a selected fossil fuel with a mitigation fuel; total energy remains close to original.")
                 default_substitute_fuel = "Biodiesel (UCO,B24)"
                 default_substitute_index = alternative_fuels.index(default_substitute_fuel) if default_substitute_fuel in alternative_fuels else 0
                 initial_fuel = st.selectbox("Select Fuel to Replace", initial_fuels, key="sub_initial")
