@@ -946,76 +946,76 @@ if st.button("Export to PDF (with selections)"):
             pdf.set_font("Arial", "B", 12)
             pdf.cell(200, 10, txt="--- Cost-Benefit Analysis ---", ln=True)
         
-        # Base scenario
-        base_parts = [("Initial fuels", total_cost)]
-        label_bits = ["Initial fuels"]
-        base_total = total_cost
-        if penalty and penalty > 0:
-            base_parts.append(("Penalty", penalty))
-            label_bits.append("Penalty")
-            base_total += penalty
-        if eua_price > 0:
-            base_parts.append(("EU ETS", ets_cost))
-            label_bits.append("EU ETS")
-            base_total += ets_cost
-        _pdf_bullet(pdf, " + ".join(label_bits), base_total, base_parts)
-        
-        
-        # Pooling (only if a price was entered during the session)
-        try:
-            _pool_price = float(pooling_price_usd_per_tonne)
-        except Exception:
-            _pool_price = 0.0
-        if _pool_price > 0:
-            _pool_cost_eur = _pool_price * float(exchange_rate) * abs(float(compliance_balance))
-            pool_parts = [("Initial fuels", total_cost), ("Pooling", _pool_cost_eur)]
-            pool_label = "Initial fuels + Pooling"
-            pool_total = total_cost + _pool_cost_eur
+            # Base scenario
+            base_parts = [("Initial fuels", total_cost)]
+            label_bits = ["Initial fuels"]
+            base_total = total_cost
+            if penalty and penalty > 0:
+                base_parts.append(("Penalty", penalty))
+                label_bits.append("Penalty")
+                base_total += penalty
             if eua_price > 0:
-                pool_parts.append(("EU ETS", ets_cost))
-                pool_label += " + EU ETS"
-                pool_total += ets_cost
-            _pdf_bullet(pdf, pool_label + " (no Penalty)", pool_total, pool_parts)
+                base_parts.append(("EU ETS", ets_cost))
+                label_bits.append("EU ETS")
+                base_total += ets_cost
+            _pdf_bullet(pdf, " + ".join(label_bits), base_total, base_parts)
+            
+            
+            # Pooling (only if a price was entered during the session)
+            try:
+                _pool_price = float(pooling_price_usd_per_tonne)
+            except Exception:
+                _pool_price = 0.0
+            if _pool_price > 0:
+                _pool_cost_eur = _pool_price * float(exchange_rate) * abs(float(compliance_balance))
+                pool_parts = [("Initial fuels", total_cost), ("Pooling", _pool_cost_eur)]
+                pool_label = "Initial fuels + Pooling"
+                pool_total = total_cost + _pool_cost_eur
+                if eua_price > 0:
+                    pool_parts.append(("EU ETS", ets_cost))
+                    pool_label += " + EU ETS"
+                    pool_total += ets_cost
+                _pdf_bullet(pdf, pool_label + " (no Penalty)", pool_total, pool_parts)
+            
+            # Bio fuel addition (if priced)
+            if added_biofuel_cost > 0:
+                ets_component = (
+                new_blend_ets_cost if (eua_price > 0 and new_blend_ets_cost is not None)
+                else (ets_cost if eua_price > 0 else 0.0))
+                bio_parts = [("Initial fuels", total_cost), ("Bio fuels", added_biofuel_cost)]
+                bio_label = "Initial fuels + Bio fuels"
+                bio_total = total_cost + added_biofuel_cost
+                if eua_price > 0:
+                    bio_parts.append(("EU ETS", ets_component))
+                    bio_label += " + EU ETS"
+                    bio_total += ets_component
+                _pdf_bullet(pdf, bio_label + " (no Penalty)", bio_total, bio_parts)
+            
+            # Replacement (if priced)
+            try:
+                _sub_price = float(substitution_price_usd)
+            except Exception:
+                _sub_price = 0.0
         
-        # Bio fuel addition (if priced)
-        if added_biofuel_cost > 0:
-            ets_component = (
-            new_blend_ets_cost if (eua_price > 0 and new_blend_ets_cost is not None)
-            else (ets_cost if eua_price > 0 else 0.0))
-            bio_parts = [("Initial fuels", total_cost), ("Bio fuels", added_biofuel_cost)]
-            bio_label = "Initial fuels + Bio fuels"
-            bio_total = total_cost + added_biofuel_cost
-            if eua_price > 0:
-                bio_parts.append(("EU ETS", ets_component))
-                bio_label += " + EU ETS"
-                bio_total += ets_component
-            _pdf_bullet(pdf, bio_label + " (no Penalty)", bio_total, bio_parts)
+            if _sub_price > 0 and (additional_substitution_cost is not None):
+                repl_total_direct = (
+                    float(total_cost)
+                    + float(additional_substitution_cost)
+                    + (float(substitution_ets_cost) if (eua_price > 0 and substitution_ets_cost is not None) else 0.0))
         
-        # Replacement (if priced)
-        try:
-            _sub_price = float(substitution_price_usd)
-        except Exception:
-            _sub_price = 0.0
-    
-        if _sub_price > 0 and (additional_substitution_cost is not None):
-            repl_total_direct = (
-                float(total_cost)
-                + float(additional_substitution_cost)
-                + (float(substitution_ets_cost) if (eua_price > 0 and substitution_ets_cost is not None) else 0.0))
-    
-            _pdf_bullet(
-                pdf,
-                "Fuel Replacement" + (" + EU ETS, no Penalty" if eua_price > 0 else ", no Penalty"),
-                repl_total_direct,
-                [
-                    ("Initial fuels", total_cost),
-                    ("Additional fuel cost", additional_substitution_cost),
-                    ("EU ETS", substitution_ets_cost if eua_price > 0 else 0.0),],)
-        
-            if eua_price > 0:
-                pdf.cell(200, 8, txt=f"- Fuel Replacement + EU ETS, no Penalty: {repl_total_direct:,.2f} Eur", ln=True)
-            else:
-                pdf.cell(200, 8, txt=f"- Fuel Replacement, no Penalty: {repl_total_direct:,.2f} Eur", ln=True)
+                _pdf_bullet(
+                    pdf,
+                    "Fuel Replacement" + (" + EU ETS, no Penalty" if eua_price > 0 else ", no Penalty"),
+                    repl_total_direct,
+                    [
+                        ("Initial fuels", total_cost),
+                        ("Additional fuel cost", additional_substitution_cost),
+                        ("EU ETS", substitution_ets_cost if eua_price > 0 else 0.0),],)
+            
+                if eua_price > 0:
+                    pdf.cell(200, 8, txt=f"- Fuel Replacement + EU ETS, no Penalty: {repl_total_direct:,.2f} Eur", ln=True)
+                else:
+                    pdf.cell(200, 8, txt=f"- Fuel Replacement, no Penalty: {repl_total_direct:,.2f} Eur", ln=True)
         
         # --- Optional charts (saved as images and embedded) ---
         chart_tmp_files = []
