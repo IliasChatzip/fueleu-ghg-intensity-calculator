@@ -129,11 +129,17 @@ def compute_ets_cost(ttw_co2_g: Decimal, ttw_nonco2_g: Decimal, price_eur_per_t:
     covered_tonnes = float(covered_g / Decimal("1000000"))
     return covered_tonnes * float(price_eur_per_t), covered_tonnes
 
-# === READ ME FILE ===
-st.sidebar.markdown("### 📄 Help & README")
-if st.sidebar.button("Open README"):
-    readme_path = pathlib.Path(__file__).with_name("README.md")
-    st.markdown(readme_path.read_text(encoding="utf-8"))
+# === README FILE ===
+st.sidebar.markdown("### 📄 Help")
+if "show_readme" not in st.session_state:
+    st.session_state.show_readme = False
+col1, col2 = st.columns([1, 1])
+with col1:
+    st.button("📖 Open README", on_click=lambda: st.session_state.update(show_readme=True))
+with col2:
+    st.button("✖ Close README", on_click=lambda: st.session_state.update(show_readme=False))
+if st.session_state.show_readme:
+    st.markdown(readme_text)
 
 # === STABLE RESET HANDLER ===
 def reset_app():
