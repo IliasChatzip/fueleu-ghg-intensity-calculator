@@ -139,7 +139,7 @@ def reset_app():
 if st.session_state.get("trigger_reset", False):
     reset_app()
 
-st.sidebar.button("Reset Calculator", on_click=lambda: st.session_state.update({"trigger_reset": True}))
+st.sidebar.button("🔁 Reset Calculator", on_click=lambda: st.session_state.update({"trigger_reset": True}))
 
 # === SIDEBAR INPUTS ===
 st.title("Fuel EU - GHG Intensity & Penalty Calculator")
