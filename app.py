@@ -127,776 +127,776 @@ FUELS = [
 # === HELPERS ===
 def target_intensity(year: int) -> float:
     if year <= 2020:
-        return BASE_TARGET
-    if year <= 2029:
-        return BASE_TARGET * (1 - REDUCTIONS[2025])
-    if year <= 2034:
-        return BASE_TARGET * (1 - REDUCTIONS[2030])
-    if year <= 2039:
-        return BASE_TARGET * (1 - REDUCTIONS[2035])
-    if year <= 2044:
-        return BASE_TARGET * (1 - REDUCTIONS[2040])
-    if year <= 2049:
-        return BASE_TARGET * (1 - REDUCTIONS[2045])
-    return BASE_TARGET * (1 - REDUCTIONS[2050])
-
-
-def default_phase_in_pct(year: int) -> int:
-    # EU ETS maritime phase-in: 2024:40%, 2025:70%, 2026+:100%. Years before ETS -> 0 by default
-    if year <= 2024:
-        return 0
-    if year == 2025:
-        return 70
-    return 100
-
-
-def compute_ets_cost(ttw_co2_g: Decimal, ttw_nonco2_g: Decimal, price_eur_per_t: float,
-                      effective_coverage_pct: float, phase_in_pct: float, include_nonco2: bool):
-    """Return (cost_eur, covered_tonnes). ETS is TtW-only. CH4+N2O+slip included from 2026+ if include_nonco2 is True."""
-    ttw_for_ets = ttw_co2_g + (ttw_nonco2_g if include_nonco2 else Decimal("0"))
-    covered_g = ttw_for_ets * Decimal(str(effective_coverage_pct / 100.0)) * Decimal(str(phase_in_pct / 100.0))
-    covered_tonnes = float(covered_g / Decimal("1000000"))
-    return covered_tonnes * float(price_eur_per_t), covered_tonnes
-
-# === README FILE ===
-if "show_readme" not in st.session_state:
-    st.session_state.show_readme = False
-
-def _open_readme():
-    st.session_state.show_readme = True
-
-def _close_readme():
-    st.session_state.show_readme = False
-
-with st.sidebar:
-    st.markdown("📖 Help")
-    col_a, col_b = st.columns(2)
-    with col_a:
-        st.button("Open README", on_click=_open_readme, use_container_width=True)
-    with col_b:
-        st.button("✖ Close", on_click=_close_readme, use_container_width=True)
-    st.markdown("---")  # optional divider
-
-# Render README in the main page when toggled on
-if st.session_state.show_readme:
-    try:
-        with open("README.md", "r", encoding="utf-8") as f:
-            readme_text = f.read()
-    except Exception:
-        readme_text = "_README.md not found in app directory._"
-    st.markdown(readme_text, unsafe_allow_html=False)
-
-# === STABLE RESET HANDLER ===
-def reset_app():
-    for key in list(st.session_state.keys()):
-        del st.session_state[key]
-    st.session_state["trigger_reset"] = False
-
-if st.session_state.get("trigger_reset", False):
-    reset_app()
-
-st.sidebar.button("🔁 Reset Calculator", on_click=lambda: st.session_state.update({"trigger_reset": True}))
-
-# === SIDEBAR INPUTS ===
-st.title("Fuel EU - GHG Intensity & Penalty Calculator")
-st.sidebar.info("Enter fuel prices in USD & provide exchange rate.")
-
-# Fuel pickers
-fuel_inputs = {}
-fuel_price_inputs = {}
-initial_fuels = [
-    f["name"]
-    for f in FUELS
-    if (not f["rfnbo"]) and ("Bio" not in f["name"]) and ("Biodiesel" not in f["name"]) and ("E-" not in f["name"]) and ("Vegetable" not in f["name"]) and ("SVO" not in f["name"]) and ("HVO" not in f["name"]) and ("Bio-" not in f["name"])  # keep purely fossil
-]
-mitigation_fuels = [f["name"] for f in FUELS if ("Bio" in f["name"]) or ("Biodiesel" in f["name"]) or ("Vegetable" in f["name"]) or f["rfnbo"] or ("E-" in f["name"]) or ("HVO" in f["name"]) or ("SVO" in f["name"]) ]
-alternative_fuels = mitigation_fuels  # alias used below
-
-categories = {
-    "Fossil": [f for f in FUELS if f in [x for x in FUELS if x["name"] in initial_fuels]],
-    "Bio": [f for f in FUELS if ("Bio" in f['name']) or ("Biodiesel" in f['name']) or ("Vegetable" in f['name']) or ("HVO" in f['name']) or ("SVO" in f['name'])],
-    "RFNBO": [f for f in FUELS if f['rfnbo'] or ("E-" in f['name'])],
-}
-
-for category, fuels_in_cat in categories.items():
-    with st.sidebar.expander(f"{category} Fuels", expanded=False):
-        selected_fuels = st.multiselect(f"Select {category} Fuels", [f["name"] for f in fuels_in_cat], key=f"multiselect_{category}")
-        for selected_fuel in selected_fuels:
-            qty = st.number_input(f"{selected_fuel} (t)", min_value=0.0, step=1.0, value=0.0, format="%0.0f", key=f"qty_{selected_fuel}")
-            fuel_inputs[selected_fuel] = qty
-            price = st.number_input(
-                f"{selected_fuel} - Price (USD/t)",
-                min_value=0.0,
-                value=0.0,
-                step=0.01,
-                format="%.2f",
-                key=f"price_{selected_fuel}",)
-            fuel_price_inputs[selected_fuel] = price
-
-# EUA price and FX
-st.sidebar.header("EU ETS Pricing")
-eua_price = st.sidebar.number_input(
-    "EU ETS Allowance Price (EUR/tCO2eq)", min_value=0.0, value=0.0, step=1.0, format="%.2f",
-    help="Enter current market price per tCO2eq for EU ETS allowances (EUA).",)
-
-st.sidebar.markdown("---")
-exchange_rate = st.sidebar.number_input(
-    "EUR/USD Exchange Rate", min_value=0.000001, value=1.000000, step=0.000001, format="%.6f",
-    help="Exchange rate to convert USD fuel prices to EUR (EUR = USD * rate).",)
-
-# Other params
-st.sidebar.header("Input Parameters")
-year = st.sidebar.selectbox("Compliance Year", [2020, 2025, 2030, 2035, 2040, 2045, 2050], index=1)
-gwp_choice = st.sidebar.radio(
-    "GWP Standard", ["AR4", "AR5"], index=0,
-    help=(
-        "Choose Global Warming Potential values: AR4 (CH₄:25, N₂O:298) or AR5 (CH₄:29.8, N₂O:273). "
-        "Use AR4 for 2025 per current regulation; AR5 expected before Jan 2026 — better for methane-emitting fuels."),)
-gwp = GWP_VALUES[gwp_choice]
-
-ops = st.sidebar.selectbox(
-    "OPS Reward Factor (%)", list(range(0, 21)), index=0,
-    help="Reward factor: % of electricity delivered via OPS. Max 20%.",)
-wind = st.sidebar.selectbox(
-    "Wind Reward Factor", [1.00, 0.99, 0.97, 0.95], index=0,
-    help="Wind-assisted propulsion reward factor (lower = more assistance).",)
-
-# === ETS CONFIG (Coverage & Phase-in) ===
-st.sidebar.header("EU ETS Settings")
-
-ets_mode = st.sidebar.radio(
-    "Coverage input mode",
-    ["Simple", "Advanced"],
-    index=0,
-    help=(
-    "Simple: set Outside‑EU activity and what share of the remaining is Intra‑EU; "
-    "Advanced: set coverage & shares per leg type (Intra/Inbound/Outbound/Outside)."),)
-
-if ets_mode == "Simple":
-    outside_pct = st.sidebar.slider(
-    "Outside‑EU activity (%)", 0, 100, 0,
-    help="Voyages entirely between non‑EU/EEA ports (outside ETS scope).",
-    )
-    intra_of_remaining_pct = st.sidebar.slider(
-    "Intra‑EU share of remaining (%)", 0, 100, 100,
-    help=(
-    "Of the activity that touches the EU (i.e., not Outside‑EU), the % that is entirely within EU/EEA ports. "
-    "The rest is split evenly into inbound and outbound extra‑EU legs."),)
+            return BASE_TARGET
+        if year <= 2029:
+            return BASE_TARGET * (1 - REDUCTIONS[2025])
+        if year <= 2034:
+            return BASE_TARGET * (1 - REDUCTIONS[2030])
+        if year <= 2039:
+            return BASE_TARGET * (1 - REDUCTIONS[2035])
+        if year <= 2044:
+            return BASE_TARGET * (1 - REDUCTIONS[2040])
+        if year <= 2049:
+            return BASE_TARGET * (1 - REDUCTIONS[2045])
+        return BASE_TARGET * (1 - REDUCTIONS[2050])
     
-    # Derive shares
-    share_outside = float(outside_pct)
-    remaining = 100.0 - share_outside
-    share_intra = remaining * (intra_of_remaining_pct / 100.0)
-    share_extra = remaining - share_intra
-    share_inbound = share_extra / 2.0
-    share_outbound = share_extra / 2.0
     
-    # Default regulatory coverages (override in Advanced mode if needed)
-    cov_intra, cov_inbound, cov_outbound, cov_outside = 100.0, 50.0, 100.0, 0.0
-
-else:
-    st.caption("Set coverage (%) by voyage type and your activity shares to derive an effective ETS coverage.")
-    cov_intra = st.sidebar.number_input(
-    "Coverage: Intra-EU (%)", 0, 100, 100,
-    help="Voyages between two EU/EEA ports (incl. at-berth in EU ports). Fraction of these emissions covered by ETS.",
-    )
-    cov_inbound = st.sidebar.number_input(
-    "Coverage: Inbound to EU (%)", 0, 100, 50,
-    help="Legs from the last non‑EU/EEA port to an EU/EEA port. Fraction of these emissions covered by ETS.",
-    )
-    cov_outbound = st.sidebar.number_input(
-    "Coverage: Outbound from EU (%)", 0, 100, 100,
-    help="Legs from an EU/EEA port to the first non‑EU/EEA port. Fraction of these emissions covered by ETS.",
-    )
-    cov_outside = st.sidebar.number_input(
-    "Coverage: Outside EU (%)", 0, 100, 0,
-    help="Voyages between non‑EU/EEA ports. Fraction covered by ETS (often 0%).",
-    )
-    st.markdown("**Activity mix (shares should roughly sum to 100%)**")
-    share_intra = st.sidebar.number_input(
-    "Share: Intra-EU (%)", 0.0, 100.0, 100.0, step=1.0,
-    help="Share of your annual activity attributable to Intra‑EU voyages (by energy/fuel/emissions).",
-    )
-    share_inbound = st.sidebar.number_input(
-    "Share: Inbound to EU (%)", 0.0, 100.0, 0.0, step=1.0,
-    help="Share of your annual activity on legs arriving from non‑EU/EEA ports to EU/EEA ports.",
-    )
-    share_outbound = st.sidebar.number_input(
-    "Share: Outbound from EU (%)", 0.0, 100.0, 0.0, step=1.0,
-    help="Share of your annual activity on legs departing EU/EEA ports to the first non‑EU/EEA port.",
-    )
-    share_outside = st.sidebar.number_input(
-    "Share: Outside EU (%)", 0.0, 100.0, 0.0, step=1.0,
-    help="Share of your annual activity on voyages entirely between non‑EU/EEA ports (outside ETS scope).",
-    )
+    def default_phase_in_pct(year: int) -> int:
+        # EU ETS maritime phase-in: 2024:40%, 2025:70%, 2026+:100%. Years before ETS -> 0 by default
+        if year <= 2024:
+            return 0
+        if year == 2025:
+            return 70
+        return 100
     
-# Effective coverage from the (possibly derived) shares and coverages
-share_sum = max(share_intra + share_inbound + share_outbound + share_outside, 1.0)
-effective_coverage_pct = (
-(cov_intra * share_intra) + (cov_inbound * share_inbound) + (cov_outbound * share_outbound) + (cov_outside * share_outside)) / share_sum
-
-# Phase-in and non-CO2 rule
-auto_phase_default = default_phase_in_pct(year)
-phase_in_pct = st.sidebar.slider(
-"Phase-in (%)", 0, 100, auto_phase_default,
-help="Default follows EU ETS maritime: 2025→70%, 2026+→100%. Override as needed.",
-)
-st.info(f"Effective ETS coverage: **{effective_coverage_pct:.1f}%** | Phase-in: **{phase_in_pct}%**")
-include_nonco2_in_ets = (year >= 2026) # CH4 + N2O + slip from 2026 and after
-
-# === CORE CALCULATIONS ===
-getcontext().prec = 28
-
-# Totals
-total_energy = Decimal("0")   # MJ
-wtt_sum = Decimal("0")        # gCO2eq (WtT)
-ttw_co2_sum = Decimal("0")    # gCO2eq (CO2 only)
-ttw_nonco2_sum = Decimal("0") # gCO2eq (CH4 + N2O + slip)
-emissions = Decimal("0")      # gCO2eq (WtW = WtT + TtW)
-rows = []
-
-for fuel in FUELS:
-    qty = Decimal(str(fuel_inputs.get(fuel["name"], 0.0)))  # tonnes
-    if qty > 0:
-        mass_g = qty * Decimal("1000000")  # g
-        lcv = Decimal(str(fuel["lcv"]))  # MJ/g
-        energy = mass_g * lcv  # MJ
-        if fuel["rfnbo"] and year <= 2033:
-            energy *= Decimal(str(REWARD_FACTOR_RFNBO_MULTIPLIER))
-
-        # Per-gram TTW factors
-        co2_per_g = Decimal(str(fuel["ttw_co2"])) * Decimal(str(1 - ops / 100)) * Decimal(str(wind))
-        ch4_per_g = Decimal(str(fuel["ttw_ch4"])) * Decimal(str(gwp["CH4"]))
-        n2o_per_g = Decimal(str(fuel["ttw_n2O"])) * Decimal(str(gwp["N2O"]))
-        # Slip (g CH4 / MJ) * GWP * energy (MJ)
-        slip_total = Decimal(str(fuel.get("ch4_slip", 0.0))) * Decimal(str(gwp["CH4"])) * energy
-
-        # Components
-        ttw_co2 = co2_per_g * mass_g
-        ttw_nonco2 = (ch4_per_g + n2o_per_g) * mass_g + slip_total
-        wtt_total = energy * Decimal(str(fuel["wtt"]))
-
-        ttw_total = ttw_co2 + ttw_nonco2
-        total_emissions = ttw_total + wtt_total
-
-        total_energy += energy
-        wtt_sum += wtt_total
-        ttw_co2_sum += ttw_co2
-        ttw_nonco2_sum += ttw_nonco2
-        emissions += total_emissions
-
-        ghg_intensity_mj = (total_emissions / energy) if energy > 0 else Decimal("0")
-
-        price_usd = Decimal(str(fuel_price_inputs.get(fuel["name"], 0.0)))
-        price_eur = price_usd * Decimal(str(exchange_rate))
-        cost = qty * price_eur
-
-        rows.append({
-            "Fuel": fuel["name"],
-            "Quantity (t)": float(qty),
-            "Price per Tonne (USD)": float(price_usd),
-            "Cost (Eur)": float(cost),
-            "TTW CO2 (g)": float(ttw_co2),
-            "TTW non-CO2 (g)": float(ttw_nonco2),
-            "WtT (g)": float(wtt_total),
-            "Emissions (gCO2eq)": float(total_emissions),  # WtW
-            "Energy (MJ)": float(energy),
-            "GHG Intensity (gCO2eq/MJ)": float(ghg_intensity_mj),
-        })
-
-# Summary totals
-emissions_tonnes = float(emissions / Decimal("1000000"))  # WtW
-
-ghg_intensity = float(emissions / total_energy) if total_energy > 0 else 0.0
-st.session_state["computed_ghg"] = ghg_intensity
-
-# ETS cost (TtW-only with 2026+ non-CO2 and coverage & phase-in)
-ets_cost, ets_covered_tonnes = compute_ets_cost(
-    ttw_co2_sum, ttw_nonco2_sum, eua_price, effective_coverage_pct, phase_in_pct, include_nonco2_in_ets)
-
-# Positive = surplus (good), Negative = deficit (bad)
-compliance_balance = float(total_energy) * (target_intensity(year) - ghg_intensity) / 1_000_000.0  # tCO2eq
-
-# Penalty only if there is a negative compliance balance (deficit)
-if compliance_balance < 0:
-    penalty = (abs(compliance_balance) / (ghg_intensity * VLSFO_ENERGY_CONTENT)) * PENALTY_RATE * 1_000_000
-else:
-    penalty = 0.0
-
-# Mitigation scaffolding
-added_biofuel_cost = 0.0
-mitigation_rows = []
-new_blend_ets_cost = None
-
-# Substitution scaffolding
-substitution_price_usd = 0.0
-additional_substitution_cost = None
-replaced_mass = None
-best_x = None
-substitution_total_emissions = None
-substitution_ets_cost = None
-total_substitution_cost = None
-
-# === RESET HANDLER (light) ===
-if st.session_state.get("trigger_reset", False):
-    exclude_keys = {"exchange_rate"}
-    for key in list(st.session_state.keys()):
-        if key not in exclude_keys and key != "trigger_reset":
+    
+    def compute_ets_cost(ttw_co2_g: Decimal, ttw_nonco2_g: Decimal, price_eur_per_t: float,
+                          effective_coverage_pct: float, phase_in_pct: float, include_nonco2: bool):
+        """Return (cost_eur, covered_tonnes). ETS is TtW-only. CH4+N2O+slip included from 2026+ if include_nonco2 is True."""
+        ttw_for_ets = ttw_co2_g + (ttw_nonco2_g if include_nonco2 else Decimal("0"))
+        covered_g = ttw_for_ets * Decimal(str(effective_coverage_pct / 100.0)) * Decimal(str(phase_in_pct / 100.0))
+        covered_tonnes = float(covered_g / Decimal("1000000"))
+        return covered_tonnes * float(price_eur_per_t), covered_tonnes
+    
+    # === README FILE ===
+    if "show_readme" not in st.session_state:
+        st.session_state.show_readme = False
+    
+    def _open_readme():
+        st.session_state.show_readme = True
+    
+    def _close_readme():
+        st.session_state.show_readme = False
+    
+    with st.sidebar:
+        st.markdown("📖 Help")
+        col_a, col_b = st.columns(2)
+        with col_a:
+            st.button("Open README", on_click=_open_readme, use_container_width=True)
+        with col_b:
+            st.button("✖ Close", on_click=_close_readme, use_container_width=True)
+        st.markdown("---")  # optional divider
+    
+    # Render README in the main page when toggled on
+    if st.session_state.show_readme:
+        try:
+            with open("README.md", "r", encoding="utf-8") as f:
+                readme_text = f.read()
+        except Exception:
+            readme_text = "_README.md not found in app directory._"
+        st.markdown(readme_text, unsafe_allow_html=False)
+    
+    # === STABLE RESET HANDLER ===
+    def reset_app():
+        for key in list(st.session_state.keys()):
             del st.session_state[key]
-    st.session_state["trigger_reset"] = False
-    st.experimental_rerun()
-
-# === OUTPUT TABLES & METRICS ===
-user_entered_prices = any(r.get("Price per Tonne (USD)", 0) > 0 for r in rows)
-
-if rows:
-    header_col, details_col = st.columns([7, 2])
-    with header_col:
-        st.subheader("Fuel Breakdown")
-    with details_col:
-        show_details = st.checkbox("🔍 Fuel Details", value=False, key="show_details_inline")
-
-    df_raw = pd.DataFrame(rows).sort_values("Emissions (gCO2eq)", ascending=False).reset_index(drop=True)
-    cols = ["Fuel", "Quantity (t)"]
-    if user_entered_prices:
-        cols += ["Price per Tonne (USD)", "Cost (Eur)"]
-    cols += ["TTW CO2 (g)", "TTW non-CO2 (g)", "WtT (g)", "Emissions (gCO2eq)", "Energy (MJ)", "GHG Intensity (gCO2eq/MJ)"]
-    df_display = df_raw[cols]
-
-    fmt = {
-        "Quantity (t)": "{:,.0f}",
-        "TTW CO2 (g)": "{:,.0f}",
-        "TTW non-CO2 (g)": "{:,.0f}",
-        "WtT (g)": "{:,.0f}",
-        "Emissions (gCO2eq)": "{:,.0f}",
-        "Energy (MJ)": "{:,.0f}",
-        "GHG Intensity (gCO2eq/MJ)": "{:,.2f}",
+        st.session_state["trigger_reset"] = False
+    
+    if st.session_state.get("trigger_reset", False):
+        reset_app()
+    
+    st.sidebar.button("🔁 Reset Calculator", on_click=lambda: st.session_state.update({"trigger_reset": True}))
+    
+    # === SIDEBAR INPUTS ===
+    st.title("Fuel EU - GHG Intensity & Penalty Calculator")
+    st.sidebar.info("Enter fuel prices in USD & provide exchange rate.")
+    
+    # Fuel pickers
+    fuel_inputs = {}
+    fuel_price_inputs = {}
+    initial_fuels = [
+        f["name"]
+        for f in FUELS
+        if (not f["rfnbo"]) and ("Bio" not in f["name"]) and ("Biodiesel" not in f["name"]) and ("E-" not in f["name"]) and ("Vegetable" not in f["name"]) and ("SVO" not in f["name"]) and ("HVO" not in f["name"]) and ("Bio-" not in f["name"])  # keep purely fossil
+    ]
+    mitigation_fuels = [f["name"] for f in FUELS if ("Bio" in f["name"]) or ("Biodiesel" in f["name"]) or ("Vegetable" in f["name"]) or f["rfnbo"] or ("E-" in f["name"]) or ("HVO" in f["name"]) or ("SVO" in f["name"]) ]
+    alternative_fuels = mitigation_fuels  # alias used below
+    
+    categories = {
+        "Fossil": [f for f in FUELS if f in [x for x in FUELS if x["name"] in initial_fuels]],
+        "Bio": [f for f in FUELS if ("Bio" in f['name']) or ("Biodiesel" in f['name']) or ("Vegetable" in f['name']) or ("HVO" in f['name']) or ("SVO" in f['name'])],
+        "RFNBO": [f for f in FUELS if f['rfnbo'] or ("E-" in f['name'])],
     }
-    if user_entered_prices:
-        fmt.update({"Price per Tonne (USD)": "{:,.2f}", "Cost (Eur)": "{:,.2f}"})
-
-    st.dataframe(df_display.style.format(fmt))
-
-    if show_details:
-        # Details of selected fuels
-        selected = [name for name, qty in fuel_inputs.items() if qty > 0]
-        detail_rows = []
-        for fuel in FUELS:
-            if fuel["name"] in selected:
-                row = {
-                    "Fuel": fuel["name"],
-                    "LCV (MJ/g)": fuel["lcv"],
-                    "WtT Factor (gCO2eq/MJ)": fuel["wtt"],
-                    "TtW CO2 (g/g)": fuel["ttw_co2"],
-                    "TtW CH4 (g/g)": fuel["ttw_ch4"],
-                    "TtW N2O (g/g)": fuel["ttw_n2O"],
-                }
-                if "ch4_slip" in fuel:
-                    row["CH4 Slip (g/MJ)"] = fuel["ch4_slip"]
-                detail_rows.append(row)
-        if detail_rows:
-            st.subheader("LCV & Emission Factors")
-            st.dataframe(pd.DataFrame(detail_rows).style.format({
-                "LCV (MJ/g)": "{:.4f}",
-                "WtT Factor (gCO2eq/MJ)": "{:.2f}",
-                "TtW CO2 (g/g)": "{:.3f}",
-                "TtW CH4 (g/g)": "{:.5f}",
-                "TtW N2O (g/g)": "{:.5f}",
-                "CH4 Slip (g/MJ)": "{:.1f}",
-            }))
-
-    total_cost = sum(row["Cost (Eur)"] for row in rows)
-    if user_entered_prices:
-        st.metric("Total Fuel Cost (Eur)", f"{total_cost:,.2f}")
-
-    # Summary (WtW & ETS TtW)
-    st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}")
-    st.metric("Total Emissions (WtW, tCO2eq)", f"{emissions_tonnes:,.2f}")
-    st.metric("ETS-eligible TtW (covered, tCO2eq)", f"{ets_covered_tonnes:,.2f}")
-    if eua_price > 0.0:
-        st.metric("EU ETS Cost (EUR)", f"{ets_cost:,.2f}")
-    st.metric("Compliance Balance (tCO2eq)", f"{compliance_balance:,.2f}")
-    st.metric("Estimated Penalty (EUR)", f"{penalty:,.2f}")
-
-    # Always define conservative_total for later use
-    conservative_total = (total_cost if user_entered_prices else 0.0) + (penalty or 0.0) + (ets_cost if eua_price > 0 else 0.0)
-
-    # Display rolled-up totals
-    if user_entered_prices:
-        label = "Total Cost of Selected Fuels (Eur)"
-        if penalty > 0 and eua_price > 0:
-            label = "Total Cost + Penalty + EU ETS (Eur)"
-        elif penalty > 0:
-            label = "Total Cost + Penalty (Eur)"
-        elif eua_price > 0:
-            label = "Total Cost + EU ETS (Eur)"
-        st.metric(label, f"{conservative_total:,.2f}")
-
-    # === MITIGATION STRATEGIES ===
-    if compliance_balance < 0:
-        st.subheader("Mitigation Strategies")
-
-        # --- POOLING OPTION ---
-        with st.expander("**Pooling**", expanded=False):
-            st.info(f"CO2 Deficit: {abs(compliance_balance):,.0f} tCO2eq. Offset via pooling if you have access to external credits.")
-            pooling_price_usd_per_tonne = st.number_input(
-                "Pooling Price (USD/tCO2eq)", min_value=0.0, value=0.0, step=0.01,
-                help="Cost per tCO2eq to buy compliance credits. If 0, pooling is ignored.",
-            )
-            pooling_cost_eur = pooling_price_usd_per_tonne * exchange_rate * abs(compliance_balance) if pooling_price_usd_per_tonne > 0 else 0.0
-            total_with_pooling = (total_cost if user_entered_prices else 0.0) + pooling_cost_eur + (ets_cost if eua_price > 0 else 0.0)
-            if pooling_price_usd_per_tonne > 0:
-                st.metric("Pooling Cost (Eur)", f"{pooling_cost_eur:,.2f}")
-
-        # --- ADD BIO FUEL (ADDITION) ---
-        with st.expander("**Add Bio Fuel**", expanded=False):
-            st.info("Adds mitigation fuel on top of current fuels (total energy increases).")
-            dec_ghg = Decimal(str(ghg_intensity))
-            dec_emissions = Decimal(str(emissions))
-            dec_energy = Decimal(str(total_energy))
-            dec_ttw_co2_sum = Decimal(str(ttw_co2_sum))
-            dec_ttw_nonco2_sum = Decimal(str(ttw_nonco2_sum))
-            target = Decimal(str(target_intensity(year)))
-
-            mitigation_rows = []
-            for fuel in FUELS:
-                # Compute per-unit intensities
-                co2_g = Decimal(str(fuel["ttw_co2"])) * Decimal(str(1 - ops / 100)) * Decimal(str(wind))
-                ch4_g = Decimal(str(fuel["ttw_ch4"])) * Decimal(str(gwp["CH4"]))
-                n2o_g = Decimal(str(fuel["ttw_n2O"])) * Decimal(str(gwp["N2O"]))
-                wtt_mj = Decimal(str(fuel["wtt"]))
-                slip_mj = Decimal(str(fuel.get("ch4_slip", 0.0))) * Decimal(str(gwp["CH4"]))
-                approx_intensity = wtt_mj + (co2_g + ch4_g + n2o_g) * Decimal(str(fuel["lcv"])) + slip_mj
-                if approx_intensity >= dec_ghg:
-                    continue
-
-                low = Decimal("0")
-                high = Decimal("100000.0")
-                best_qty = None
-                for _ in range(50):
-                    mid = (low + high) / 2
-                    mass_g = mid * Decimal("1000000")
-                    energy_mj = mass_g * Decimal(str(fuel["lcv"]))
-                    if fuel["rfnbo"] and year <= 2033:
-                        energy_mj *= Decimal(str(REWARD_FACTOR_RFNBO_MULTIPLIER))
-                    ttw_co2_add = co2_g * mass_g
-                    ttw_nonco2_add = (ch4_g + n2o_g) * mass_g + slip_mj * energy_mj
-                    ttw_add = ttw_co2_add + ttw_nonco2_add
-                    wtt_add = wtt_mj * energy_mj
-
-                    new_emissions = dec_emissions + ttw_add + wtt_add
-                    new_energy = dec_energy + energy_mj
-                    new_ghg = new_emissions / new_energy if new_energy > 0 else Decimal("1e9")
-                    if new_ghg <= target:
-                        best_qty = mid
-                        high = mid
-                    else:
-                        low = mid
-                    if high - low < Decimal("0.00001"):
-                        break
-
-                if best_qty is not None:
-                    mass_g = best_qty * Decimal("1000000")
-                    energy_mj = mass_g * Decimal(str(fuel["lcv"]))
-                    if fuel["rfnbo"] and year <= 2033:
-                        energy_mj *= Decimal(str(REWARD_FACTOR_RFNBO_MULTIPLIER))
-                    ttw_co2_add = co2_g * mass_g
-                    ttw_nonco2_add = (ch4_g + n2o_g) * mass_g + slip_mj * energy_mj
-                    wtt_add = wtt_mj * energy_mj
-                    new_emissions = dec_emissions + (ttw_co2_add + ttw_nonco2_add) + wtt_add
-
-                    # ETS for the new blend
-                    new_ttw_co2_total = dec_ttw_co2_sum + ttw_co2_add
-                    new_ttw_nonco2_total = dec_ttw_nonco2_sum + ttw_nonco2_add
-                    new_blend_ets_cost, _ = compute_ets_cost(
-                        new_ttw_co2_total, new_ttw_nonco2_total, eua_price, effective_coverage_pct, phase_in_pct, include_nonco2_in_ets
-                    )
-
-                    mitigation_rows.append({
-                        "Fuel": fuel["name"],
-                        "Required Amount (t)": float(math.ceil(float(best_qty))),
-                        "New Emissions (gCO2eq)": float(new_emissions),
-                        "ETS Cost (EUR)": float(new_blend_ets_cost),
-                    })
-
-            if mitigation_rows:
-                mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
-                df_mit = pd.DataFrame(mitigation_rows)
-                st.dataframe(df_mit.style.format({
-                    "Required Amount (t)": "{:,.0f}",
-                    "New Emissions (gCO2eq)": "{:,.0f}",
-                    "ETS Cost (EUR)": "{:,.2f}",
-                }))
-
-                # Optional: price input for a single chosen mitigation fuel
-                default_fuel = "Biodiesel (UCO,B24)"
-                fuel_names = [row["Fuel"] for row in mitigation_rows]
-                default_index = fuel_names.index(default_fuel) if default_fuel in fuel_names else 0
-                selected_fuel = st.selectbox("Select Mitigation Fuel for Pricing", fuel_names, index=default_index)
-                mitigation_price_usd = st.number_input(
-                    f"{selected_fuel} - Price (USD/t)", min_value=0.0, value=0.0, step=10.0, key=f"mitigation_price_input_{selected_fuel.replace(' ', '_')}"
-                )
-                # capture ETS cost for the selected blend
-                selected_row = next((row for row in mitigation_rows if row["Fuel"] == selected_fuel), None)
-                if selected_row is not None:
-                    new_blend_ets_cost = selected_row.get("ETS Cost (EUR)")
-                if mitigation_price_usd > 0:
-                    for row in mitigation_rows:
-                        row["Price (USD/t)"] = mitigation_price_usd if row["Fuel"] == selected_fuel else 0.0
-                        row["Estimated Cost (Eur)"] = row.get("Price (USD/t)", 0.0) * exchange_rate * row["Required Amount (t)"]
-                    added_biofuel_cost = sum(row.get("Estimated Cost (Eur)", 0.0) for row in mitigation_rows)
-                    st.markdown(f"**Bio Fuel Cost:** {added_biofuel_cost:,.2f} EUR")
-                    if eua_price > 0:
-                        st.markdown(f"**EU ETS Cost:** {new_blend_ets_cost:,.2f} EUR")
-
-        # --- SUBSTITUTION (REPLACEMENT) ---
-        with st.expander("**Replace high-emission fuel with Bio/RFNBO**", expanded=False):
-            st.info("Replaces a fraction of a selected fossil fuel with a mitigation fuel; total energy remains close to original for that stream.")
-            initial_fuel = st.selectbox("Fuel to replace", initial_fuels, key="sub_initial")
-            substitute_fuel = st.selectbox("Mitigation fuel", alternative_fuels, index=(alternative_fuels.index("Biodiesel (UCO,B24)") if "Biodiesel (UCO,B24)" in alternative_fuels else 0), key="sub_mitigation")
-            qty_initial = float(fuel_inputs.get(initial_fuel, 0.0))  # t
-            price_initial_eur_per_t = float(fuel_price_inputs.get(initial_fuel, 0.0)) * float(exchange_rate)
-            substitution_price_usd = st.number_input(
-                f"{substitute_fuel} - Price (USD/t)", min_value=0.0, value=0.0, step=10.0, key="substitution_price_input"
-            )
-            substitution_price_eur_per_t = substitution_price_usd * exchange_rate
-
-            if qty_initial > 0:
-                # Pull props
-                fi = next(f for f in FUELS if f["name"] == initial_fuel)
-                fm = next(f for f in FUELS if f["name"] == substitute_fuel)
-
-                # Precompute per-gram and per-MJ bits
-                co2_i = fi["ttw_co2"] * (1 - ops / 100) * wind
-                ch4_i = fi["ttw_ch4"] * gwp["CH4"]
-                n2o_i = fi["ttw_n2O"] * gwp["N2O"]
-                slip_i = fi.get("ch4_slip", 0.0) * gwp["CH4"]  # per MJ
-
-                co2_m = fm["ttw_co2"] * (1 - ops / 100) * wind
-                ch4_m = fm["ttw_ch4"] * gwp["CH4"]
-                n2o_m = fm["ttw_n2O"] * gwp["N2O"]
-                slip_m = fm.get("ch4_slip", 0.0) * gwp["CH4"]  # per MJ
-
-                lcv_i = fi["lcv"]; lcv_m = fm["lcv"]
-                wtt_i = fi["wtt"];  wtt_m = fm["wtt"]
-
-                target_val = target_intensity(year)
-                precision = 1e-6
-                low, high = 0.0, 1.0
-                best_x = None
-
-                total_energy_all = float(total_energy)
-                # Original initial stream components (for removal)
-                initial_mass_g = qty_initial * 1_000_000.0
-                initial_energy_stream = initial_mass_g * lcv_i
-                initial_ttw_co2_stream = initial_mass_g * co2_i
-                initial_ttw_nonco2_stream = initial_mass_g * (ch4_i + n2o_i) + initial_energy_stream * slip_i
-                initial_wtt_stream = initial_energy_stream * wtt_i
-                initial_total_stream = initial_ttw_co2_stream + initial_ttw_nonco2_stream + initial_wtt_stream
-
-                # Base totals in float for reuse
-                base_ttw_co2 = float(ttw_co2_sum)
-                base_ttw_nonco2 = float(ttw_nonco2_sum)
-                base_wtt = float(wtt_sum)
-                base_wtw = base_ttw_co2 + base_ttw_nonco2 + base_wtt
-
-                for _ in range(100):
-                    mid = (low + high) / 2
-                    sub_mass_g = initial_mass_g * mid
-                    remain_mass_g = initial_mass_g * (1 - mid)
-
-                    energy_initial_part = remain_mass_g * lcv_i
-                    energy_sub_part = sub_mass_g * lcv_m
-                    if fm["rfnbo"] and year <= 2033:
-                        energy_sub_part *= REWARD_FACTOR_RFNBO_MULTIPLIER
-
-                    # TTW components for parts
-                    ttw_i_co2_part = remain_mass_g * co2_i
-                    ttw_i_nonco2_part = remain_mass_g * (ch4_i + n2o_i) + energy_initial_part * slip_i
-                    ttw_m_co2_part = sub_mass_g * co2_m
-                    ttw_m_nonco2_part = sub_mass_g * (ch4_m + n2o_m) + energy_sub_part * slip_m
-
-                    wtt_i_part = energy_initial_part * wtt_i
-                    wtt_m_part = energy_sub_part * wtt_m
-
-                    # Replace initial stream with parts in totals
-                    total_energy_blend = total_energy_all - initial_energy_stream + (energy_initial_part + energy_sub_part)
-                    ttw_co2_blend = base_ttw_co2 - initial_ttw_co2_stream + (ttw_i_co2_part + ttw_m_co2_part)
-                    ttw_nonco2_blend = base_ttw_nonco2 - initial_ttw_nonco2_stream + (ttw_i_nonco2_part + ttw_m_nonco2_part)
-                    wtt_blend = base_wtt - initial_wtt_stream + (wtt_i_part + wtt_m_part)
-                    total_emissions_blend = ttw_co2_blend + ttw_nonco2_blend + wtt_blend
-
-                    blended_ghg = total_emissions_blend / total_energy_blend if total_energy_blend > 0 else 1e9
-                    if blended_ghg <= target_val + precision:
-                        best_x = mid
-                        high = mid
-                    else:
-                        low = mid
-                    if (high - low) < precision:
-                        break
-
-                if best_x is None or best_x > 1.0:
-                    st.warning("⚠️ No feasible replacement fraction found. Consider another mitigation fuel.")
-                else:
-                    replaced_mass = best_x * qty_initial  # tonnes
-                    # Recompute emissions for best_x for reporting
-                    sub_mass_g = initial_mass_g * best_x
-                    remain_mass_g = initial_mass_g * (1 - best_x)
-                    energy_initial_part = remain_mass_g * lcv_i
-                    energy_sub_part = sub_mass_g * lcv_m
-                    if fm["rfnbo"] and year <= 2033:
-                        energy_sub_part *= REWARD_FACTOR_RFNBO_MULTIPLIER
-
-                    ttw_i_co2_part = remain_mass_g * co2_i
-                    ttw_i_nonco2_part = remain_mass_g * (ch4_i + n2o_i) + energy_initial_part * slip_i
-                    ttw_m_co2_part = sub_mass_g * co2_m
-                    ttw_m_nonco2_part = sub_mass_g * (ch4_m + n2o_m) + energy_sub_part * slip_m
-
-                    wtt_i_part = energy_initial_part * wtt_i
-                    wtt_m_part = energy_sub_part * wtt_m
-
-                    total_energy_blend = total_energy_all - initial_energy_stream + (energy_initial_part + energy_sub_part)
-                    ttw_co2_blend = base_ttw_co2 - initial_ttw_co2_stream + (ttw_i_co2_part + ttw_m_co2_part)
-                    ttw_nonco2_blend = base_ttw_nonco2 - initial_ttw_nonco2_stream + (ttw_i_nonco2_part + ttw_m_nonco2_part)
-                    wtt_blend = base_wtt - initial_wtt_stream + (wtt_i_part + wtt_m_part)
-                    substitution_total_emissions = ttw_co2_blend + ttw_nonco2_blend + wtt_blend
-
-                    # ETS for substitution blend
-                    substitution_ets_cost, _ = compute_ets_cost(
-                        Decimal(str(ttw_co2_blend)), Decimal(str(ttw_nonco2_blend)), eua_price,
-                        effective_coverage_pct, phase_in_pct, include_nonco2_in_ets
-                    )
-
-                    st.success(
-                        f"To reach {target_val:.2f} gCO2eq/MJ, replace **{best_x*100:.2f}%** of {initial_fuel} with {substitute_fuel}."
-                    )
-                    st.markdown(f"**Replaced {initial_fuel} mass**: {replaced_mass:,.2f} t")
-                    st.markdown(f"**Added {substitute_fuel} mass**: {replaced_mass:,.2f} t")
-
-                    if user_entered_prices and substitution_price_usd > 0:
-                        mitigation_fuel_cost = replaced_mass * substitution_price_eur_per_t
-                        remaining_fuel_cost = (qty_initial - replaced_mass) * price_initial_eur_per_t
-                        additional_substitution_cost = replaced_mass * (substitution_price_eur_per_t - price_initial_eur_per_t)
-                        substitution_total_cost_stream = mitigation_fuel_cost + remaining_fuel_cost
-                        other_fuel_costs = sum(
-                            (fuel_inputs.get(f["name"], 0.0) * fuel_price_inputs.get(f["name"], 0.0) * exchange_rate)
-                            for f in FUELS if f["name"] != initial_fuel
-                        )
-                        total_substitution_cost = substitution_total_cost_stream + other_fuel_costs + (substitution_ets_cost or 0.0)
-
-                    if additional_substitution_cost is not None:
-                        st.markdown(f"**Additional fuel cost**: {additional_substitution_cost:,.2f} EUR")
-                    if eua_price > 0:
-                        st.markdown(f"**EU ETS Cost**: {substitution_ets_cost:,.2f} EUR")
-
-        # --- COST-BENEFIT ANALYSIS ---
-        if user_entered_prices:
-            st.subheader("Cost-Benefit Analysis")
-            if penalty > 0 and eua_price > 0:
-                st.metric("Initial fuels + Penalty + EU ETS", f"{(total_cost + penalty + ets_cost):,.2f}")
-            elif eua_price > 0:
-                st.metric("Initial fuels + EU ETS", f"{(total_cost + ets_cost):,.2f}")
-            elif penalty > 0:
-                st.metric("Initial fuels + Penalty", f"{(total_cost + penalty):,.2f}")
-            else:
-                st.metric("Initial fuels", f"{total_cost:,.2f}")
-
-            # Pooling Option
-            if pooling_price_usd_per_tonne and eua_price > 0:    
-                st.metric("Initial fuels + Pooling" + (" + EU ETS" if eua_price > 0 else "") + " (No Penalty)", f"{total_with_pooling:,.2f}")
-
-            # Bio fuel addition (if priced)
-            if added_biofuel_cost > 0:
-                ets_component = (
-                    new_blend_ets_cost if (eua_price > 0 and new_blend_ets_cost is not None)
-                    else (ets_cost if eua_price > 0 else 0.0))
-                st.metric(
-                    "Initial fuels + Bio Fuels" + (" + EU ETS" if eua_price > 0 else "") + " (No Penalty)",f"{(total_cost + added_biofuel_cost + ets_component):,.2f}")
-                
-            # Substitution
-            if substitution_price_usd > 0 and total_substitution_cost is not None:
-                st.metric(
-                    "Fuel Replacement" + (" + EU ETS" if eua_price > 0 else "") + " (No Penalty)",f"{total_substitution_cost:,.2f}")
+    
+    for category, fuels_in_cat in categories.items():
+        with st.sidebar.expander(f"{category} Fuels", expanded=False):
+            selected_fuels = st.multiselect(f"Select {category} Fuels", [f["name"] for f in fuels_in_cat], key=f"multiselect_{category}")
+            for selected_fuel in selected_fuels:
+                qty = st.number_input(f"{selected_fuel} (t)", min_value=0.0, step=1.0, value=0.0, format="%0.0f", key=f"qty_{selected_fuel}")
+                fuel_inputs[selected_fuel] = qty
+                price = st.number_input(
+                    f"{selected_fuel} - Price (USD/t)",
+                    min_value=0.0,
+                    value=0.0,
+                    step=0.01,
+                    format="%.2f",
+                    key=f"price_{selected_fuel}",)
+                fuel_price_inputs[selected_fuel] = price
+    
+    # EUA price and FX
+    st.sidebar.header("EU ETS Pricing")
+    eua_price = st.sidebar.number_input(
+        "EU ETS Allowance Price (EUR/tCO2eq)", min_value=0.0, value=0.0, step=1.0, format="%.2f",
+        help="Enter current market price per tCO2eq for EU ETS allowances (EUA).",)
+    
+    st.sidebar.markdown("---")
+    exchange_rate = st.sidebar.number_input(
+        "EUR/USD Exchange Rate", min_value=0.000001, value=1.000000, step=0.000001, format="%.6f",
+        help="Exchange rate to convert USD fuel prices to EUR (EUR = USD * rate).",)
+    
+    # Other params
+    st.sidebar.header("Input Parameters")
+    year = st.sidebar.selectbox("Compliance Year", [2020, 2025, 2030, 2035, 2040, 2045, 2050], index=1)
+    gwp_choice = st.sidebar.radio(
+        "GWP Standard", ["AR4", "AR5"], index=0,
+        help=(
+            "Choose Global Warming Potential values: AR4 (CH₄:25, N₂O:298) or AR5 (CH₄:29.8, N₂O:273). "
+            "Use AR4 for 2025 per current regulation; AR5 expected before Jan 2026 — better for methane-emitting fuels."),)
+    gwp = GWP_VALUES[gwp_choice]
+    
+    ops = st.sidebar.selectbox(
+        "OPS Reward Factor (%)", list(range(0, 21)), index=0,
+        help="Reward factor: % of electricity delivered via OPS. Max 20%.",)
+    wind = st.sidebar.selectbox(
+        "Wind Reward Factor", [1.00, 0.99, 0.97, 0.95], index=0,
+        help="Wind-assisted propulsion reward factor (lower = more assistance).",)
+    
+    # === ETS CONFIG (Coverage & Phase-in) ===
+    st.sidebar.header("EU ETS Settings")
+    
+    ets_mode = st.sidebar.radio(
+        "Coverage input mode",
+        ["Simple", "Advanced"],
+        index=0,
+        help=(
+        "Simple: set Outside‑EU activity and what share of the remaining is Intra‑EU; "
+        "Advanced: set coverage & shares per leg type (Intra/Inbound/Outbound/Outside)."),)
+    
+    if ets_mode == "Simple":
+        outside_pct = st.sidebar.slider(
+        "Outside‑EU activity (%)", 0, 100, 0,
+        help="Voyages entirely between non‑EU/EEA ports (outside ETS scope).",
+        )
+        intra_of_remaining_pct = st.sidebar.slider(
+        "Intra‑EU share of remaining (%)", 0, 100, 100,
+        help=(
+        "Of the activity that touches the EU (i.e., not Outside‑EU), the % that is entirely within EU/EEA ports. "
+        "The rest is split evenly into inbound and outbound extra‑EU legs."),)
+        
+        # Derive shares
+        share_outside = float(outside_pct)
+        remaining = 100.0 - share_outside
+        share_intra = remaining * (intra_of_remaining_pct / 100.0)
+        share_extra = remaining - share_intra
+        share_inbound = share_extra / 2.0
+        share_outbound = share_extra / 2.0
+        
+        # Default regulatory coverages (override in Advanced mode if needed)
+        cov_intra, cov_inbound, cov_outbound, cov_outside = 100.0, 50.0, 100.0, 0.0
+    
     else:
-        st.info("✅ Compliance already achieved! No mitigation strategy required.")
-else:
-    st.info("No fuel data provided yet.")
-
-# === COMPLIANCE CHART ===
-years = sorted(set([2025] + list(REDUCTIONS.keys())))
-def _sector_target_for_plot(y: int) -> float:
-# FuelEU applies from 2025; show baseline (no reduction) for 2024
-    return BASE_TARGET if y < 2025 else BASE_TARGET * (1 - REDUCTIONS[y])
-targets = [_sector_target_for_plot(y) for y in years]
-
-st.subheader("Sector-wide GHG Intensity Targets")
-fig, ax = plt.subplots(figsize=(10, 4))
-ax.plot(years, targets, linestyle='--', marker='o', label='EU Target')
-for x, yv in zip(years, targets):
-    ax.annotate(f"{yv:.2f}", (x, yv), textcoords="offset points", xytext=(0,5), ha='center', fontsize=8)
-computed_ghg = st.session_state.get("computed_ghg", ghg_intensity)
-line_color = 'red' if computed_ghg > target_intensity(year) else 'green'
-ax.axhline(computed_ghg, color=line_color, linestyle='-', label='Your GHG Intensity')
-ax.annotate(f"{computed_ghg:.2f}", xy=(max(years), computed_ghg), xytext=(0, -10), textcoords="offset points", ha="center", va="top", fontsize=10)
-ax.set_xlabel(None)
-ax.set_ylabel("gCO2eq/MJ")
-ax.set_title("Your Performance vs Sector Target")
-ax.legend()
-ax.grid(True)
-st.pyplot(fig)
-
-
-# === REGULATORY DYNAMICS (STACKED COLUMNS) ===
-st.subheader("Regulatory Dynamics: FuelEU vs EU ETS")
-
-# Milestone years for display (include ETS start & FuelEU targets)
-years_dyn = sorted(set([2025, 2026] + list(REDUCTIONS.keys())))
-
-# FuelEU: reduction vs baseline as % and remaining intensity %
-fueleu_reduction_pct = [max(0.0, min(100.0, (BASE_TARGET - target_intensity(y)) / BASE_TARGET * 100.0)) for y in years_dyn]
-fueleu_remaining_pct = [100.0 - r for r in fueleu_reduction_pct]
-
-# ETS: effective coverage path = coverage * phase-in (policy schedule)
-def _ets_phase(y: int) -> int:
-    if y <= 2023:
-        return 0
-    if y == 2024:
-        return 40
-    if y == 2025:
-        return 70
-    return 100 # 2026+
-
-ets_effective_pct = [float(effective_coverage_pct) * _ets_phase(y) / 100.0 for y in years_dyn]
-ets_uncovered_pct = [max(0.0, 100.0 - c) for c in ets_effective_pct]
-
-x = np.arange(len(years_dyn))
-width = 0.38
-
-fig_dyn, ax_dyn = plt.subplots(figsize=(10, 4))
-
-# ETS stacked (covered vs uncovered)
-ax_dyn.bar(x - width/2, ets_effective_pct, width, label='ETS covered (%)')
-ax_dyn.bar(x - width/2, ets_uncovered_pct, width, bottom=ets_effective_pct, label='ETS not covered (%)')
-
-# FuelEU stacked (required reduction vs remaining intensity)
-ax_dyn.bar(x + width/2, fueleu_reduction_pct, width, label='FuelEU required reduction (%)')
-ax_dyn.bar(x + width/2, fueleu_remaining_pct, width, bottom=fueleu_reduction_pct, label='Remaining intensity (%)')
-
-ax_dyn.set_xticks(x)
-ax_dyn.set_xticklabels([str(y) for y in years_dyn])
-ax_dyn.set_ylabel('%')
-ax_dyn.set_title('EU ETS coverage vs FuelEU sector target path')
-ax_dyn.legend(ncol=2, loc='upper center')
-ax_dyn.grid(axis='y', linestyle='--', alpha=0.5)
-
-# Marker: non-CO₂ enters ETS from 2026
-if 2026 in years_dyn:
-    idx_2026 = years_dyn.index(2026)
-    ax_dyn.axvline(idx_2026, linestyle=':', linewidth=1)
-    ylim = ax_dyn.get_ylim()
-    ax_dyn.text(idx_2026 + 0.03, ylim[1]*0.95, 'ETS adds CH₄+N₂O from 2026', rotation=90, va='top')
-
-st.pyplot(fig_dyn)
+        st.caption("Set coverage (%) by voyage type and your activity shares to derive an effective ETS coverage.")
+        cov_intra = st.sidebar.number_input(
+        "Coverage: Intra-EU (%)", 0, 100, 100,
+        help="Voyages between two EU/EEA ports (incl. at-berth in EU ports). Fraction of these emissions covered by ETS.",
+        )
+        cov_inbound = st.sidebar.number_input(
+        "Coverage: Inbound to EU (%)", 0, 100, 50,
+        help="Legs from the last non‑EU/EEA port to an EU/EEA port. Fraction of these emissions covered by ETS.",
+        )
+        cov_outbound = st.sidebar.number_input(
+        "Coverage: Outbound from EU (%)", 0, 100, 100,
+        help="Legs from an EU/EEA port to the first non‑EU/EEA port. Fraction of these emissions covered by ETS.",
+        )
+        cov_outside = st.sidebar.number_input(
+        "Coverage: Outside EU (%)", 0, 100, 0,
+        help="Voyages between non‑EU/EEA ports. Fraction covered by ETS (often 0%).",
+        )
+        st.markdown("**Activity mix (shares should roughly sum to 100%)**")
+        share_intra = st.sidebar.number_input(
+        "Share: Intra-EU (%)", 0.0, 100.0, 100.0, step=1.0,
+        help="Share of your annual activity attributable to Intra‑EU voyages (by energy/fuel/emissions).",
+        )
+        share_inbound = st.sidebar.number_input(
+        "Share: Inbound to EU (%)", 0.0, 100.0, 0.0, step=1.0,
+        help="Share of your annual activity on legs arriving from non‑EU/EEA ports to EU/EEA ports.",
+        )
+        share_outbound = st.sidebar.number_input(
+        "Share: Outbound from EU (%)", 0.0, 100.0, 0.0, step=1.0,
+        help="Share of your annual activity on legs departing EU/EEA ports to the first non‑EU/EEA port.",
+        )
+        share_outside = st.sidebar.number_input(
+        "Share: Outside EU (%)", 0.0, 100.0, 0.0, step=1.0,
+        help="Share of your annual activity on voyages entirely between non‑EU/EEA ports (outside ETS scope).",
+        )
+        
+    # Effective coverage from the (possibly derived) shares and coverages
+    share_sum = max(share_intra + share_inbound + share_outbound + share_outside, 1.0)
+    effective_coverage_pct = (
+    (cov_intra * share_intra) + (cov_inbound * share_inbound) + (cov_outbound * share_outbound) + (cov_outside * share_outside)) / share_sum
+    
+    # Phase-in and non-CO2 rule
+    auto_phase_default = default_phase_in_pct(year)
+    phase_in_pct = st.sidebar.slider(
+    "Phase-in (%)", 0, 100, auto_phase_default,
+    help="Default follows EU ETS maritime: 2025→70%, 2026+→100%. Override as needed.",
+    )
+    st.info(f"Effective ETS coverage: **{effective_coverage_pct:.1f}%** | Phase-in: **{phase_in_pct}%**")
+    include_nonco2_in_ets = (year >= 2026) # CH4 + N2O + slip from 2026 and after
+    
+    # === CORE CALCULATIONS ===
+    getcontext().prec = 28
+    
+    # Totals
+    total_energy = Decimal("0")   # MJ
+    wtt_sum = Decimal("0")        # gCO2eq (WtT)
+    ttw_co2_sum = Decimal("0")    # gCO2eq (CO2 only)
+    ttw_nonco2_sum = Decimal("0") # gCO2eq (CH4 + N2O + slip)
+    emissions = Decimal("0")      # gCO2eq (WtW = WtT + TtW)
+    rows = []
+    
+    for fuel in FUELS:
+        qty = Decimal(str(fuel_inputs.get(fuel["name"], 0.0)))  # tonnes
+        if qty > 0:
+            mass_g = qty * Decimal("1000000")  # g
+            lcv = Decimal(str(fuel["lcv"]))  # MJ/g
+            energy = mass_g * lcv  # MJ
+            if fuel["rfnbo"] and year <= 2033:
+                energy *= Decimal(str(REWARD_FACTOR_RFNBO_MULTIPLIER))
+    
+            # Per-gram TTW factors
+            co2_per_g = Decimal(str(fuel["ttw_co2"])) * Decimal(str(1 - ops / 100)) * Decimal(str(wind))
+            ch4_per_g = Decimal(str(fuel["ttw_ch4"])) * Decimal(str(gwp["CH4"]))
+            n2o_per_g = Decimal(str(fuel["ttw_n2O"])) * Decimal(str(gwp["N2O"]))
+            # Slip (g CH4 / MJ) * GWP * energy (MJ)
+            slip_total = Decimal(str(fuel.get("ch4_slip", 0.0))) * Decimal(str(gwp["CH4"])) * energy
+    
+            # Components
+            ttw_co2 = co2_per_g * mass_g
+            ttw_nonco2 = (ch4_per_g + n2o_per_g) * mass_g + slip_total
+            wtt_total = energy * Decimal(str(fuel["wtt"]))
+    
+            ttw_total = ttw_co2 + ttw_nonco2
+            total_emissions = ttw_total + wtt_total
+    
+            total_energy += energy
+            wtt_sum += wtt_total
+            ttw_co2_sum += ttw_co2
+            ttw_nonco2_sum += ttw_nonco2
+            emissions += total_emissions
+    
+            ghg_intensity_mj = (total_emissions / energy) if energy > 0 else Decimal("0")
+    
+            price_usd = Decimal(str(fuel_price_inputs.get(fuel["name"], 0.0)))
+            price_eur = price_usd * Decimal(str(exchange_rate))
+            cost = qty * price_eur
+    
+            rows.append({
+                "Fuel": fuel["name"],
+                "Quantity (t)": float(qty),
+                "Price per Tonne (USD)": float(price_usd),
+                "Cost (Eur)": float(cost),
+                "TTW CO2 (g)": float(ttw_co2),
+                "TTW non-CO2 (g)": float(ttw_nonco2),
+                "WtT (g)": float(wtt_total),
+                "Emissions (gCO2eq)": float(total_emissions),  # WtW
+                "Energy (MJ)": float(energy),
+                "GHG Intensity (gCO2eq/MJ)": float(ghg_intensity_mj),
+            })
+    
+    # Summary totals
+    emissions_tonnes = float(emissions / Decimal("1000000"))  # WtW
+    
+    ghg_intensity = float(emissions / total_energy) if total_energy > 0 else 0.0
+    st.session_state["computed_ghg"] = ghg_intensity
+    
+    # ETS cost (TtW-only with 2026+ non-CO2 and coverage & phase-in)
+    ets_cost, ets_covered_tonnes = compute_ets_cost(
+        ttw_co2_sum, ttw_nonco2_sum, eua_price, effective_coverage_pct, phase_in_pct, include_nonco2_in_ets)
+    
+    # Positive = surplus (good), Negative = deficit (bad)
+    compliance_balance = float(total_energy) * (target_intensity(year) - ghg_intensity) / 1_000_000.0  # tCO2eq
+    
+    # Penalty only if there is a negative compliance balance (deficit)
+    if compliance_balance < 0:
+        penalty = (abs(compliance_balance) / (ghg_intensity * VLSFO_ENERGY_CONTENT)) * PENALTY_RATE * 1_000_000
+    else:
+        penalty = 0.0
+    
+    # Mitigation scaffolding
+    added_biofuel_cost = 0.0
+    mitigation_rows = []
+    new_blend_ets_cost = None
+    
+    # Substitution scaffolding
+    substitution_price_usd = 0.0
+    additional_substitution_cost = None
+    replaced_mass = None
+    best_x = None
+    substitution_total_emissions = None
+    substitution_ets_cost = None
+    total_substitution_cost = None
+    
+    # === RESET HANDLER (light) ===
+    if st.session_state.get("trigger_reset", False):
+        exclude_keys = {"exchange_rate"}
+        for key in list(st.session_state.keys()):
+            if key not in exclude_keys and key != "trigger_reset":
+                del st.session_state[key]
+        st.session_state["trigger_reset"] = False
+        st.experimental_rerun()
+    
+    # === OUTPUT TABLES & METRICS ===
+    user_entered_prices = any(r.get("Price per Tonne (USD)", 0) > 0 for r in rows)
+    
+    if rows:
+        header_col, details_col = st.columns([7, 2])
+        with header_col:
+            st.subheader("Fuel Breakdown")
+        with details_col:
+            show_details = st.checkbox("🔍 Fuel Details", value=False, key="show_details_inline")
+    
+        df_raw = pd.DataFrame(rows).sort_values("Emissions (gCO2eq)", ascending=False).reset_index(drop=True)
+        cols = ["Fuel", "Quantity (t)"]
+        if user_entered_prices:
+            cols += ["Price per Tonne (USD)", "Cost (Eur)"]
+        cols += ["TTW CO2 (g)", "TTW non-CO2 (g)", "WtT (g)", "Emissions (gCO2eq)", "Energy (MJ)", "GHG Intensity (gCO2eq/MJ)"]
+        df_display = df_raw[cols]
+    
+        fmt = {
+            "Quantity (t)": "{:,.0f}",
+            "TTW CO2 (g)": "{:,.0f}",
+            "TTW non-CO2 (g)": "{:,.0f}",
+            "WtT (g)": "{:,.0f}",
+            "Emissions (gCO2eq)": "{:,.0f}",
+            "Energy (MJ)": "{:,.0f}",
+            "GHG Intensity (gCO2eq/MJ)": "{:,.2f}",
+        }
+        if user_entered_prices:
+            fmt.update({"Price per Tonne (USD)": "{:,.2f}", "Cost (Eur)": "{:,.2f}"})
+    
+        st.dataframe(df_display.style.format(fmt))
+    
+        if show_details:
+            # Details of selected fuels
+            selected = [name for name, qty in fuel_inputs.items() if qty > 0]
+            detail_rows = []
+            for fuel in FUELS:
+                if fuel["name"] in selected:
+                    row = {
+                        "Fuel": fuel["name"],
+                        "LCV (MJ/g)": fuel["lcv"],
+                        "WtT Factor (gCO2eq/MJ)": fuel["wtt"],
+                        "TtW CO2 (g/g)": fuel["ttw_co2"],
+                        "TtW CH4 (g/g)": fuel["ttw_ch4"],
+                        "TtW N2O (g/g)": fuel["ttw_n2O"],
+                    }
+                    if "ch4_slip" in fuel:
+                        row["CH4 Slip (g/MJ)"] = fuel["ch4_slip"]
+                    detail_rows.append(row)
+            if detail_rows:
+                st.subheader("LCV & Emission Factors")
+                st.dataframe(pd.DataFrame(detail_rows).style.format({
+                    "LCV (MJ/g)": "{:.4f}",
+                    "WtT Factor (gCO2eq/MJ)": "{:.2f}",
+                    "TtW CO2 (g/g)": "{:.3f}",
+                    "TtW CH4 (g/g)": "{:.5f}",
+                    "TtW N2O (g/g)": "{:.5f}",
+                    "CH4 Slip (g/MJ)": "{:.1f}",
+                }))
+    
+        total_cost = sum(row["Cost (Eur)"] for row in rows)
+        if user_entered_prices:
+            st.metric("Total Fuel Cost (Eur)", f"{total_cost:,.2f}")
+    
+        # Summary (WtW & ETS TtW)
+        st.metric("GHG Intensity (gCO2eq/MJ)", f"{ghg_intensity:.2f}")
+        st.metric("Total Emissions (WtW, tCO2eq)", f"{emissions_tonnes:,.2f}")
+        st.metric("ETS-eligible TtW (covered, tCO2eq)", f"{ets_covered_tonnes:,.2f}")
+        if eua_price > 0.0:
+            st.metric("EU ETS Cost (EUR)", f"{ets_cost:,.2f}")
+        st.metric("Compliance Balance (tCO2eq)", f"{compliance_balance:,.2f}")
+        st.metric("Estimated Penalty (EUR)", f"{penalty:,.2f}")
+    
+        # Always define conservative_total for later use
+        conservative_total = (total_cost if user_entered_prices else 0.0) + (penalty or 0.0) + (ets_cost if eua_price > 0 else 0.0)
+    
+        # Display rolled-up totals
+        if user_entered_prices:
+            label = "Total Cost of Selected Fuels (Eur)"
+            if penalty > 0 and eua_price > 0:
+                label = "Total Cost + Penalty + EU ETS (Eur)"
+            elif penalty > 0:
+                label = "Total Cost + Penalty (Eur)"
+            elif eua_price > 0:
+                label = "Total Cost + EU ETS (Eur)"
+            st.metric(label, f"{conservative_total:,.2f}")
+    
+        # === MITIGATION STRATEGIES ===
+        if compliance_balance < 0:
+            st.subheader("Mitigation Strategies")
+    
+            # --- POOLING OPTION ---
+            with st.expander("**Pooling**", expanded=False):
+                st.info(f"CO2 Deficit: {abs(compliance_balance):,.0f} tCO2eq. Offset via pooling if you have access to external credits.")
+                pooling_price_usd_per_tonne = st.number_input(
+                    "Pooling Price (USD/tCO2eq)", min_value=0.0, value=0.0, step=0.01,
+                    help="Cost per tCO2eq to buy compliance credits. If 0, pooling is ignored.",
+                )
+                pooling_cost_eur = pooling_price_usd_per_tonne * exchange_rate * abs(compliance_balance) if pooling_price_usd_per_tonne > 0 else 0.0
+                total_with_pooling = (total_cost if user_entered_prices else 0.0) + pooling_cost_eur + (ets_cost if eua_price > 0 else 0.0)
+                if pooling_price_usd_per_tonne > 0:
+                    st.metric("Pooling Cost (Eur)", f"{pooling_cost_eur:,.2f}")
+    
+            # --- ADD BIO FUEL (ADDITION) ---
+            with st.expander("**Add Bio Fuel**", expanded=False):
+                st.info("Adds mitigation fuel on top of current fuels (total energy increases).")
+                dec_ghg = Decimal(str(ghg_intensity))
+                dec_emissions = Decimal(str(emissions))
+                dec_energy = Decimal(str(total_energy))
+                dec_ttw_co2_sum = Decimal(str(ttw_co2_sum))
+                dec_ttw_nonco2_sum = Decimal(str(ttw_nonco2_sum))
+                target = Decimal(str(target_intensity(year)))
+    
+                mitigation_rows = []
+                for fuel in FUELS:
+                    # Compute per-unit intensities
+                    co2_g = Decimal(str(fuel["ttw_co2"])) * Decimal(str(1 - ops / 100)) * Decimal(str(wind))
+                    ch4_g = Decimal(str(fuel["ttw_ch4"])) * Decimal(str(gwp["CH4"]))
+                    n2o_g = Decimal(str(fuel["ttw_n2O"])) * Decimal(str(gwp["N2O"]))
+                    wtt_mj = Decimal(str(fuel["wtt"]))
+                    slip_mj = Decimal(str(fuel.get("ch4_slip", 0.0))) * Decimal(str(gwp["CH4"]))
+                    approx_intensity = wtt_mj + (co2_g + ch4_g + n2o_g) * Decimal(str(fuel["lcv"])) + slip_mj
+                    if approx_intensity >= dec_ghg:
+                        continue
+    
+                    low = Decimal("0")
+                    high = Decimal("100000.0")
+                    best_qty = None
+                    for _ in range(50):
+                        mid = (low + high) / 2
+                        mass_g = mid * Decimal("1000000")
+                        energy_mj = mass_g * Decimal(str(fuel["lcv"]))
+                        if fuel["rfnbo"] and year <= 2033:
+                            energy_mj *= Decimal(str(REWARD_FACTOR_RFNBO_MULTIPLIER))
+                        ttw_co2_add = co2_g * mass_g
+                        ttw_nonco2_add = (ch4_g + n2o_g) * mass_g + slip_mj * energy_mj
+                        ttw_add = ttw_co2_add + ttw_nonco2_add
+                        wtt_add = wtt_mj * energy_mj
+    
+                        new_emissions = dec_emissions + ttw_add + wtt_add
+                        new_energy = dec_energy + energy_mj
+                        new_ghg = new_emissions / new_energy if new_energy > 0 else Decimal("1e9")
+                        if new_ghg <= target:
+                            best_qty = mid
+                            high = mid
+                        else:
+                            low = mid
+                        if high - low < Decimal("0.00001"):
+                            break
+    
+                    if best_qty is not None:
+                        mass_g = best_qty * Decimal("1000000")
+                        energy_mj = mass_g * Decimal(str(fuel["lcv"]))
+                        if fuel["rfnbo"] and year <= 2033:
+                            energy_mj *= Decimal(str(REWARD_FACTOR_RFNBO_MULTIPLIER))
+                        ttw_co2_add = co2_g * mass_g
+                        ttw_nonco2_add = (ch4_g + n2o_g) * mass_g + slip_mj * energy_mj
+                        wtt_add = wtt_mj * energy_mj
+                        new_emissions = dec_emissions + (ttw_co2_add + ttw_nonco2_add) + wtt_add
+    
+                        # ETS for the new blend
+                        new_ttw_co2_total = dec_ttw_co2_sum + ttw_co2_add
+                        new_ttw_nonco2_total = dec_ttw_nonco2_sum + ttw_nonco2_add
+                        new_blend_ets_cost, _ = compute_ets_cost(
+                            new_ttw_co2_total, new_ttw_nonco2_total, eua_price, effective_coverage_pct, phase_in_pct, include_nonco2_in_ets
+                        )
+    
+                        mitigation_rows.append({
+                            "Fuel": fuel["name"],
+                            "Required Amount (t)": float(math.ceil(float(best_qty))),
+                            "New Emissions (gCO2eq)": float(new_emissions),
+                            "ETS Cost (EUR)": float(new_blend_ets_cost),
+                        })
+    
+                if mitigation_rows:
+                    mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
+                    df_mit = pd.DataFrame(mitigation_rows)
+                    st.dataframe(df_mit.style.format({
+                        "Required Amount (t)": "{:,.0f}",
+                        "New Emissions (gCO2eq)": "{:,.0f}",
+                        "ETS Cost (EUR)": "{:,.2f}",
+                    }))
+    
+                    # Optional: price input for a single chosen mitigation fuel
+                    default_fuel = "Biodiesel (UCO,B24)"
+                    fuel_names = [row["Fuel"] for row in mitigation_rows]
+                    default_index = fuel_names.index(default_fuel) if default_fuel in fuel_names else 0
+                    selected_fuel = st.selectbox("Select Mitigation Fuel for Pricing", fuel_names, index=default_index)
+                    mitigation_price_usd = st.number_input(
+                        f"{selected_fuel} - Price (USD/t)", min_value=0.0, value=0.0, step=10.0, key=f"mitigation_price_input_{selected_fuel.replace(' ', '_')}"
+                    )
+                    # capture ETS cost for the selected blend
+                    selected_row = next((row for row in mitigation_rows if row["Fuel"] == selected_fuel), None)
+                    if selected_row is not None:
+                        new_blend_ets_cost = selected_row.get("ETS Cost (EUR)")
+                    if mitigation_price_usd > 0:
+                        for row in mitigation_rows:
+                            row["Price (USD/t)"] = mitigation_price_usd if row["Fuel"] == selected_fuel else 0.0
+                            row["Estimated Cost (Eur)"] = row.get("Price (USD/t)", 0.0) * exchange_rate * row["Required Amount (t)"]
+                        added_biofuel_cost = sum(row.get("Estimated Cost (Eur)", 0.0) for row in mitigation_rows)
+                        st.markdown(f"**Bio Fuel Cost:** {added_biofuel_cost:,.2f} EUR")
+                        if eua_price > 0:
+                            st.markdown(f"**EU ETS Cost:** {new_blend_ets_cost:,.2f} EUR")
+    
+            # --- SUBSTITUTION (REPLACEMENT) ---
+            with st.expander("**Replace high-emission fuel with Bio/RFNBO**", expanded=False):
+                st.info("Replaces a fraction of a selected fossil fuel with a mitigation fuel; total energy remains close to original for that stream.")
+                initial_fuel = st.selectbox("Fuel to replace", initial_fuels, key="sub_initial")
+                substitute_fuel = st.selectbox("Mitigation fuel", alternative_fuels, index=(alternative_fuels.index("Biodiesel (UCO,B24)") if "Biodiesel (UCO,B24)" in alternative_fuels else 0), key="sub_mitigation")
+                qty_initial = float(fuel_inputs.get(initial_fuel, 0.0))  # t
+                price_initial_eur_per_t = float(fuel_price_inputs.get(initial_fuel, 0.0)) * float(exchange_rate)
+                substitution_price_usd = st.number_input(
+                    f"{substitute_fuel} - Price (USD/t)", min_value=0.0, value=0.0, step=10.0, key="substitution_price_input"
+                )
+                substitution_price_eur_per_t = substitution_price_usd * exchange_rate
+    
+                if qty_initial > 0:
+                    # Pull props
+                    fi = next(f for f in FUELS if f["name"] == initial_fuel)
+                    fm = next(f for f in FUELS if f["name"] == substitute_fuel)
+    
+                    # Precompute per-gram and per-MJ bits
+                    co2_i = fi["ttw_co2"] * (1 - ops / 100) * wind
+                    ch4_i = fi["ttw_ch4"] * gwp["CH4"]
+                    n2o_i = fi["ttw_n2O"] * gwp["N2O"]
+                    slip_i = fi.get("ch4_slip", 0.0) * gwp["CH4"]  # per MJ
+    
+                    co2_m = fm["ttw_co2"] * (1 - ops / 100) * wind
+                    ch4_m = fm["ttw_ch4"] * gwp["CH4"]
+                    n2o_m = fm["ttw_n2O"] * gwp["N2O"]
+                    slip_m = fm.get("ch4_slip", 0.0) * gwp["CH4"]  # per MJ
+    
+                    lcv_i = fi["lcv"]; lcv_m = fm["lcv"]
+                    wtt_i = fi["wtt"];  wtt_m = fm["wtt"]
+    
+                    target_val = target_intensity(year)
+                    precision = 1e-6
+                    low, high = 0.0, 1.0
+                    best_x = None
+    
+                    total_energy_all = float(total_energy)
+                    # Original initial stream components (for removal)
+                    initial_mass_g = qty_initial * 1_000_000.0
+                    initial_energy_stream = initial_mass_g * lcv_i
+                    initial_ttw_co2_stream = initial_mass_g * co2_i
+                    initial_ttw_nonco2_stream = initial_mass_g * (ch4_i + n2o_i) + initial_energy_stream * slip_i
+                    initial_wtt_stream = initial_energy_stream * wtt_i
+                    initial_total_stream = initial_ttw_co2_stream + initial_ttw_nonco2_stream + initial_wtt_stream
+    
+                    # Base totals in float for reuse
+                    base_ttw_co2 = float(ttw_co2_sum)
+                    base_ttw_nonco2 = float(ttw_nonco2_sum)
+                    base_wtt = float(wtt_sum)
+                    base_wtw = base_ttw_co2 + base_ttw_nonco2 + base_wtt
+    
+                    for _ in range(100):
+                        mid = (low + high) / 2
+                        sub_mass_g = initial_mass_g * mid
+                        remain_mass_g = initial_mass_g * (1 - mid)
+    
+                        energy_initial_part = remain_mass_g * lcv_i
+                        energy_sub_part = sub_mass_g * lcv_m
+                        if fm["rfnbo"] and year <= 2033:
+                            energy_sub_part *= REWARD_FACTOR_RFNBO_MULTIPLIER
+    
+                        # TTW components for parts
+                        ttw_i_co2_part = remain_mass_g * co2_i
+                        ttw_i_nonco2_part = remain_mass_g * (ch4_i + n2o_i) + energy_initial_part * slip_i
+                        ttw_m_co2_part = sub_mass_g * co2_m
+                        ttw_m_nonco2_part = sub_mass_g * (ch4_m + n2o_m) + energy_sub_part * slip_m
+    
+                        wtt_i_part = energy_initial_part * wtt_i
+                        wtt_m_part = energy_sub_part * wtt_m
+    
+                        # Replace initial stream with parts in totals
+                        total_energy_blend = total_energy_all - initial_energy_stream + (energy_initial_part + energy_sub_part)
+                        ttw_co2_blend = base_ttw_co2 - initial_ttw_co2_stream + (ttw_i_co2_part + ttw_m_co2_part)
+                        ttw_nonco2_blend = base_ttw_nonco2 - initial_ttw_nonco2_stream + (ttw_i_nonco2_part + ttw_m_nonco2_part)
+                        wtt_blend = base_wtt - initial_wtt_stream + (wtt_i_part + wtt_m_part)
+                        total_emissions_blend = ttw_co2_blend + ttw_nonco2_blend + wtt_blend
+    
+                        blended_ghg = total_emissions_blend / total_energy_blend if total_energy_blend > 0 else 1e9
+                        if blended_ghg <= target_val + precision:
+                            best_x = mid
+                            high = mid
+                        else:
+                            low = mid
+                        if (high - low) < precision:
+                            break
+    
+                    if best_x is None or best_x > 1.0:
+                        st.warning("⚠️ No feasible replacement fraction found. Consider another mitigation fuel.")
+                    else:
+                        replaced_mass = best_x * qty_initial  # tonnes
+                        # Recompute emissions for best_x for reporting
+                        sub_mass_g = initial_mass_g * best_x
+                        remain_mass_g = initial_mass_g * (1 - best_x)
+                        energy_initial_part = remain_mass_g * lcv_i
+                        energy_sub_part = sub_mass_g * lcv_m
+                        if fm["rfnbo"] and year <= 2033:
+                            energy_sub_part *= REWARD_FACTOR_RFNBO_MULTIPLIER
+    
+                        ttw_i_co2_part = remain_mass_g * co2_i
+                        ttw_i_nonco2_part = remain_mass_g * (ch4_i + n2o_i) + energy_initial_part * slip_i
+                        ttw_m_co2_part = sub_mass_g * co2_m
+                        ttw_m_nonco2_part = sub_mass_g * (ch4_m + n2o_m) + energy_sub_part * slip_m
+    
+                        wtt_i_part = energy_initial_part * wtt_i
+                        wtt_m_part = energy_sub_part * wtt_m
+    
+                        total_energy_blend = total_energy_all - initial_energy_stream + (energy_initial_part + energy_sub_part)
+                        ttw_co2_blend = base_ttw_co2 - initial_ttw_co2_stream + (ttw_i_co2_part + ttw_m_co2_part)
+                        ttw_nonco2_blend = base_ttw_nonco2 - initial_ttw_nonco2_stream + (ttw_i_nonco2_part + ttw_m_nonco2_part)
+                        wtt_blend = base_wtt - initial_wtt_stream + (wtt_i_part + wtt_m_part)
+                        substitution_total_emissions = ttw_co2_blend + ttw_nonco2_blend + wtt_blend
+    
+                        # ETS for substitution blend
+                        substitution_ets_cost, _ = compute_ets_cost(
+                            Decimal(str(ttw_co2_blend)), Decimal(str(ttw_nonco2_blend)), eua_price,
+                            effective_coverage_pct, phase_in_pct, include_nonco2_in_ets
+                        )
+    
+                        st.success(
+                            f"To reach {target_val:.2f} gCO2eq/MJ, replace **{best_x*100:.2f}%** of {initial_fuel} with {substitute_fuel}."
+                        )
+                        st.markdown(f"**Replaced {initial_fuel} mass**: {replaced_mass:,.2f} t")
+                        st.markdown(f"**Added {substitute_fuel} mass**: {replaced_mass:,.2f} t")
+    
+                        if user_entered_prices and substitution_price_usd > 0:
+                            mitigation_fuel_cost = replaced_mass * substitution_price_eur_per_t
+                            remaining_fuel_cost = (qty_initial - replaced_mass) * price_initial_eur_per_t
+                            additional_substitution_cost = replaced_mass * (substitution_price_eur_per_t - price_initial_eur_per_t)
+                            substitution_total_cost_stream = mitigation_fuel_cost + remaining_fuel_cost
+                            other_fuel_costs = sum(
+                                (fuel_inputs.get(f["name"], 0.0) * fuel_price_inputs.get(f["name"], 0.0) * exchange_rate)
+                                for f in FUELS if f["name"] != initial_fuel
+                            )
+                            total_substitution_cost = substitution_total_cost_stream + other_fuel_costs + (substitution_ets_cost or 0.0)
+    
+                        if additional_substitution_cost is not None:
+                            st.markdown(f"**Additional fuel cost**: {additional_substitution_cost:,.2f} EUR")
+                        if eua_price > 0:
+                            st.markdown(f"**EU ETS Cost**: {substitution_ets_cost:,.2f} EUR")
+    
+            # --- COST-BENEFIT ANALYSIS ---
+            if user_entered_prices:
+                st.subheader("Cost-Benefit Analysis")
+                if penalty > 0 and eua_price > 0:
+                    st.metric("Initial fuels + Penalty + EU ETS", f"{(total_cost + penalty + ets_cost):,.2f}")
+                elif eua_price > 0:
+                    st.metric("Initial fuels + EU ETS", f"{(total_cost + ets_cost):,.2f}")
+                elif penalty > 0:
+                    st.metric("Initial fuels + Penalty", f"{(total_cost + penalty):,.2f}")
+                else:
+                    st.metric("Initial fuels", f"{total_cost:,.2f}")
+    
+                # Pooling Option
+                if pooling_price_usd_per_tonne and eua_price > 0:    
+                    st.metric("Initial fuels + Pooling" + (" + EU ETS" if eua_price > 0 else "") + " (No Penalty)", f"{total_with_pooling:,.2f}")
+    
+                # Bio fuel addition (if priced)
+                if added_biofuel_cost > 0:
+                    ets_component = (
+                        new_blend_ets_cost if (eua_price > 0 and new_blend_ets_cost is not None)
+                        else (ets_cost if eua_price > 0 else 0.0))
+                    st.metric(
+                        "Initial fuels + Bio Fuels" + (" + EU ETS" if eua_price > 0 else "") + " (No Penalty)",f"{(total_cost + added_biofuel_cost + ets_component):,.2f}")
+                    
+                # Substitution
+                if substitution_price_usd > 0 and total_substitution_cost is not None:
+                    st.metric(
+                        "Fuel Replacement" + (" + EU ETS" if eua_price > 0 else "") + " (No Penalty)",f"{total_substitution_cost:,.2f}")
+        else:
+            st.info("✅ Compliance already achieved! No mitigation strategy required.")
+    else:
+        st.info("No fuel data provided yet.")
+    
+    # === COMPLIANCE CHART ===
+    years = sorted(set([2025] + list(REDUCTIONS.keys())))
+    def _sector_target_for_plot(y: int) -> float:
+    # FuelEU applies from 2025; show baseline (no reduction) for 2024
+        return BASE_TARGET if y < 2025 else BASE_TARGET * (1 - REDUCTIONS[y])
+    targets = [_sector_target_for_plot(y) for y in years]
+    
+    st.subheader("Sector-wide GHG Intensity Targets")
+    fig, ax = plt.subplots(figsize=(10, 4))
+    ax.plot(years, targets, linestyle='--', marker='o', label='EU Target')
+    for x, yv in zip(years, targets):
+        ax.annotate(f"{yv:.2f}", (x, yv), textcoords="offset points", xytext=(0,5), ha='center', fontsize=8)
+    computed_ghg = st.session_state.get("computed_ghg", ghg_intensity)
+    line_color = 'red' if computed_ghg > target_intensity(year) else 'green'
+    ax.axhline(computed_ghg, color=line_color, linestyle='-', label='Your GHG Intensity')
+    ax.annotate(f"{computed_ghg:.2f}", xy=(max(years), computed_ghg), xytext=(0, -10), textcoords="offset points", ha="center", va="top", fontsize=10)
+    ax.set_xlabel(None)
+    ax.set_ylabel("gCO2eq/MJ")
+    ax.set_title("Your Performance vs Sector Target")
+    ax.legend()
+    ax.grid(True)
+    st.pyplot(fig)
+    
+    
+    # === REGULATORY DYNAMICS (STACKED COLUMNS) ===
+    st.subheader("Regulatory Dynamics: FuelEU vs EU ETS")
+    
+    # Milestone years for display (include ETS start & FuelEU targets)
+    years_dyn = sorted(set([2025, 2026] + list(REDUCTIONS.keys())))
+    
+    # FuelEU: reduction vs baseline as % and remaining intensity %
+    fueleu_reduction_pct = [max(0.0, min(100.0, (BASE_TARGET - target_intensity(y)) / BASE_TARGET * 100.0)) for y in years_dyn]
+    fueleu_remaining_pct = [100.0 - r for r in fueleu_reduction_pct]
+    
+    # ETS: effective coverage path = coverage * phase-in (policy schedule)
+    def _ets_phase(y: int) -> int:
+        if y <= 2023:
+            return 0
+        if y == 2024:
+            return 40
+        if y == 2025:
+            return 70
+        return 100 # 2026+
+    
+    ets_effective_pct = [float(effective_coverage_pct) * _ets_phase(y) / 100.0 for y in years_dyn]
+    ets_uncovered_pct = [max(0.0, 100.0 - c) for c in ets_effective_pct]
+    
+    x = np.arange(len(years_dyn))
+    width = 0.38
+    
+    fig_dyn, ax_dyn = plt.subplots(figsize=(10, 4))
+    
+    # ETS stacked (covered vs uncovered)
+    ax_dyn.bar(x - width/2, ets_effective_pct, width, label='ETS covered (%)')
+    ax_dyn.bar(x - width/2, ets_uncovered_pct, width, bottom=ets_effective_pct, label='ETS not covered (%)')
+    
+    # FuelEU stacked (required reduction vs remaining intensity)
+    ax_dyn.bar(x + width/2, fueleu_reduction_pct, width, label='FuelEU required reduction (%)')
+    ax_dyn.bar(x + width/2, fueleu_remaining_pct, width, bottom=fueleu_reduction_pct, label='Remaining intensity (%)')
+    
+    ax_dyn.set_xticks(x)
+    ax_dyn.set_xticklabels([str(y) for y in years_dyn])
+    ax_dyn.set_ylabel('%')
+    ax_dyn.set_title('EU ETS coverage vs FuelEU sector target path')
+    ax_dyn.legend(ncol=2, loc='upper center')
+    ax_dyn.grid(axis='y', linestyle='--', alpha=0.5)
+    
+    # Marker: non-CO₂ enters ETS from 2026
+    if 2026 in years_dyn:
+        idx_2026 = years_dyn.index(2026)
+        ax_dyn.axvline(idx_2026, linestyle=':', linewidth=1)
+        ylim = ax_dyn.get_ylim()
+        ax_dyn.text(idx_2026 + 0.03, ylim[1]*0.95, 'ETS adds CH₄+N₂O from 2026', rotation=90, va='top')
+    
+    st.pyplot(fig_dyn)
 
 with st.sidebar.expander("Thumbnail (Streamlit Cloud card)", expanded=False):
     st.caption("Generate a clean banner image combining the two charts.")
