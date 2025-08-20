@@ -41,197 +41,197 @@ def save_app_thumbnail(fig1=None, fig2=None, path="thumbnail.png", pad_px=32, bg
     canvas.save(path)
     return path
     
-# === PAGE CONFIG ===
-st.set_page_config(page_title="Fuel EU GHG Calculator", layout="wide")
-
-# === CONSTANTS & CONFIGURATION ===
-BASE_TARGET = 91.16
-REDUCTIONS = {2025: 0.02, 2030: 0.06, 2035: 0.145, 2040: 0.31, 2045: 0.62, 2050: 0.80}
-PENALTY_RATE = 2400  # EUR per tonne of VLSFO-equivalent energy shortfall
-VLSFO_ENERGY_CONTENT = 41_000  # MJ/t
-REWARD_FACTOR_RFNBO_MULTIPLIER = 2
-GWP_VALUES = {
-    "AR4": {"CH4": 25, "N2O": 298},
-    "AR5": {"CH4": 29.8, "N2O": 273},}
-
-# === FUEL DATABASE ===
-FUELS = [
-    {"name": "Heavy Fuel Oil (HFO)",                                                                    "lcv": 0.0405,  "wtt": 13.5,  "ttw_co2": 3.114,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
-    {"name": "Low Sulphur Fuel Oil (LSFO)",                                                             "lcv": 0.0405,  "wtt": 13.7,  "ttw_co2": 3.114,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
-    {"name": "Very Low Sulphur Fuel Oil (VLSFO)",                                                       "lcv": 0.041,   "wtt": 13.2,  "ttw_co2": 3.206,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
-    {"name": "Ultra Low Sulphur Fuel Oil (ULSFO)",                                                      "lcv": 0.0405,  "wtt": 13.2,  "ttw_co2": 3.114,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
-    {"name": "Low Fuel Oil (LFO)",                                                                      "lcv": 0.041,   "wtt": 13.2,  "ttw_co2": 3.151,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
-    {"name": "Marine Diesel/Gas Oil (MDO/MGO)",                                                         "lcv": 0.0427,  "wtt": 14.4,  "ttw_co2": 3.206,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
-    {"name": "Liquefied Natural Gas (LNG Otto dual fuel medium speed)",                                 "lcv": 0.0491,  "wtt": 18.5,  "ttw_co2": 2.750,  "ttw_ch4": 0.0,      "ttw_n2O": 0.00011,  "rfnbo": False, "ch4_slip":3.1},
-    {"name": "Liquefied Natural Gas (LNG Otto dual fuel slow speed)",                                   "lcv": 0.0491,  "wtt": 18.5,  "ttw_co2": 2.750,  "ttw_ch4": 0.0,      "ttw_n2O": 0.00011,  "rfnbo": False, "ch4_slip":1.7},
-    {"name": "Liquefied Natural Gas (LNG Diesel dual fuel slow speed)",                                 "lcv": 0.0491,  "wtt": 18.5,  "ttw_co2": 2.750,  "ttw_ch4": 0.0,      "ttw_n2O": 0.00011,  "rfnbo": False, "ch4_slip":0.2},
-    {"name": "Liquefied Natural Gas (LNG LBSI)",                                                        "lcv": 0.0491,  "wtt": 18.5,  "ttw_co2": 2.750,  "ttw_ch4": 0.0,      "ttw_n2O": 0.00011,  "rfnbo": False, "ch4_slip":2.6},
-    {"name": "Liquefied Petroleum Gas (LPG propane)",                                                   "lcv": 0.0460,  "wtt": 7.8,   "ttw_co2": 3.000,  "ttw_ch4": 0.007,    "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Liquefied Petroleum Gas (LPG butane)",                                                    "lcv": 0.0460,  "wtt": 7.8,   "ttw_co2": 3.030,  "ttw_ch4": 0.007,    "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Fossil Hydrogen (H2)",                                                                    "lcv": 0.12,    "wtt": 132,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Fossil Ammonia (NH3)",                                                                    "lcv": 0.0186,  "wtt": 121,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Fossil Methanol",                                                                         "lcv": 0.0199,  "wtt": 31.3,  "ttw_co2": 1.375,  "ttw_ch4": 0.003,    "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Biodiesel (Rapeseed Oil,B100)",                                                           "lcv": 0.0372,  "wtt": 50.1,  "ttw_co2": 2.834,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Biodiesel (Wheat Straw,B100)",                                                            "lcv": 0.0372,  "wtt": 15.7,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Biodiesel (UCO,B20)",                                                                     "lcv": 0.03984, "wtt": 13.78, "ttw_co2": 2.4912, "ttw_ch4": 0.00004,  "ttw_n2O": 0.000144, "rfnbo": False},
-    {"name": "Biodiesel (UCO,B24)",                                                                     "lcv": 0.03971, "wtt": 13.836,"ttw_co2": 2.36664,"ttw_ch4": 0.000038, "ttw_n2O": 0.0001368,"rfnbo": False},
-    {"name": "Biodiesel (UCO,B30)",                                                                     "lcv": 0.03951, "wtt": 13.92, "ttw_co2": 2.1798, "ttw_ch4": 0.000035, "ttw_n2O": 0.000126, "rfnbo": False},
-    {"name": "Biodiesel (UCO,B65)",                                                                     "lcv": 0.03836, "wtt": 14.41, "ttw_co2": 1.0899, "ttw_ch4": 0.0000175,"ttw_n2O": 0.000063, "rfnbo": False},
-    {"name": "Biodiesel (UCO,B80)",                                                                     "lcv": 0.03786, "wtt": 14.62, "ttw_co2": 0.6228, "ttw_ch4": 0.00001,  "ttw_n2O": 0.000036, "rfnbo": False},
-    {"name": "Biodiesel (UCO,B100)",                                                                    "lcv": 0.0372,  "wtt": 14.9,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Biodiesel (FAME,B100)",                                                                   "lcv": 0.0372,  "wtt": 16.65869,"ttw_co2": 0.0,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Biodiesel (FAME,B24)",                                                                    "lcv": 0.03971, "wtt": 13.836,"ttw_co2": 2.3075, "ttw_ch4": 0.000038, "ttw_n2O": 0.0001368,"rfnbo": False},
-    {"name": "Biodiesel (waste wood Fischer-Tropsch diesel,B100)",                                      "lcv": 0.0372,  "wtt": 13.7,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Biodiesel (farmed wood Fischer-Tropsch diesel,B100)",                                     "lcv": 0.0372,  "wtt": 16.7,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Biodiesel (Fischer-Tropsch diesel from black liquor gasification,B100)",                  "lcv": 0.0372,  "wtt": 10.2,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Biodiesel (Animal Fats,B100)",                                                            "lcv": 0.0372,  "wtt": 20.8,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Biodiesel (Sunflower Oil,B100)",                                                          "lcv": 0.0372,  "wtt": 44.7,  "ttw_co2": 2.834,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Biodiesel (Soybean Oil,B100)",                                                            "lcv": 0.0372,  "wtt": 47.0,  "ttw_co2": 2.834,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Biodiesel (Palm Oil from open effluent pond,B100)",                                       "lcv": 0.0372,  "wtt": 75.7,  "ttw_co2": 2.834,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Biodiesel (Palm Oil, process with methane capture at oil mill,B100)",                     "lcv": 0.0372,  "wtt": 51.6,  "ttw_co2": 2.834,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Bioethanol (Sugar Beet,E100)",                                                            "lcv": 0.0268,  "wtt": 38.2,  "ttw_co2": 1.913,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Bioethanol (Maize,E100)",                                                                 "lcv": 0.0268,  "wtt": 56.8,  "ttw_co2": 1.913,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Bioethanol (Other cereals excluding maize,E100)",                                         "lcv": 0.0268,  "wtt": 58.5,  "ttw_co2": 1.913,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Bioethanol (Wheat,E100)",                                                                 "lcv": 0.0268,  "wtt": 15.7,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Bioethanol (Sugar Cane,E100)",                                                            "lcv": 0.0268,  "wtt": 28.6,  "ttw_co2": 1.913,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Hydrotreated Vegetable Oil (Rape Seed,HVO100)",                                           "lcv": 0.0440,  "wtt": 50.1,  "ttw_co2": 3.115,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
-    {"name": "Hydrotreated Vegetable Oil (Sunflower,HVO100)",                                           "lcv": 0.0440,  "wtt": 43.6,  "ttw_co2": 3.115,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},    
-    {"name": "Hydrotreated Vegetable Oil (Soybean,HVO100)",                                             "lcv": 0.0440,  "wtt": 46.5,  "ttw_co2": 3.115,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},  
-    {"name": "Hydrotreated Vegetable Oil (Palm Oil from open effluent pond,HVO100)",                    "lcv": 0.0440,  "wtt": 73.3,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Hydrotreated Vegetable Oil (Palm Oil, process with methane capture at oil mill,HVO100)",  "lcv": 0.0440,  "wtt": 48.0,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Hydrotreated Vegetable Oil (UCO,HVO100)",                                                 "lcv": 0.0440,  "wtt": 16.0,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Hydrotreated Vegetable Oil (Animal Fats,HVO100)",                                         "lcv": 0.0440,  "wtt": 21.8,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Straight Vegetable Oil (Rape Seed,SVO100)",                                               "lcv": 0.0440,  "wtt": 40.0,  "ttw_co2": 3.115,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
-    {"name": "Straight Vegetable Oil (Sunflower,SVO100)",                                               "lcv": 0.0440,  "wtt": 34.3,  "ttw_co2": 3.115,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},    
-    {"name": "Straight Vegetable Oil (Soybean,SVO100)",                                                 "lcv": 0.0440,  "wtt": 36.9,  "ttw_co2": 3.115,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},  
-    {"name": "Straight Vegetable Oil (Palm Oil from open effluent pond,SVO100)",                        "lcv": 0.0440,  "wtt": 65.4,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Straight Vegetable Oil (Palm Oil, process with methane capture at oil mill,SVO100)",      "lcv": 0.0440,  "wtt": 57.2,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Straight Vegetable Oil (UCO ,SVO100)",                                                    "lcv": 0.0440,  "wtt": 2.2,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Bio-LNG (Otto dual fuel medium speed)",                                                   "lcv": 0.0491,  "wtt": 14.1,  "ttw_co2": 2.75,   "ttw_ch4": 0.14,     "ttw_n2O": 0.00011,  "rfnbo": False, "ch4_slip":3.1},
-    {"name": "Bio-LNG (Otto dual fuel slow speed)",                                                     "lcv": 0.0491,  "wtt": 14.1,  "ttw_co2": 2.75,   "ttw_ch4": 0.14,     "ttw_n2O": 0.00011,  "rfnbo": False, "ch4_slip":1.7},
-    {"name": "Bio-LNG (Diesel dual fuel slow speed)",                                                   "lcv": 0.0491,  "wtt": 14.1,  "ttw_co2": 2.75,   "ttw_ch4": 0.14,     "ttw_n2O": 0.00011,  "rfnbo": False, "ch4_slip":0.2},
-    {"name": "Bio-LNG (LBSI)",                                                                          "lcv": 0.0491,  "wtt": 14.1,  "ttw_co2": 2.75,   "ttw_ch4": 0.14,     "ttw_n2O": 0.00011,  "rfnbo": False, "ch4_slip":2.6},
-    {"name": "Bio-Hydrogen",                                                                            "lcv": 0.12,    "wtt": 0.0,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Bio-Methanol (waste wood methanol)",                                                      "lcv": 0.0199,  "wtt": 13.5,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Bio-Methanol (farmed wood methanol)",                                                     "lcv": 0.0199,  "wtt": 16.2,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "Bio-Methanol (from black-liquor gasification)",                                           "lcv": 0.0199,  "wtt": 10.4,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
-    {"name": "E-Methanol",                                                                              "lcv": 0.0199,  "wtt": 1.0,   "ttw_co2": 1.375,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": True},
-    {"name": "E-Diesel",                                                                                "lcv": 0.0427,  "wtt": 1.0,   "ttw_co2": 3.206,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": True},
-    {"name": "E-LNG (Otto dual fuel medium speed)",                                                     "lcv": 0.0491,  "wtt": 1.0,   "ttw_co2": 2.750,  "ttw_ch4": 0.0,      "ttw_n2O": 0.00011,  "rfnbo": True, "ch4_slip":3.1 },
-    {"name": "E-LNG (Otto dual fuel slow speed)",                                                       "lcv": 0.0491,  "wtt": 1.0,   "ttw_co2": 2.750,  "ttw_ch4": 0.0,      "ttw_n2O": 0.00011,  "rfnbo": True, "ch4_slip":1.7},
-    {"name": "E-LNG (Diesel dual fuel slow speed)",                                                     "lcv": 0.0491,  "wtt": 1.0,   "ttw_co2": 2.750,  "ttw_ch4": 0.0,      "ttw_n2O": 0.00011,  "rfnbo": True, "ch4_slip":0.2},
-    {"name": "E-LNG (LBSI)",                                                                            "lcv": 0.0491,  "wtt": 1.0,   "ttw_co2": 2.750,  "ttw_ch4": 0.0,      "ttw_n2O": 0.00011,  "rfnbo": True, "ch4_slip":2.6},
-    {"name": "E-Hydrogen",                                                                              "lcv": 0.1200,  "wtt": 3.6,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": True},
-    {"name": "E-Ammonia",                                                                               "lcv": 0.0186,  "wtt": 0.0,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": True},]
-
-# === HELPERS ===
-def target_intensity(year: int) -> float:
-    if year <= 2020:
-        return BASE_TARGET
-    if year <= 2029:
-        return BASE_TARGET * (1 - REDUCTIONS[2025])
-    if year <= 2034:
-        return BASE_TARGET * (1 - REDUCTIONS[2030])
-    if year <= 2039:
-        return BASE_TARGET * (1 - REDUCTIONS[2035])
-    if year <= 2044:
-        return BASE_TARGET * (1 - REDUCTIONS[2040])
-    if year <= 2049:
-        return BASE_TARGET * (1 - REDUCTIONS[2045])
-    return BASE_TARGET * (1 - REDUCTIONS[2050])
-
-
-def default_phase_in_pct(year: int) -> int:
-    # EU ETS maritime phase-in: 2024:40%, 2025:70%, 2026+:100%. Years before ETS -> 0 by default
-    if year <= 2024:
-        return 0
-    if year == 2025:
-        return 70
-    return 100
-
-
-def compute_ets_cost(ttw_co2_g: Decimal, ttw_nonco2_g: Decimal, price_eur_per_t: float,
-                      effective_coverage_pct: float, phase_in_pct: float, include_nonco2: bool):
-    """Return (cost_eur, covered_tonnes). ETS is TtW-only. CH4+N2O+slip included from 2026+ if include_nonco2 is True."""
-    ttw_for_ets = ttw_co2_g + (ttw_nonco2_g if include_nonco2 else Decimal("0"))
-    covered_g = ttw_for_ets * Decimal(str(effective_coverage_pct / 100.0)) * Decimal(str(phase_in_pct / 100.0))
-    covered_tonnes = float(covered_g / Decimal("1000000"))
-    return covered_tonnes * float(price_eur_per_t), covered_tonnes
-
-# === README FILE ===
-if "show_readme" not in st.session_state:
-    st.session_state.show_readme = False
-
-def _open_readme():
-    st.session_state.show_readme = True
-
-def _close_readme():
-    st.session_state.show_readme = False
-
-with st.sidebar:
-    st.markdown("📖 Help")
-    col_a, col_b = st.columns(2)
-    with col_a:
-        st.button("Open README", on_click=_open_readme, use_container_width=True)
-    with col_b:
-        st.button("✖ Close", on_click=_close_readme, use_container_width=True)
-    st.markdown("---")  # optional divider
-
-# Render README in the main page when toggled on
-if st.session_state.show_readme:
-    try:
-        with open("README.md", "r", encoding="utf-8") as f:
-            readme_text = f.read()
-    except Exception:
-        readme_text = "_README.md not found in app directory._"
-    st.markdown(readme_text, unsafe_allow_html=False)
-
-# === STABLE RESET HANDLER ===
-def reset_app():
-    for key in list(st.session_state.keys()):
-        del st.session_state[key]
-    st.session_state["trigger_reset"] = False
-
-if st.session_state.get("trigger_reset", False):
-    reset_app()
-
-st.sidebar.button("🔁 Reset Calculator", on_click=lambda: st.session_state.update({"trigger_reset": True}))
-
-# === SIDEBAR INPUTS ===
-st.title("Fuel EU - GHG Intensity & Penalty Calculator")
-st.sidebar.info("Enter fuel prices in USD & provide exchange rate.")
-
-# Fuel pickers
-fuel_inputs = {}
-fuel_price_inputs = {}
-initial_fuels = [
-    f["name"]
-    for f in FUELS
-    if (not f["rfnbo"]) and ("Bio" not in f["name"]) and ("Biodiesel" not in f["name"]) and ("E-" not in f["name"]) and ("Vegetable" not in f["name"]) and ("SVO" not in f["name"]) and ("HVO" not in f["name"]) and ("Bio-" not in f["name"])  # keep purely fossil
-]
-mitigation_fuels = [f["name"] for f in FUELS if ("Bio" in f["name"]) or ("Biodiesel" in f["name"]) or ("Vegetable" in f["name"]) or f["rfnbo"] or ("E-" in f["name"]) or ("HVO" in f["name"]) or ("SVO" in f["name"]) ]
-alternative_fuels = mitigation_fuels  # alias used below
-
-categories = {
-    "Fossil": [f for f in FUELS if f in [x for x in FUELS if x["name"] in initial_fuels]],
-    "Bio": [f for f in FUELS if ("Bio" in f['name']) or ("Biodiesel" in f['name']) or ("Vegetable" in f['name']) or ("HVO" in f['name']) or ("SVO" in f['name'])],
-    "RFNBO": [f for f in FUELS if f['rfnbo'] or ("E-" in f['name'])],
-}
-
-for category, fuels_in_cat in categories.items():
-    with st.sidebar.expander(f"{category} Fuels", expanded=False):
-        selected_fuels = st.multiselect(f"Select {category} Fuels", [f["name"] for f in fuels_in_cat], key=f"multiselect_{category}")
-        for selected_fuel in selected_fuels:
-            qty = st.number_input(f"{selected_fuel} (t)", min_value=0.0, step=1.0, value=0.0, format="%0.0f", key=f"qty_{selected_fuel}")
-            fuel_inputs[selected_fuel] = qty
-            price = st.number_input(
-                f"{selected_fuel} - Price (USD/t)",
-                min_value=0.0,
-                value=0.0,
-                step=0.01,
-                format="%.2f",
-                key=f"price_{selected_fuel}",)
-            fuel_price_inputs[selected_fuel] = price
+    # === PAGE CONFIG ===
+    st.set_page_config(page_title="Fuel EU GHG Calculator", layout="wide")
+    
+    # === CONSTANTS & CONFIGURATION ===
+    BASE_TARGET = 91.16
+    REDUCTIONS = {2025: 0.02, 2030: 0.06, 2035: 0.145, 2040: 0.31, 2045: 0.62, 2050: 0.80}
+    PENALTY_RATE = 2400  # EUR per tonne of VLSFO-equivalent energy shortfall
+    VLSFO_ENERGY_CONTENT = 41_000  # MJ/t
+    REWARD_FACTOR_RFNBO_MULTIPLIER = 2
+    GWP_VALUES = {
+        "AR4": {"CH4": 25, "N2O": 298},
+        "AR5": {"CH4": 29.8, "N2O": 273},}
+    
+    # === FUEL DATABASE ===
+    FUELS = [
+        {"name": "Heavy Fuel Oil (HFO)",                                                                    "lcv": 0.0405,  "wtt": 13.5,  "ttw_co2": 3.114,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
+        {"name": "Low Sulphur Fuel Oil (LSFO)",                                                             "lcv": 0.0405,  "wtt": 13.7,  "ttw_co2": 3.114,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
+        {"name": "Very Low Sulphur Fuel Oil (VLSFO)",                                                       "lcv": 0.041,   "wtt": 13.2,  "ttw_co2": 3.206,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
+        {"name": "Ultra Low Sulphur Fuel Oil (ULSFO)",                                                      "lcv": 0.0405,  "wtt": 13.2,  "ttw_co2": 3.114,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
+        {"name": "Low Fuel Oil (LFO)",                                                                      "lcv": 0.041,   "wtt": 13.2,  "ttw_co2": 3.151,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
+        {"name": "Marine Diesel/Gas Oil (MDO/MGO)",                                                         "lcv": 0.0427,  "wtt": 14.4,  "ttw_co2": 3.206,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
+        {"name": "Liquefied Natural Gas (LNG Otto dual fuel medium speed)",                                 "lcv": 0.0491,  "wtt": 18.5,  "ttw_co2": 2.750,  "ttw_ch4": 0.0,      "ttw_n2O": 0.00011,  "rfnbo": False, "ch4_slip":3.1},
+        {"name": "Liquefied Natural Gas (LNG Otto dual fuel slow speed)",                                   "lcv": 0.0491,  "wtt": 18.5,  "ttw_co2": 2.750,  "ttw_ch4": 0.0,      "ttw_n2O": 0.00011,  "rfnbo": False, "ch4_slip":1.7},
+        {"name": "Liquefied Natural Gas (LNG Diesel dual fuel slow speed)",                                 "lcv": 0.0491,  "wtt": 18.5,  "ttw_co2": 2.750,  "ttw_ch4": 0.0,      "ttw_n2O": 0.00011,  "rfnbo": False, "ch4_slip":0.2},
+        {"name": "Liquefied Natural Gas (LNG LBSI)",                                                        "lcv": 0.0491,  "wtt": 18.5,  "ttw_co2": 2.750,  "ttw_ch4": 0.0,      "ttw_n2O": 0.00011,  "rfnbo": False, "ch4_slip":2.6},
+        {"name": "Liquefied Petroleum Gas (LPG propane)",                                                   "lcv": 0.0460,  "wtt": 7.8,   "ttw_co2": 3.000,  "ttw_ch4": 0.007,    "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Liquefied Petroleum Gas (LPG butane)",                                                    "lcv": 0.0460,  "wtt": 7.8,   "ttw_co2": 3.030,  "ttw_ch4": 0.007,    "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Fossil Hydrogen (H2)",                                                                    "lcv": 0.12,    "wtt": 132,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Fossil Ammonia (NH3)",                                                                    "lcv": 0.0186,  "wtt": 121,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Fossil Methanol",                                                                         "lcv": 0.0199,  "wtt": 31.3,  "ttw_co2": 1.375,  "ttw_ch4": 0.003,    "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Biodiesel (Rapeseed Oil,B100)",                                                           "lcv": 0.0372,  "wtt": 50.1,  "ttw_co2": 2.834,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Biodiesel (Wheat Straw,B100)",                                                            "lcv": 0.0372,  "wtt": 15.7,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Biodiesel (UCO,B20)",                                                                     "lcv": 0.03984, "wtt": 13.78, "ttw_co2": 2.4912, "ttw_ch4": 0.00004,  "ttw_n2O": 0.000144, "rfnbo": False},
+        {"name": "Biodiesel (UCO,B24)",                                                                     "lcv": 0.03971, "wtt": 13.836,"ttw_co2": 2.36664,"ttw_ch4": 0.000038, "ttw_n2O": 0.0001368,"rfnbo": False},
+        {"name": "Biodiesel (UCO,B30)",                                                                     "lcv": 0.03951, "wtt": 13.92, "ttw_co2": 2.1798, "ttw_ch4": 0.000035, "ttw_n2O": 0.000126, "rfnbo": False},
+        {"name": "Biodiesel (UCO,B65)",                                                                     "lcv": 0.03836, "wtt": 14.41, "ttw_co2": 1.0899, "ttw_ch4": 0.0000175,"ttw_n2O": 0.000063, "rfnbo": False},
+        {"name": "Biodiesel (UCO,B80)",                                                                     "lcv": 0.03786, "wtt": 14.62, "ttw_co2": 0.6228, "ttw_ch4": 0.00001,  "ttw_n2O": 0.000036, "rfnbo": False},
+        {"name": "Biodiesel (UCO,B100)",                                                                    "lcv": 0.0372,  "wtt": 14.9,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Biodiesel (FAME,B100)",                                                                   "lcv": 0.0372,  "wtt": 16.65869,"ttw_co2": 0.0,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Biodiesel (FAME,B24)",                                                                    "lcv": 0.03971, "wtt": 13.836,"ttw_co2": 2.3075, "ttw_ch4": 0.000038, "ttw_n2O": 0.0001368,"rfnbo": False},
+        {"name": "Biodiesel (waste wood Fischer-Tropsch diesel,B100)",                                      "lcv": 0.0372,  "wtt": 13.7,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Biodiesel (farmed wood Fischer-Tropsch diesel,B100)",                                     "lcv": 0.0372,  "wtt": 16.7,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Biodiesel (Fischer-Tropsch diesel from black liquor gasification,B100)",                  "lcv": 0.0372,  "wtt": 10.2,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Biodiesel (Animal Fats,B100)",                                                            "lcv": 0.0372,  "wtt": 20.8,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Biodiesel (Sunflower Oil,B100)",                                                          "lcv": 0.0372,  "wtt": 44.7,  "ttw_co2": 2.834,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Biodiesel (Soybean Oil,B100)",                                                            "lcv": 0.0372,  "wtt": 47.0,  "ttw_co2": 2.834,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Biodiesel (Palm Oil from open effluent pond,B100)",                                       "lcv": 0.0372,  "wtt": 75.7,  "ttw_co2": 2.834,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Biodiesel (Palm Oil, process with methane capture at oil mill,B100)",                     "lcv": 0.0372,  "wtt": 51.6,  "ttw_co2": 2.834,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Bioethanol (Sugar Beet,E100)",                                                            "lcv": 0.0268,  "wtt": 38.2,  "ttw_co2": 1.913,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Bioethanol (Maize,E100)",                                                                 "lcv": 0.0268,  "wtt": 56.8,  "ttw_co2": 1.913,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Bioethanol (Other cereals excluding maize,E100)",                                         "lcv": 0.0268,  "wtt": 58.5,  "ttw_co2": 1.913,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Bioethanol (Wheat,E100)",                                                                 "lcv": 0.0268,  "wtt": 15.7,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Bioethanol (Sugar Cane,E100)",                                                            "lcv": 0.0268,  "wtt": 28.6,  "ttw_co2": 1.913,  "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Hydrotreated Vegetable Oil (Rape Seed,HVO100)",                                           "lcv": 0.0440,  "wtt": 50.1,  "ttw_co2": 3.115,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
+        {"name": "Hydrotreated Vegetable Oil (Sunflower,HVO100)",                                           "lcv": 0.0440,  "wtt": 43.6,  "ttw_co2": 3.115,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},    
+        {"name": "Hydrotreated Vegetable Oil (Soybean,HVO100)",                                             "lcv": 0.0440,  "wtt": 46.5,  "ttw_co2": 3.115,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},  
+        {"name": "Hydrotreated Vegetable Oil (Palm Oil from open effluent pond,HVO100)",                    "lcv": 0.0440,  "wtt": 73.3,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Hydrotreated Vegetable Oil (Palm Oil, process with methane capture at oil mill,HVO100)",  "lcv": 0.0440,  "wtt": 48.0,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Hydrotreated Vegetable Oil (UCO,HVO100)",                                                 "lcv": 0.0440,  "wtt": 16.0,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Hydrotreated Vegetable Oil (Animal Fats,HVO100)",                                         "lcv": 0.0440,  "wtt": 21.8,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Straight Vegetable Oil (Rape Seed,SVO100)",                                               "lcv": 0.0440,  "wtt": 40.0,  "ttw_co2": 3.115,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},
+        {"name": "Straight Vegetable Oil (Sunflower,SVO100)",                                               "lcv": 0.0440,  "wtt": 34.3,  "ttw_co2": 3.115,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},    
+        {"name": "Straight Vegetable Oil (Soybean,SVO100)",                                                 "lcv": 0.0440,  "wtt": 36.9,  "ttw_co2": 3.115,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": False},  
+        {"name": "Straight Vegetable Oil (Palm Oil from open effluent pond,SVO100)",                        "lcv": 0.0440,  "wtt": 65.4,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Straight Vegetable Oil (Palm Oil, process with methane capture at oil mill,SVO100)",      "lcv": 0.0440,  "wtt": 57.2,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Straight Vegetable Oil (UCO ,SVO100)",                                                    "lcv": 0.0440,  "wtt": 2.2,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Bio-LNG (Otto dual fuel medium speed)",                                                   "lcv": 0.0491,  "wtt": 14.1,  "ttw_co2": 2.75,   "ttw_ch4": 0.14,     "ttw_n2O": 0.00011,  "rfnbo": False, "ch4_slip":3.1},
+        {"name": "Bio-LNG (Otto dual fuel slow speed)",                                                     "lcv": 0.0491,  "wtt": 14.1,  "ttw_co2": 2.75,   "ttw_ch4": 0.14,     "ttw_n2O": 0.00011,  "rfnbo": False, "ch4_slip":1.7},
+        {"name": "Bio-LNG (Diesel dual fuel slow speed)",                                                   "lcv": 0.0491,  "wtt": 14.1,  "ttw_co2": 2.75,   "ttw_ch4": 0.14,     "ttw_n2O": 0.00011,  "rfnbo": False, "ch4_slip":0.2},
+        {"name": "Bio-LNG (LBSI)",                                                                          "lcv": 0.0491,  "wtt": 14.1,  "ttw_co2": 2.75,   "ttw_ch4": 0.14,     "ttw_n2O": 0.00011,  "rfnbo": False, "ch4_slip":2.6},
+        {"name": "Bio-Hydrogen",                                                                            "lcv": 0.12,    "wtt": 0.0,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Bio-Methanol (waste wood methanol)",                                                      "lcv": 0.0199,  "wtt": 13.5,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Bio-Methanol (farmed wood methanol)",                                                     "lcv": 0.0199,  "wtt": 16.2,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "Bio-Methanol (from black-liquor gasification)",                                           "lcv": 0.0199,  "wtt": 10.4,  "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": False},
+        {"name": "E-Methanol",                                                                              "lcv": 0.0199,  "wtt": 1.0,   "ttw_co2": 1.375,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": True},
+        {"name": "E-Diesel",                                                                                "lcv": 0.0427,  "wtt": 1.0,   "ttw_co2": 3.206,  "ttw_ch4": 0.00005,  "ttw_n2O": 0.00018,  "rfnbo": True},
+        {"name": "E-LNG (Otto dual fuel medium speed)",                                                     "lcv": 0.0491,  "wtt": 1.0,   "ttw_co2": 2.750,  "ttw_ch4": 0.0,      "ttw_n2O": 0.00011,  "rfnbo": True, "ch4_slip":3.1 },
+        {"name": "E-LNG (Otto dual fuel slow speed)",                                                       "lcv": 0.0491,  "wtt": 1.0,   "ttw_co2": 2.750,  "ttw_ch4": 0.0,      "ttw_n2O": 0.00011,  "rfnbo": True, "ch4_slip":1.7},
+        {"name": "E-LNG (Diesel dual fuel slow speed)",                                                     "lcv": 0.0491,  "wtt": 1.0,   "ttw_co2": 2.750,  "ttw_ch4": 0.0,      "ttw_n2O": 0.00011,  "rfnbo": True, "ch4_slip":0.2},
+        {"name": "E-LNG (LBSI)",                                                                            "lcv": 0.0491,  "wtt": 1.0,   "ttw_co2": 2.750,  "ttw_ch4": 0.0,      "ttw_n2O": 0.00011,  "rfnbo": True, "ch4_slip":2.6},
+        {"name": "E-Hydrogen",                                                                              "lcv": 0.1200,  "wtt": 3.6,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": True},
+        {"name": "E-Ammonia",                                                                               "lcv": 0.0186,  "wtt": 0.0,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": True},]
+    
+    # === HELPERS ===
+    def target_intensity(year: int) -> float:
+        if year <= 2020:
+            return BASE_TARGET
+        if year <= 2029:
+            return BASE_TARGET * (1 - REDUCTIONS[2025])
+        if year <= 2034:
+            return BASE_TARGET * (1 - REDUCTIONS[2030])
+        if year <= 2039:
+            return BASE_TARGET * (1 - REDUCTIONS[2035])
+        if year <= 2044:
+            return BASE_TARGET * (1 - REDUCTIONS[2040])
+        if year <= 2049:
+            return BASE_TARGET * (1 - REDUCTIONS[2045])
+        return BASE_TARGET * (1 - REDUCTIONS[2050])
+    
+    
+    def default_phase_in_pct(year: int) -> int:
+        # EU ETS maritime phase-in: 2024:40%, 2025:70%, 2026+:100%. Years before ETS -> 0 by default
+        if year <= 2024:
+            return 0
+        if year == 2025:
+            return 70
+        return 100
+    
+    
+    def compute_ets_cost(ttw_co2_g: Decimal, ttw_nonco2_g: Decimal, price_eur_per_t: float,
+                          effective_coverage_pct: float, phase_in_pct: float, include_nonco2: bool):
+        """Return (cost_eur, covered_tonnes). ETS is TtW-only. CH4+N2O+slip included from 2026+ if include_nonco2 is True."""
+        ttw_for_ets = ttw_co2_g + (ttw_nonco2_g if include_nonco2 else Decimal("0"))
+        covered_g = ttw_for_ets * Decimal(str(effective_coverage_pct / 100.0)) * Decimal(str(phase_in_pct / 100.0))
+        covered_tonnes = float(covered_g / Decimal("1000000"))
+        return covered_tonnes * float(price_eur_per_t), covered_tonnes
+    
+    # === README FILE ===
+    if "show_readme" not in st.session_state:
+        st.session_state.show_readme = False
+    
+    def _open_readme():
+        st.session_state.show_readme = True
+    
+    def _close_readme():
+        st.session_state.show_readme = False
+    
+    with st.sidebar:
+        st.markdown("📖 Help")
+        col_a, col_b = st.columns(2)
+        with col_a:
+            st.button("Open README", on_click=_open_readme, use_container_width=True)
+        with col_b:
+            st.button("✖ Close", on_click=_close_readme, use_container_width=True)
+        st.markdown("---")  # optional divider
+    
+    # Render README in the main page when toggled on
+    if st.session_state.show_readme:
+        try:
+            with open("README.md", "r", encoding="utf-8") as f:
+                readme_text = f.read()
+        except Exception:
+            readme_text = "_README.md not found in app directory._"
+        st.markdown(readme_text, unsafe_allow_html=False)
+    
+    # === STABLE RESET HANDLER ===
+    def reset_app():
+        for key in list(st.session_state.keys()):
+            del st.session_state[key]
+        st.session_state["trigger_reset"] = False
+    
+    if st.session_state.get("trigger_reset", False):
+        reset_app()
+    
+    st.sidebar.button("🔁 Reset Calculator", on_click=lambda: st.session_state.update({"trigger_reset": True}))
+    
+    # === SIDEBAR INPUTS ===
+    st.title("Fuel EU - GHG Intensity & Penalty Calculator")
+    st.sidebar.info("Enter fuel prices in USD & provide exchange rate.")
+    
+    # Fuel pickers
+    fuel_inputs = {}
+    fuel_price_inputs = {}
+    initial_fuels = [
+        f["name"]
+        for f in FUELS
+        if (not f["rfnbo"]) and ("Bio" not in f["name"]) and ("Biodiesel" not in f["name"]) and ("E-" not in f["name"]) and ("Vegetable" not in f["name"]) and ("SVO" not in f["name"]) and ("HVO" not in f["name"]) and ("Bio-" not in f["name"])  # keep purely fossil
+    ]
+    mitigation_fuels = [f["name"] for f in FUELS if ("Bio" in f["name"]) or ("Biodiesel" in f["name"]) or ("Vegetable" in f["name"]) or f["rfnbo"] or ("E-" in f["name"]) or ("HVO" in f["name"]) or ("SVO" in f["name"]) ]
+    alternative_fuels = mitigation_fuels  # alias used below
+    
+    categories = {
+        "Fossil": [f for f in FUELS if f in [x for x in FUELS if x["name"] in initial_fuels]],
+        "Bio": [f for f in FUELS if ("Bio" in f['name']) or ("Biodiesel" in f['name']) or ("Vegetable" in f['name']) or ("HVO" in f['name']) or ("SVO" in f['name'])],
+        "RFNBO": [f for f in FUELS if f['rfnbo'] or ("E-" in f['name'])],
+    }
+    
+    for category, fuels_in_cat in categories.items():
+        with st.sidebar.expander(f"{category} Fuels", expanded=False):
+            selected_fuels = st.multiselect(f"Select {category} Fuels", [f["name"] for f in fuels_in_cat], key=f"multiselect_{category}")
+            for selected_fuel in selected_fuels:
+                qty = st.number_input(f"{selected_fuel} (t)", min_value=0.0, step=1.0, value=0.0, format="%0.0f", key=f"qty_{selected_fuel}")
+                fuel_inputs[selected_fuel] = qty
+                price = st.number_input(
+                    f"{selected_fuel} - Price (USD/t)",
+                    min_value=0.0,
+                    value=0.0,
+                    step=0.01,
+                    format="%.2f",
+                    key=f"price_{selected_fuel}",)
+                fuel_price_inputs[selected_fuel] = price
     
     # EUA price and FX
     st.sidebar.header("EU ETS Pricing")
