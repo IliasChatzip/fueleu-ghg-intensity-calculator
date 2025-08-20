@@ -8,6 +8,7 @@ import tempfile
 import os
 from decimal import Decimal, getcontext
 import math
+import pathlib
 import re
 
 # === PAGE CONFIG ===
@@ -142,6 +143,10 @@ st.sidebar.button("Reset Calculator", on_click=lambda: st.session_state.update({
 
 # === SIDEBAR INPUTS ===
 st.title("Fuel EU - GHG Intensity & Penalty Calculator")
+st.sidebar.markdown("### 📄 Help & README")
+if st.sidebar.button("Open README"):
+    readme_path = pathlib.Path(__file__).with_name("README.md")
+    st.markdown(readme_path.read_text(encoding="utf-8"))
 st.sidebar.info("Enter fuel prices in USD & provide exchange rate.")
 
 # Fuel pickers
