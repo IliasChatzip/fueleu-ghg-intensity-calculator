@@ -95,7 +95,6 @@ FUELS = [
     {"name": "E-Ammonia",                                                                               "lcv": 0.0186,  "wtt": 0.0,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": True},]
 
 # === HELPERS ===
-
 def target_intensity(year: int) -> float:
     if year <= 2020:
         return BASE_TARGET
