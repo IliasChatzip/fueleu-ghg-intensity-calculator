@@ -140,7 +140,7 @@ def _close_readme():
     st.session_state.show_readme = False
 
 with st.sidebar:
-    st.markdown("###📖 Help")
+    st.markdown("📖 Help")
     col_a, col_b = st.columns(2)
     with col_a:
         st.button("Open README", on_click=_open_readme, use_container_width=True)
