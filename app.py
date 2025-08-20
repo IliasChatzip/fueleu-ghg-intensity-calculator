@@ -134,10 +134,8 @@ st.sidebar.markdown("### 📄 Help & README")
 if st.sidebar.button("Open README"):
     readme_path = pathlib.Path(__file__).with_name("README.md")
     st.markdown(readme_path.read_text(encoding="utf-8"))
-    st.line(5)
 
 # === STABLE RESET HANDLER ===
-
 def reset_app():
     for key in list(st.session_state.keys()):
         del st.session_state[key]
