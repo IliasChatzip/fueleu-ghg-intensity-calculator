@@ -10,7 +10,37 @@ from decimal import Decimal, getcontext
 import math
 import pathlib
 import re
+from PIL import Image
 
+# ===Thumbnail Helper ===
+def save_app_thumbnail(fig1=None, fig2=None, path="thumbnail.png", pad_px=32, bg=(255,255,255)):
+    """
+    Combine up to two Matplotlib figures vertically into one PNG banner.
+    Returns the saved path or None if nothing to save.
+    """
+    import tempfile
+    imgs = []
+    for fig in (fig1, fig2):
+        if fig:
+            tmp = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
+            fig.savefig(tmp.name, dpi=220, bbox_inches="tight")
+            imgs.append(Image.open(tmp.name).convert("RGB"))
+    if not imgs:
+        return None
+
+    max_w = max(im.width for im in imgs)
+    total_h = sum(im.height for im in imgs) + pad_px * (len(imgs)-1)
+    canvas = Image.new("RGB", (max_w, total_h), bg)
+
+    y = 0
+    for i, im in enumerate(imgs):
+        x = (max_w - im.width) // 2
+        canvas.paste(im, (x, y))
+        y += im.height + (pad_px if i < len(imgs)-1 else 0)
+
+    canvas.save(path)
+    return path
+    
 # === PAGE CONFIG ===
 st.set_page_config(page_title="Fuel EU GHG Calculator", layout="wide")
 
@@ -867,6 +897,23 @@ if 2026 in years_dyn:
     ax_dyn.text(idx_2026 + 0.03, ylim[1]*0.95, 'ETS adds CH₄+N₂O from 2026', rotation=90, va='top')
 
 st.pyplot(fig_dyn)
+
+with st.sidebar.expander("Thumbnail (Streamlit Cloud card)", expanded=False):
+    st.caption("Generate a clean banner image combining the two charts.")
+    if st.button("Create thumbnail.png", key="make_thumb"):
+        thumb_path = save_app_thumbnail(fig, fig_dyn, path="thumbnail.png")
+        if thumb_path:
+            st.success("Thumbnail created.")
+            with open(thumb_path, "rb") as fh:
+                st.download_button(
+                    "Download thumbnail.png",
+                    data=fh.read(),
+                    file_name="thumbnail.png",
+                    mime="image/png",
+                    key="dl_thumb",
+                )
+        else:
+            st.warning("No charts available to build the thumbnail.")
 
 # === PDF EXPORT ===
 st.subheader("Export to PDF")
