@@ -124,114 +124,114 @@ FUELS = [
     {"name": "E-Hydrogen",                                                                              "lcv": 0.1200,  "wtt": 3.6,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": True},
     {"name": "E-Ammonia",                                                                               "lcv": 0.0186,  "wtt": 0.0,   "ttw_co2": 0.0,    "ttw_ch4": 0.0,      "ttw_n2O": 0.0,      "rfnbo": True},]
 
-    # === HELPERS ===
-    def target_intensity(year: int) -> float:
-        if year <= 2020:
-            return BASE_TARGET
-        if year <= 2029:
-            return BASE_TARGET * (1 - REDUCTIONS[2025])
-        if year <= 2034:
-            return BASE_TARGET * (1 - REDUCTIONS[2030])
-        if year <= 2039:
-            return BASE_TARGET * (1 - REDUCTIONS[2035])
-        if year <= 2044:
-            return BASE_TARGET * (1 - REDUCTIONS[2040])
-        if year <= 2049:
-            return BASE_TARGET * (1 - REDUCTIONS[2045])
-        return BASE_TARGET * (1 - REDUCTIONS[2050])
-    
-    
-    def default_phase_in_pct(year: int) -> int:
-        # EU ETS maritime phase-in: 2024:40%, 2025:70%, 2026+:100%. Years before ETS -> 0 by default
-        if year <= 2024:
-            return 0
-        if year == 2025:
-            return 70
-        return 100
-    
-    
-    def compute_ets_cost(ttw_co2_g: Decimal, ttw_nonco2_g: Decimal, price_eur_per_t: float,
-                          effective_coverage_pct: float, phase_in_pct: float, include_nonco2: bool):
-        """Return (cost_eur, covered_tonnes). ETS is TtW-only. CH4+N2O+slip included from 2026+ if include_nonco2 is True."""
-        ttw_for_ets = ttw_co2_g + (ttw_nonco2_g if include_nonco2 else Decimal("0"))
-        covered_g = ttw_for_ets * Decimal(str(effective_coverage_pct / 100.0)) * Decimal(str(phase_in_pct / 100.0))
-        covered_tonnes = float(covered_g / Decimal("1000000"))
-        return covered_tonnes * float(price_eur_per_t), covered_tonnes
-    
-    # === README FILE ===
-    if "show_readme" not in st.session_state:
-        st.session_state.show_readme = False
-    
-    def _open_readme():
-        st.session_state.show_readme = True
-    
-    def _close_readme():
-        st.session_state.show_readme = False
-    
-    with st.sidebar:
-        st.markdown("📖 Help")
-        col_a, col_b = st.columns(2)
-        with col_a:
-            st.button("Open README", on_click=_open_readme, use_container_width=True)
-        with col_b:
-            st.button("✖ Close", on_click=_close_readme, use_container_width=True)
-        st.markdown("---")  # optional divider
-    
-    # Render README in the main page when toggled on
-    if st.session_state.show_readme:
-        try:
-            with open("README.md", "r", encoding="utf-8") as f:
-                readme_text = f.read()
-        except Exception:
-            readme_text = "_README.md not found in app directory._"
-        st.markdown(readme_text, unsafe_allow_html=False)
-    
-    # === STABLE RESET HANDLER ===
-    def reset_app():
-        for key in list(st.session_state.keys()):
-            del st.session_state[key]
-        st.session_state["trigger_reset"] = False
-    
-    if st.session_state.get("trigger_reset", False):
-        reset_app()
-    
-    st.sidebar.button("🔁 Reset Calculator", on_click=lambda: st.session_state.update({"trigger_reset": True}))
-    
-    # === SIDEBAR INPUTS ===
-    st.title("Fuel EU - GHG Intensity & Penalty Calculator")
-    st.sidebar.info("Enter fuel prices in USD & provide exchange rate.")
-    
-    # Fuel pickers
-    fuel_inputs = {}
-    fuel_price_inputs = {}
-    initial_fuels = [
-        f["name"]
-        for f in FUELS
-        if (not f["rfnbo"]) and ("Bio" not in f["name"]) and ("Biodiesel" not in f["name"]) and ("E-" not in f["name"]) and ("Vegetable" not in f["name"]) and ("SVO" not in f["name"]) and ("HVO" not in f["name"]) and ("Bio-" not in f["name"])  # keep purely fossil
-    ]
-    mitigation_fuels = [f["name"] for f in FUELS if ("Bio" in f["name"]) or ("Biodiesel" in f["name"]) or ("Vegetable" in f["name"]) or f["rfnbo"] or ("E-" in f["name"]) or ("HVO" in f["name"]) or ("SVO" in f["name"]) ]
-    alternative_fuels = mitigation_fuels  # alias used below
-    
-    categories = {
-        "Fossil": [f for f in FUELS if f in [x for x in FUELS if x["name"] in initial_fuels]],
-        "Bio": [f for f in FUELS if ("Bio" in f['name']) or ("Biodiesel" in f['name']) or ("Vegetable" in f['name']) or ("HVO" in f['name']) or ("SVO" in f['name'])],
-        "RFNBO": [f for f in FUELS if f['rfnbo'] or ("E-" in f['name'])],
-    }
-    
-    for category, fuels_in_cat in categories.items():
-        with st.sidebar.expander(f"{category} Fuels", expanded=False):
-            selected_fuels = st.multiselect(f"Select {category} Fuels", [f["name"] for f in fuels_in_cat], key=f"multiselect_{category}")
-            for selected_fuel in selected_fuels:
-                qty = st.number_input(f"{selected_fuel} (t)", min_value=0.0, step=1.0, value=0.0, format="%0.0f", key=f"qty_{selected_fuel}")
-                fuel_inputs[selected_fuel] = qty
-                price = st.number_input(
-                    f"{selected_fuel} - Price (USD/t)",
-                    min_value=0.0,
-                    value=0.0,
-                    step=0.01,
-                    format="%.2f",
-                    key=f"price_{selected_fuel}",)
-                fuel_price_inputs[selected_fuel] = price
+# === HELPERS ===
+def target_intensity(year: int) -> float:
+    if year <= 2020:
+        return BASE_TARGET
+    if year <= 2029:
+        return BASE_TARGET * (1 - REDUCTIONS[2025])
+    if year <= 2034:
+        return BASE_TARGET * (1 - REDUCTIONS[2030])
+    if year <= 2039:
+        return BASE_TARGET * (1 - REDUCTIONS[2035])
+    if year <= 2044:
+        return BASE_TARGET * (1 - REDUCTIONS[2040])
+    if year <= 2049:
+        return BASE_TARGET * (1 - REDUCTIONS[2045])
+    return BASE_TARGET * (1 - REDUCTIONS[2050])
+
+
+def default_phase_in_pct(year: int) -> int:
+    # EU ETS maritime phase-in: 2024:40%, 2025:70%, 2026+:100%. Years before ETS -> 0 by default
+    if year <= 2024:
+        return 0
+    if year == 2025:
+        return 70
+    return 100
+
+
+def compute_ets_cost(ttw_co2_g: Decimal, ttw_nonco2_g: Decimal, price_eur_per_t: float,
+                      effective_coverage_pct: float, phase_in_pct: float, include_nonco2: bool):
+    """Return (cost_eur, covered_tonnes). ETS is TtW-only. CH4+N2O+slip included from 2026+ if include_nonco2 is True."""
+    ttw_for_ets = ttw_co2_g + (ttw_nonco2_g if include_nonco2 else Decimal("0"))
+    covered_g = ttw_for_ets * Decimal(str(effective_coverage_pct / 100.0)) * Decimal(str(phase_in_pct / 100.0))
+    covered_tonnes = float(covered_g / Decimal("1000000"))
+    return covered_tonnes * float(price_eur_per_t), covered_tonnes
+
+# === README FILE ===
+if "show_readme" not in st.session_state:
+    st.session_state.show_readme = False
+
+def _open_readme():
+    st.session_state.show_readme = True
+
+def _close_readme():
+    st.session_state.show_readme = False
+
+with st.sidebar:
+    st.markdown("📖 Help")
+    col_a, col_b = st.columns(2)
+    with col_a:
+        st.button("Open README", on_click=_open_readme, use_container_width=True)
+    with col_b:
+        st.button("✖ Close", on_click=_close_readme, use_container_width=True)
+    st.markdown("---")  # optional divider
+
+# Render README in the main page when toggled on
+if st.session_state.show_readme:
+    try:
+        with open("README.md", "r", encoding="utf-8") as f:
+            readme_text = f.read()
+    except Exception:
+        readme_text = "_README.md not found in app directory._"
+    st.markdown(readme_text, unsafe_allow_html=False)
+
+# === STABLE RESET HANDLER ===
+def reset_app():
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+    st.session_state["trigger_reset"] = False
+
+if st.session_state.get("trigger_reset", False):
+    reset_app()
+
+st.sidebar.button("🔁 Reset Calculator", on_click=lambda: st.session_state.update({"trigger_reset": True}))
+
+# === SIDEBAR INPUTS ===
+st.title("Fuel EU - GHG Intensity & Penalty Calculator")
+st.sidebar.info("Enter fuel prices in USD & provide exchange rate.")
+
+# Fuel pickers
+fuel_inputs = {}
+fuel_price_inputs = {}
+initial_fuels = [
+    f["name"]
+    for f in FUELS
+    if (not f["rfnbo"]) and ("Bio" not in f["name"]) and ("Biodiesel" not in f["name"]) and ("E-" not in f["name"]) and ("Vegetable" not in f["name"]) and ("SVO" not in f["name"]) and ("HVO" not in f["name"]) and ("Bio-" not in f["name"])  # keep purely fossil
+]
+mitigation_fuels = [f["name"] for f in FUELS if ("Bio" in f["name"]) or ("Biodiesel" in f["name"]) or ("Vegetable" in f["name"]) or f["rfnbo"] or ("E-" in f["name"]) or ("HVO" in f["name"]) or ("SVO" in f["name"]) ]
+alternative_fuels = mitigation_fuels  # alias used below
+
+categories = {
+    "Fossil": [f for f in FUELS if f in [x for x in FUELS if x["name"] in initial_fuels]],
+    "Bio": [f for f in FUELS if ("Bio" in f['name']) or ("Biodiesel" in f['name']) or ("Vegetable" in f['name']) or ("HVO" in f['name']) or ("SVO" in f['name'])],
+    "RFNBO": [f for f in FUELS if f['rfnbo'] or ("E-" in f['name'])],
+}
+
+for category, fuels_in_cat in categories.items():
+    with st.sidebar.expander(f"{category} Fuels", expanded=False):
+        selected_fuels = st.multiselect(f"Select {category} Fuels", [f["name"] for f in fuels_in_cat], key=f"multiselect_{category}")
+        for selected_fuel in selected_fuels:
+            qty = st.number_input(f"{selected_fuel} (t)", min_value=0.0, step=1.0, value=0.0, format="%0.0f", key=f"qty_{selected_fuel}")
+            fuel_inputs[selected_fuel] = qty
+            price = st.number_input(
+                f"{selected_fuel} - Price (USD/t)",
+                min_value=0.0,
+                value=0.0,
+                step=0.01,
+                format="%.2f",
+                key=f"price_{selected_fuel}",)
+            fuel_price_inputs[selected_fuel] = price
     
     # EUA price and FX
     st.sidebar.header("EU ETS Pricing")
