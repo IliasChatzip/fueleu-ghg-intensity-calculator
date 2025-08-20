@@ -147,7 +147,6 @@ with st.sidebar:
     with col_b:
         st.button("✖ Close", on_click=_close_readme, use_container_width=True)
     st.markdown("---")  # optional divider
-    st.button("↻ Reset Calculator", on_click=reset_app, help="Clear all inputs and results")
 
 # Render README in the main page when toggled on
 if st.session_state.show_readme:
