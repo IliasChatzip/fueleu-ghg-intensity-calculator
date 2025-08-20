@@ -1,6 +1,9 @@
 <p align="center">
   <img src="thumbnail.png" alt="FuelEU & EU ETS Calculator — thumbnail" width="900">
 </p>
+git add thumbnail.png README.md
+git commit -m "Add app thumbnail to README"
+git push
 
 # FuelEU Maritime GHG Intensity & Penalty Calculator
 
