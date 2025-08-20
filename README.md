@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="thumbnail.png" alt="FuelEU & EU ETS Calculator — thumbnail" width="900">
-</p>
-
 # FuelEU Maritime GHG Intensity & Penalty Calculator
 
 This is a Streamlit app for calculating fuel GHG intensity, compliance balance and penalties according to the FuelEU Maritime regulation. It also lets you explore mitigation scenarios and export a tailored PDF report.
