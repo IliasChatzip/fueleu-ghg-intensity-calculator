@@ -130,16 +130,33 @@ def compute_ets_cost(ttw_co2_g: Decimal, ttw_nonco2_g: Decimal, price_eur_per_t:
     return covered_tonnes * float(price_eur_per_t), covered_tonnes
 
 # === README FILE ===
-st.sidebar.markdown("### 📄 Help")
 if "show_readme" not in st.session_state:
     st.session_state.show_readme = False
-col1, col2 = st.columns([1, 1])
-with col1:
-    st.button("📖 Open README", on_click=lambda: st.session_state.update(show_readme=True))
-with col2:
-    st.button("✖ Close README", on_click=lambda: st.session_state.update(show_readme=False))
+
+def _open_readme():
+    st.session_state.show_readme = True
+
+def _close_readme():
+    st.session_state.show_readme = False
+
+with st.sidebar:
+    st.markdown("### Help")
+    col_a, col_b = st.columns(2)
+    with col_a:
+        st.button("📖 Open README", on_click=_open_readme, use_container_width=True)
+    with col_b:
+        st.button("✖ Close", on_click=_close_readme, use_container_width=True)
+    st.markdown("---")  # optional divider
+    st.button("↻ Reset Calculator", on_click=reset_app, help="Clear all inputs and results")
+
+# Render README in the main page when toggled on
 if st.session_state.show_readme:
-    st.markdown(readme_text)
+    try:
+        with open("README.md", "r", encoding="utf-8") as f:
+            readme_text = f.read()
+    except Exception:
+        readme_text = "_README.md not found in app directory._"
+    st.markdown(readme_text, unsafe_allow_html=False)
 
 # === STABLE RESET HANDLER ===
 def reset_app():
