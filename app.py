@@ -129,6 +129,12 @@ def compute_ets_cost(ttw_co2_g: Decimal, ttw_nonco2_g: Decimal, price_eur_per_t:
     covered_tonnes = float(covered_g / Decimal("1000000"))
     return covered_tonnes * float(price_eur_per_t), covered_tonnes
 
+# === READ ME FILE ===
+st.sidebar.markdown("### 📄 Help & README")
+if st.sidebar.button("Open README"):
+    readme_path = pathlib.Path(__file__).with_name("README.md")
+    st.markdown(readme_path.read_text(encoding="utf-8"))
+
 # === STABLE RESET HANDLER ===
 
 def reset_app():
@@ -143,10 +149,6 @@ st.sidebar.button("🔁 Reset Calculator", on_click=lambda: st.session_state.upd
 
 # === SIDEBAR INPUTS ===
 st.title("Fuel EU - GHG Intensity & Penalty Calculator")
-st.sidebar.markdown("### 📄 Help & README")
-if st.sidebar.button("Open README"):
-    readme_path = pathlib.Path(__file__).with_name("README.md")
-    st.markdown(readme_path.read_text(encoding="utf-8"))
 st.sidebar.info("Enter fuel prices in USD & provide exchange rate.")
 
 # Fuel pickers
