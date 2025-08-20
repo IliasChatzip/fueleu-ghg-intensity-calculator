@@ -126,7 +126,7 @@ FUELS = [
 
 # === HELPERS ===
 def target_intensity(year: int) -> float:
-    if year <= 2020:
+        if year <= 2020:
             return BASE_TARGET
         if year <= 2029:
             return BASE_TARGET * (1 - REDUCTIONS[2025])
