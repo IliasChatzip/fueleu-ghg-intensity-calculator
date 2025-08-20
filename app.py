@@ -589,7 +589,8 @@ if rows:
                         row["Estimated Cost (Eur)"] = row.get("Price (USD/t)", 0.0) * exchange_rate * row["Required Amount (t)"]
                     added_biofuel_cost = sum(row.get("Estimated Cost (Eur)", 0.0) for row in mitigation_rows)
                     st.markdown(f"**Bio Fuel Cost:** {added_biofuel_cost:,.2f} EUR")
-                    st.markdown(f"**EU ETS Cost:** {new_blend_ets_cost:,.2f} EUR")
+                    if eua_price > 0:
+                        st.markdown(f"**EU ETS Cost:** {new_blend_ets_cost:,.2f} EUR")
 
         # --- SUBSTITUTION (REPLACEMENT) ---
         with st.expander("**Replace high-emission fuel with Bio/RFNBO**", expanded=False):
