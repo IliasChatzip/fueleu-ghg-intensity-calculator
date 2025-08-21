@@ -5,6 +5,8 @@ This is a Streamlit app for calculating fuel GHG intensity, compliance balance a
 ## Features
 
 - **Per-fuel accounting**: Enter quantities (t), prices (USD/t), and compute energy, WtT/TtW splits, and blend GHG intensity.
+  - Fossil fuels, Bio fuels, RFNBO fuels with prepopulated values based on defined fuel type and FuelEU annexes.
+  - Ability to add custom fuels for a more customised experience.
 - **Fuel Details table**: Toggle the 🔍 Fuel Details view to audit the factors used for your selected fuels—LCV (MJ/g), WtT factor (gCO₂e/MJ), TtW CO₂/CH₄/N₂O (g/g), and CH₄ slip (g/MJ, when applicable)
 - **EU ETS integration**:
   - **Simple** or **Advanced** coverage modes.
@@ -22,7 +24,7 @@ This is a Streamlit app for calculating fuel GHG intensity, compliance balance a
   - **Line chart**: Your blend vs sector target (2024–2050), no X-axis title in PDF if desired.
   - **Stacked columns**: **FuelEU vs EU ETS** dynamics across the timeline (coverage vs required reduction).
 - **PDF export**:
-  - Pick sections to include (summary, ETS, fuel table, WtT/TtW splits, mitigation, cost–benefit, charts).
+  - Pick sections to include (summary, ETS, fuel table, emission factors,  WtT/TtW splits, mitigation, cost–benefit, charts).
   - Safe defaults; works even if mitigation inputs are missing.
 
 ## How to Use
