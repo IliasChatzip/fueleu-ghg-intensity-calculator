@@ -10,6 +10,8 @@ from decimal import Decimal, getcontext
 import math
 import pathlib
 import re
+import io
+import uuid
 
 # === PAGE CONFIG ===
 st.set_page_config(page_title="Fuel EU GHG Calculator", layout="wide")
@@ -23,6 +25,24 @@ REWARD_FACTOR_RFNBO_MULTIPLIER = 2
 GWP_VALUES = {
     "AR4": {"CH4": 25, "N2O": 298},
     "AR5": {"CH4": 29.8, "N2O": 273},}
+
+# --- CUSTOM FUELS SESSION SCAFFOLD ---
+DEFAULT_CF = {
+    "name": "Custom fuel",
+    "qty_t": 0.0,
+    "price_usd": 0.0,
+    "lcv": 0.0000,
+    "rfnbo": False,
+    "mode": "Basic",         # "Basic" or "Advanced"
+    "wtw": 0.00,            # used only in Basic mode (gCO2e/MJ)
+    "wtt": 0.0,             # used only in Advanced mode (gCO2e/MJ)
+    "ttw_co2": 0.000,        # g/g fuel
+    "ttw_ch4": 0.0,          # g/g fuel
+    "ttw_n2o": 0.0,          # g/g fuel
+    "ch4_slip": 0.0,         # g CH4 / MJ
+}
+if "custom_fuels" not in st.session_state:
+    st.session_state.custom_fuels = [] # list of dicts like DEFAULT_CF
 
 # === FUEL DATABASE ===
 FUELS = [
@@ -203,6 +223,98 @@ for category, fuels_in_cat in categories.items():
                 key=f"price_{selected_fuel}",)
             fuel_price_inputs[selected_fuel] = price
 
+# === CUSTOM FUEL (optional) ===
+if "custom_fuels" not in st.session_state:
+    st.session_state["custom_fuels"] = []
+
+def _new_custom_fuel():
+    return {
+        "id": f"cf_{uuid.uuid4().hex[:8]}",
+        "name": "Custom fuel",
+        "qty_t": 0.0,
+        "price_usd": 0.0,
+        "lcv": 0.0000,
+        "rfnbo": False,
+        "mode": "Basic",
+        "wtw": 0.00,  
+        "wtt": 0.0,
+        "ttw_co2": 0.000,
+        "ttw_ch4": 0.0,
+        "ttw_n2o": 0.0,
+        "ch4_slip": 0.0,
+    }
+
+with st.sidebar.expander("Custom Fuel (optional)", expanded=False):
+    # If empty, start with one row (no top-level Add button)
+    if not st.session_state["custom_fuels"]:
+        st.session_state["custom_fuels"].append(_new_custom_fuel())
+
+    # Top-right "Clear all"
+    _, col_right = st.columns([1, 1])
+    with col_right:
+        if st.button("🧹 Clear all", key="btn_clear_custom", use_container_width=True):
+            st.session_state["custom_fuels"].clear()
+            st.session_state["custom_fuels"].append(_new_custom_fuel())
+            st.rerun()
+
+    # Per-row editors
+    for idx, cf in enumerate(list(st.session_state["custom_fuels"])):
+        st.divider()
+
+        # Remove button above the name (as requested)
+        _, col_rm = st.columns([1, 1])
+        with col_rm:
+            if st.button("🗑 Remove", key=f"{cf['id']}_remove", use_container_width=True):
+                st.session_state["custom_fuels"].pop(idx)
+                if not st.session_state["custom_fuels"]:
+                    st.session_state["custom_fuels"].append(_new_custom_fuel())
+                st.rerun()
+
+        cf["name"] = st.text_input("Name", value=cf.get("name","Custom fuel"), key=f"{cf['id']}_name")
+        cf["qty_t"] = st.number_input("Quantity (t)", min_value=0.0, step=1.0,
+                                      value=float(cf.get("qty_t",0.0)), format="%0.0f", key=f"{cf['id']}_qty")
+        cf["price_usd"] = st.number_input("Price (USD/t)", min_value=0.0, step=1.0,
+                                          value=float(cf.get("price_usd",0.0)), format="%.2f", key=f"{cf['id']}_price")
+        cf["lcv"] = st.number_input("LCV (MJ/g)", min_value=0.0, value=float(cf.get("lcv",0.0400)),
+                                    step=0.0001, format="%.4f", key=f"{cf['id']}_lcv")
+        cf["rfnbo"] = st.checkbox("RFNBO (x2 energy credit until 2033)", value=bool(cf.get("rfnbo", False)),
+                                  key=f"{cf['id']}_rfnbo")
+
+        mode_idx = 0 if str(cf.get("mode","Basic")).startswith("Basic") else 1
+        choice = st.radio(
+            "Emission input mode",
+            ["Basic", "Advanced"],
+            index=mode_idx,
+            key=f"{cf['id']}_mode",
+            help=("Basic: single WtW intensity (counts for FuelEU only, excluded from ETS/splits). "
+                  "Advanced: provide WtT & TtW so ETS and splits are computed.")
+        )
+        cf["mode"] = "Basic" if choice.startswith("Basic") else "Advanced"
+
+        if cf["mode"] == "Basic":
+            cf["wtw"] = st.number_input("WtW intensity (gCO₂e/MJ)", min_value=0.0,
+                                        value=float(cf.get("wtw", 91.16)), step=0.1, key=f"{cf['id']}_wtw")
+        else:
+            cf["wtt"] = st.number_input("WtT factor (gCO₂e/MJ)", min_value=0.0,
+                                        value=float(cf.get("wtt", 13.2)), step=0.1, key=f"{cf['id']}_wtt")
+            cf["ttw_co2"] = st.number_input("TtW CO₂ (g/g fuel)", min_value=0.0,
+                                            value=float(cf.get("ttw_co2", 3.114)), step=0.0001, format="%.4f", key=f"{cf['id']}_ttwco2")
+            cf["ttw_ch4"] = st.number_input("TtW CH₄ (g/g fuel)", min_value=0.0,
+                                            value=float(cf.get("ttw_ch4", 0.0)), step=0.00001, format="%.5f", key=f"{cf['id']}_ttwch4")
+            cf["ttw_n2o"] = st.number_input("TtW N₂O (g/g fuel)", min_value=0.0,
+                                            value=float(cf.get("ttw_n2o", 0.0)), step=0.00001, format="%.5f", key=f"{cf['id']}_ttwn2o")
+            cf["ch4_slip"] = st.number_input("CH₄ slip (g/MJ)", min_value=0.0,
+                                             value=float(cf.get("ch4_slip", 0.0)), step=0.1, format="%.1f", key=f"{cf['id']}_slip")
+
+        # Per-row "Add custom fuel" (kept; no top-level Add)
+        if st.button("➕ Add custom fuel", key=f"{cf['id']}_add_below", use_container_width=True):
+            st.session_state["custom_fuels"].insert(idx + 1, _new_custom_fuel())
+            st.rerun()
+
+# Mark whether custom fuels should be used (any with qty > 0)
+st.session_state["use_custom_fuels"] = any(float(cf.get("qty_t", 0)) > 0 for cf in st.session_state["custom_fuels"])
+
+
 # EUA price and FX
 st.sidebar.header("EU ETS Pricing")
 eua_price = st.sidebar.number_input(
@@ -314,7 +426,7 @@ help="Default follows EU ETS maritime: 2025→70%, 2026+→100%. Override as nee
 st.info(f"Effective ETS coverage: **{effective_coverage_pct:.1f}%** | Phase-in: **{phase_in_pct}%**")
 include_nonco2_in_ets = (year >= 2026) # CH4 + N2O + slip from 2026 and after
 
-# === CORE CALCULATIONS ===
+# === CALCULATIONS ===
 getcontext().prec = 28
 
 # Totals
@@ -371,8 +483,79 @@ for fuel in FUELS:
             "WtT (g)": float(wtt_total),
             "Emissions (gCO2eq)": float(total_emissions),  # WtW
             "Energy (MJ)": float(energy),
-            "GHG Intensity (gCO2eq/MJ)": float(ghg_intensity_mj),
-        })
+            "GHG Intensity (gCO2eq/MJ)": float(ghg_intensity_mj),})
+
+# === CUSTOM FUEL CALCULATIONS ===
+if st.session_state.get("use_custom_fuels"):
+    for cf in st.session_state.get("custom_fuels", []):
+        qty_t = Decimal(str(cf.get("qty_t", 0.0)))
+        if qty_t <= 0:
+            continue
+
+        mass_g = qty_t * Decimal("1000000")
+        lcv = Decimal(str(cf.get("lcv", 0.0)))
+        energy = mass_g * lcv
+
+        if cf.get("rfnbo") and year <= 2033:
+            energy *= Decimal(str(REWARD_FACTOR_RFNBO_MULTIPLIER))
+
+        price_eur = Decimal(str(cf.get("price_usd", 0.0))) * Decimal(str(exchange_rate))
+        cost_eur = qty_t * price_eur
+
+        if cf.get("mode") == "Basic":
+            # WtW-only; excluded from ETS splits
+            wtw = Decimal(str(cf.get("wtw", 0.0)))  # gCO2e/MJ
+            total_emissions_cf = energy * wtw
+
+            total_energy += energy
+            emissions += total_emissions_cf
+
+            ghg_intensity_mj_cf = (total_emissions_cf / energy) if energy > 0 else Decimal("0")
+
+            rows.append({
+                "Fuel": f"{cf.get('name','Custom fuel')} (custom, WtW-only)",
+                "Quantity (t)": float(qty_t),
+                "Price per Tonne (USD)": float(Decimal(str(cf.get("price_usd", 0.0)))),
+                "Cost (Eur)": float(cost_eur),
+                "TTW CO2 (g)": float("nan"),
+                "TTW non-CO2 (g)": float("nan"),
+                "WtT (g)": float("nan"),
+                "Emissions (gCO2eq)": float(total_emissions_cf),
+                "Energy (MJ)": float(energy),
+                "GHG Intensity (gCO2eq/MJ)": float(ghg_intensity_mj_cf),})
+
+        else:
+            # Advanced: contributes to ETS, WtT/TtW
+            co2_per_g = Decimal(str(cf.get("ttw_co2", 0.0))) * Decimal(str(1 - ops / 100)) * Decimal(str(wind))
+            ch4_per_g = Decimal(str(cf.get("ttw_ch4", 0.0))) * Decimal(str(gwp["CH4"]))
+            n2o_per_g = Decimal(str(cf.get("ttw_n2o", 0.0))) * Decimal(str(gwp["N2O"]))
+            slip_total = Decimal(str(cf.get("ch4_slip", 0.0))) * Decimal(str(gwp["CH4"])) * energy
+
+            ttw_co2_cf = co2_per_g * mass_g
+            ttw_nonco2_cf = (ch4_per_g + n2o_per_g) * mass_g + slip_total
+            wtt_total_cf = energy * Decimal(str(cf.get("wtt", 0.0)))
+
+            total_emissions_cf = ttw_co2_cf + ttw_nonco2_cf + wtt_total_cf
+
+            total_energy += energy
+            wtt_sum += wtt_total_cf
+            ttw_co2_sum += ttw_co2_cf
+            ttw_nonco2_sum += ttw_nonco2_cf
+            emissions += total_emissions_cf
+
+            ghg_intensity_mj_cf = (total_emissions_cf / energy) if energy > 0 else Decimal("0")
+
+            rows.append({
+                "Fuel": f"{cf.get('name','Custom fuel')} (custom)",
+                "Quantity (t)": float(qty_t),
+                "Price per Tonne (USD)": float(Decimal(str(cf.get("price_usd", 0.0)))),
+                "Cost (Eur)": float(cost_eur),
+                "TTW CO2 (g)": float(ttw_co2_cf),
+                "TTW non-CO2 (g)": float(ttw_nonco2_cf),
+                "WtT (g)": float(wtt_total_cf),
+                "Emissions (gCO2eq)": float(total_emissions_cf),
+                "Energy (MJ)": float(energy),
+                "GHG Intensity (gCO2eq/MJ)": float(ghg_intensity_mj_cf),})
 
 # Summary totals
 emissions_tonnes = float(emissions / Decimal("1000000"))  # WtW
@@ -459,11 +642,23 @@ if rows:
                     "WtT Factor (gCO2eq/MJ)": fuel["wtt"],
                     "TtW CO2 (g/g)": fuel["ttw_co2"],
                     "TtW CH4 (g/g)": fuel["ttw_ch4"],
-                    "TtW N2O (g/g)": fuel["ttw_n2O"],
-                }
+                    "TtW N2O (g/g)": fuel["ttw_n2O"],}
                 if "ch4_slip" in fuel:
                     row["CH4 Slip (g/MJ)"] = fuel["ch4_slip"]
                 detail_rows.append(row)
+        if st.session_state.get("use_custom_fuels"):
+            for cf in st.session_state.get("custom_fuels", []):
+                if cf.get("mode") == "Advanced" and float(cf.get("qty_t", 0)) > 0:
+                    row = {
+                        "Fuel": f"{cf.get('name','Custom fuel')} (custom)",
+                        "LCV (MJ/g)": cf["lcv"],
+                        "WtT Factor (gCO2eq/MJ)": cf["wtt"],
+                        "TtW CO2 (g/g)": cf["ttw_co2"],
+                        "TtW CH4 (g/g)": cf["ttw_ch4"],
+                        "TtW N2O (g/g)": cf["ttw_n2o"],}
+                    if cf.get("ch4_slip", 0.0):
+                        row["CH4 Slip (g/MJ)"] = cf["ch4_slip"]
+                    detail_rows.append(row)
         if detail_rows:
             st.subheader("LCV & Emission Factors")
             st.dataframe(pd.DataFrame(detail_rows).style.format({
@@ -472,8 +667,7 @@ if rows:
                 "TtW CO2 (g/g)": "{:.3f}",
                 "TtW CH4 (g/g)": "{:.5f}",
                 "TtW N2O (g/g)": "{:.5f}",
-                "CH4 Slip (g/MJ)": "{:.1f}",
-            }))
+                "CH4 Slip (g/MJ)": "{:.1f}",}))
 
     total_cost = sum(row["Cost (Eur)"] for row in rows)
     if user_entered_prices:
@@ -579,15 +773,13 @@ if rows:
                     new_ttw_co2_total = dec_ttw_co2_sum + ttw_co2_add
                     new_ttw_nonco2_total = dec_ttw_nonco2_sum + ttw_nonco2_add
                     new_blend_ets_cost, _ = compute_ets_cost(
-                        new_ttw_co2_total, new_ttw_nonco2_total, eua_price, effective_coverage_pct, phase_in_pct, include_nonco2_in_ets
-                    )
+                        new_ttw_co2_total, new_ttw_nonco2_total, eua_price, effective_coverage_pct, phase_in_pct, include_nonco2_in_ets)
 
                     mitigation_rows.append({
                         "Fuel": fuel["name"],
                         "Required Amount (t)": float(math.ceil(float(best_qty))),
                         "New Emissions (gCO2eq)": float(new_emissions),
-                        "ETS Cost (EUR)": float(new_blend_ets_cost),
-                    })
+                        "ETS Cost (EUR)": float(new_blend_ets_cost),})
 
             if mitigation_rows:
                 mitigation_rows = sorted(mitigation_rows, key=lambda x: x["Required Amount (t)"])
@@ -595,8 +787,7 @@ if rows:
                 st.dataframe(df_mit.style.format({
                     "Required Amount (t)": "{:,.0f}",
                     "New Emissions (gCO2eq)": "{:,.0f}",
-                    "ETS Cost (EUR)": "{:,.2f}",
-                }))
+                    "ETS Cost (EUR)": "{:,.2f}",}))
 
                 # Optional: price input for a single chosen mitigation fuel
                 default_fuel = "Biodiesel (UCO,B24)"
@@ -762,15 +953,9 @@ if rows:
         # --- COST-BENEFIT ANALYSIS ---
         if user_entered_prices:
             st.subheader("Cost-Benefit Analysis")
-            if penalty > 0 and eua_price > 0:
-                st.metric("Initial fuels + Penalty + EU ETS", f"{(total_cost + penalty + ets_cost):,.2f}")
-            elif eua_price > 0:
-                st.metric("Initial fuels + EU ETS", f"{(total_cost + ets_cost):,.2f}")
-            elif penalty > 0:
-                st.metric("Initial fuels + Penalty", f"{(total_cost + penalty):,.2f}")
-            else:
-                st.metric("Initial fuels", f"{total_cost:,.2f}")
-
+            st.metric(
+                "Initial fuels" + (" + Penalty" if penalty > 0 else "") + (" + EU ETS" if eua_price > 0 else ""), f"{(conservative_total):,.2f}")
+            
             # Pooling Option
             if pooling_price_usd_per_tonne and eua_price > 0:    
                 st.metric("Initial fuels + Pooling" + (" + EU ETS" if eua_price > 0 else "") + " (No Penalty)", f"{total_with_pooling:,.2f}")
@@ -875,6 +1060,7 @@ with st.expander("PDF sections to include", expanded=False):
     opt_summary = st.checkbox("Summary header", True)
     opt_ets = st.checkbox("ETS parameters & total", False)
     opt_fuel_table = st.checkbox("Fuel breakdown", True)
+    opt_fuel_details_pdf = st.checkbox("Fuel details table (LCV & factors)", False)
     opt_split_totals = st.checkbox("Emissions totals (TtW vs WtT)", False)
     opt_mitigation = st.checkbox("Mitigation overview (if deficit)", True)
     opt_cost_benefit = st.checkbox("Cost–Benefit analysis rollup", True)
@@ -919,33 +1105,80 @@ if st.button("Export to PDF (with selections)"):
             pdf.cell(200, 10, txt=f"Total Emissions (WtW): {emissions_tonnes:,.0f} tCO2eq", ln=True)
             pdf.ln(5)
         
-        # --- Fuel Breakdown ---
+       # --- Fuel Breakdown ---
         if opt_fuel_table:
             pdf.set_font("Arial", "U", size=10)
-            pdf.cell(200, 10, txt="Fuel Breakdown:", ln=True)
+            pdf.cell(200, 8, txt="Fuel Breakdown:", ln=True)
             pdf.set_font("Arial", size=10)
-            _user_entered_prices = any(fuel_price_inputs.get(f["name"], 0.0) > 0.0 for f in FUELS)
-        if _user_entered_prices:
+        
+        if user_entered_prices:
             for row in rows:
-                fuel_name = row['Fuel']
-                qty = row['Quantity (t)']
-                price_usd = fuel_price_inputs.get(fuel_name, 0.0)
-                cost = qty * price_usd * exchange_rate
-                ghg_i = row['GHG Intensity (gCO2eq/MJ)']
-                line = f"{fuel_name}: {qty:,.0f} t @ {price_usd:,.2f} USD/t | {cost:,.2f} Eur | GHG Intensity: {ghg_i:.2f} gCO2eq/MJ"
-                pdf.cell(200, 10, txt=line, ln=True)
-            pdf.ln(5)
+                fuel_name = row["Fuel"]
+                qty = row["Quantity (t)"]
+                price_usd = (row.get("Price per Tonne (USD)") or 0.0)
+                cost_eur = (row.get("Cost (Eur)") or 0.0)
+                ghg_i = row["GHG Intensity (gCO2eq/MJ)"]
+                line = (f"{fuel_name}: {qty:,.0f} t @ {price_usd:,.2f} USD/t | "
+                        f"{cost_eur:,.2f} Eur | GHG Intensity: {ghg_i:.2f} gCO2eq/MJ")
+                pdf.multi_cell(200, 6, txt=line)
+            pdf.ln(2)
             pdf.set_font("Arial", size=8)
-            pdf.cell(200, 10, txt=f"Conversion Rate Used: 1 USD = {exchange_rate:.6f} Eur", ln=True)
+            pdf.cell(200, 6, txt=f"Conversion Rate Used: 1 USD = {exchange_rate:.6f} Eur", ln=True)
             pdf.set_font("Arial", "B", size=11)
-            rollup = ((total_cost if _user_entered_prices else 0.0) + (penalty or 0.0) + (ets_cost if eua_price > 0 else 0.0))
-            pdf.cell(200, 10, txt=f"Total Cost: {rollup:,.2f} Eur", ln=True)
+            rollup = ((total_cost if user_entered_prices else 0.0)
+                      + (penalty or 0.0)
+                      + (ets_cost if eua_price > 0 else 0.0))
+            pdf.cell(200, 8, txt=f"Total Cost: {rollup:,.2f} Eur", ln=True)
         else:
             for row in rows:
-                fuel_name = row['Fuel']
-                qty = row['Quantity (t)']
-                ghg_i = row['GHG Intensity (gCO2eq/MJ)']
-                pdf.cell(200, 10, txt=f"{fuel_name}: {qty:,.0f} t | GHG Intensity: {ghg_i:.2f} gCO2eq/MJ", ln=True)
+                fuel_name = row["Fuel"]
+                qty = row["Quantity (t)"]
+                ghg_i = row["GHG Intensity (gCO2eq/MJ)"]
+                pdf.cell(200, 6, txt=f"{fuel_name}: {qty:,.0f} t | GHG Intensity: {ghg_i:.2f} gCO2eq/MJ", ln=True)
+
+        # --- Fuel Details (LCV & emission factors) ---
+        if opt_fuel_details_pdf:
+            pdf.ln(3)
+            pdf.set_font("Arial", "U", 10)
+            pdf.cell(200, 8, "Fuel Details (LCV & Emission Factors):", ln=True)
+            pdf.set_font("Arial", size=9)
+        
+            # Selected stock fuels (qty > 0)
+            selected = [name for name, qty in fuel_inputs.items() if qty > 0]
+            for f in FUELS:
+                if f["name"] not in selected:
+                    continue
+                line = (f"{f['name']} | LCV {f['lcv']:.4f} MJ/g | WtT {f['wtt']:.2f} g/MJ | "
+                        f"TtW CO2 {f['ttw_co2']:.3f} g/g | CH4 {f['ttw_ch4']:.5f} g/g | "
+                        f"N2O {f['ttw_n2O']:.5f} g/g")
+                if f.get("ch4_slip"):
+                    line += f" | CH4 slip {float(f['ch4_slip']):.1f} g/MJ"
+                pdf.multi_cell(200, 5, line)
+        
+            # Custom fuels (qty > 0)
+            for cf in st.session_state.get("custom_fuels", []):
+                if float(cf.get("qty_t", 0)) <= 0:
+                    continue
+                is_basic = str(cf.get("mode", "Basic")).startswith("Basic")
+                if is_basic:
+                    line = (f"{cf.get('name','Custom fuel')} (custom; WtW-only) | "
+                            f"LCV {float(cf.get('lcv',0.0)):.4f} MJ/g | "
+                            f"WtW {float(cf.get('wtw',0.0)):.2f} g/MJ")
+                else:
+                    line = (f"{cf.get('name','Custom fuel')} (custom) | "
+                            f"LCV {float(cf.get('lcv',0.0)):.4f} MJ/g | "
+                            f"WtT {float(cf.get('wtt',0.0)):.2f} g/MJ | "
+                            f"TtW CO2 {float(cf.get('ttw_co2',0.0)):.3f} g/g | "
+                            f"CH4 {float(cf.get('ttw_ch4',0.0)):.5f} g/g | "
+                            f"N2O {float(cf.get('ttw_n2o',0.0)):.5f} g/g")
+                    slip = float(cf.get("ch4_slip", 0.0))
+                    if slip:
+                        line += f" | CH4 slip {slip:.1f} g/MJ"
+                pdf.multi_cell(200, 5, line)
+        
+            pdf.set_font("Arial", size=8)
+            pdf.multi_cell(200, 5,
+                "Note: Custom fuels entered in Basic mode are excluded from ETS and the split totals (TtW/WtT).")
         
         # --- Mitigation overview (only if deficit) ---
         if opt_mitigation and (compliance_balance < 0):
@@ -1040,10 +1273,6 @@ if st.button("Export to PDF (with selections)"):
                         ("Additional fuel cost", additional_substitution_cost),
                         ("EU ETS", substitution_ets_cost if eua_price > 0 else 0.0),],)
             
-                if eua_price > 0:
-                    pdf.cell(200, 8, txt=f"- Fuel Replacement + EU ETS, no Penalty: {repl_total_direct:,.2f} Eur", ln=True)
-                else:
-                    pdf.cell(200, 8, txt=f"- Fuel Replacement, no Penalty: {repl_total_direct:,.2f} Eur", ln=True)
         
         # --- Optional charts (saved as images and embedded) ---
         chart_tmp_files = []
