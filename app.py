@@ -218,7 +218,7 @@ for category, fuels_in_cat in categories.items():
                 f"{selected_fuel} - Price (USD/t)",
                 min_value=0.0,
                 value=0.0,
-                step=0.1,
+                step=10.0,
                 format="%.2f",
                 key=f"price_{selected_fuel}",)
             fuel_price_inputs[selected_fuel] = price
@@ -273,7 +273,7 @@ with st.sidebar.expander("Custom Fuel (optional)", expanded=False):
         cf["name"] = st.text_input("Name", value=cf.get("name","Custom fuel"), key=f"{cf['id']}_name")
         cf["qty_t"] = st.number_input("Quantity (t)", min_value=0.0, step=1.0,
                                       value=float(cf.get("qty_t",0.0)), format="%0.0f", key=f"{cf['id']}_qty")
-        cf["price_usd"] = st.number_input("Price (USD/t)", min_value=0.0, step=1.0,
+        cf["price_usd"] = st.number_input("Price (USD/t)", min_value=0.0, step=10.0,
                                           value=float(cf.get("price_usd",0.0)), format="%.2f", key=f"{cf['id']}_price")
         cf["lcv"] = st.number_input("LCV (MJ/g)", min_value=0.0, value=float(cf.get("lcv",0.0400)),
                                     step=0.0001, format="%.4f", key=f"{cf['id']}_lcv")
@@ -704,7 +704,7 @@ if rows:
         with st.expander("**Pooling**", expanded=False):
             st.info(f"CO2 Deficit: {abs(compliance_balance):,.0f} tCO2eq. Offset via pooling if you have access to external credits.")
             pooling_price_usd_per_tonne = st.number_input(
-                "Pooling Price (USD/tCO2eq)", min_value=0.0, value=0.0, step=0.1, format="%.2f",
+                "Pooling Price (USD/tCO2eq)", min_value=0.0, value=0.0, step=10.0, format="%.2f",
                 help="Cost per tCO2eq to buy compliance credits. If 0, pooling is ignored.",
             )
             pooling_cost_eur = pooling_price_usd_per_tonne * exchange_rate * abs(compliance_balance) if pooling_price_usd_per_tonne > 0 else 0.0
