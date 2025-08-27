@@ -704,7 +704,7 @@ if rows:
         with st.expander("**Pooling**", expanded=False):
             st.info(f"CO2 Deficit: {abs(compliance_balance):,.0f} tCO2eq. Offset via pooling if you have access to external credits.")
             pooling_price_usd_per_tonne = st.number_input(
-                "Pooling Price (USD/tCO2eq)", min_value=000.0, max_value=999.99, value=0.0, step=0.01, format="%.2f",
+                "Pooling Price (USD/tCO2eq)", min_value=0.0, max_value=9999.99, value=0.0, step=0.01, format="%.2f",
                 help="Cost per tCO2eq to buy compliance credits. If 0, pooling is ignored.",
             )
             pooling_cost_eur = pooling_price_usd_per_tonne * exchange_rate * abs(compliance_balance) if pooling_price_usd_per_tonne > 0 else 0.0
