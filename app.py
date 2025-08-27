@@ -6,6 +6,7 @@ from fpdf import FPDF
 from datetime import datetime
 import tempfile
 import os
+from decimal import Decimal, getcontext
 import math
 import pathlib
 import re
